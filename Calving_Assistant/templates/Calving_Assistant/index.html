@@ -1,0 +1,85 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calving Care AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pasture: "#4E7E63",
+                        barn: "#6A4C37",
+                        dusk: "#182431",
+                        cream: "#F5F6F2"
+                    },
+                    boxShadow: {
+                        soft: "0 28px 58px -34px rgba(24, 36, 49, 0.45)"
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="stylesheet" href="{% static 'Calving_Assistant/css/ai-demo.css' %}">
+</head>
+<body class="bg-cream text-dusk min-h-screen">
+    <main class="max-w-7xl mx-auto px-4 py-5 sm:py-9">
+        <section class="chat-shell rounded-3xl border border-dusk/10 bg-white/90 backdrop-blur shadow-soft overflow-hidden">
+            <header class="topbar px-5 sm:px-8 py-6 border-b border-dusk/10 text-center">
+                <h1 class="font-display hero-title text-2xl sm:text-[2rem] leading-tight font-bold">COW CALVING AI</h1>
+                <p class="hero-subtitle text-sm mt-2 mx-auto max-w-2xl">
+                    Consultation Chat
+                </p>
+                <span class="sr-only">AI Advice Demo</span>
+            </header>
+
+            <div class="grid lg:grid-cols-[320px_1fr] min-h-[78vh]">
+                <aside class="sidebar p-5 sm:p-6 border-b lg:border-b-0 lg:border-r border-dusk/10">
+                    <div class="panel">
+                        <h2 class="panel-title">QUICK PROMPTS</h2>
+                        <div id="quick-questions" class="flex flex-col gap-2 mt-3">
+                            <button class="option-chip" type="button" data-question="What signs show this cow may calve within 24 hours?">24-hour calving signs</button>
+                            <button class="option-chip" type="button" data-question="What should I prepare in the calving pen before labor starts?">Calving pen checklist</button>
+                            <button class="option-chip" type="button" data-question="Which danger signs mean I should call a vet immediately during labor?">Emergency labor signs</button>
+                            <button class="option-chip" type="button" data-question="What should I monitor in the first 12 hours after calving?">First 12-hour monitoring</button>
+                            <button class="option-chip" type="button" data-question="How do I support a weak newborn calf in the first hour?">Weak calf support</button>
+                        </div>
+                    </div>
+                    <p id="status" class="status-text status-normal mt-5 text-sm text-center">Ready.</p>
+                </aside>
+
+                <section class="chat-stage">
+                    <div id="chat-log" class="chat-log px-3 sm:px-5">
+                        <article class="chat-row assistant">
+                            <div class="avatar avatar-assistant">AI</div>
+                            <div class="bubble bubble-assistant markdown">
+                                <h3>Welcome to Calving Care AI</h3>
+                                <p>I can help with labor signs, risk alerts, and immediate calf support steps.</p>
+                                <ul>
+                                    <li>Use the quick prompts for common scenarios.</li>
+                                    <li>Add a Cow ID for focused context.</li>
+                                    <li>Ask follow-up questions to refine the plan.</li>
+                                </ul>
+                            </div>
+                        </article>
+                    </div>
+
+                    <form id="ai-form" class="composer">
+                        <label class="sr-only" for="question">Question</label>
+                        <div class="composer-shell">
+                            <textarea id="question" name="q" rows="1" placeholder="Ask about calving risk, labor progress, or calf care..." class="composer-input" required></textarea>
+                            <button id="submit-btn" type="submit" class="composer-primary">Send</button>
+                        </div>
+                        <button id="clear-btn" type="button" class="composer-secondary">Clear chat</button>
+                    </form>
+                </section>
+            </div>
+        </section>
+    </main>
+
+    <script src="{% static 'Calving_Assistant/js/ai-demo.js' %}" defer></script>
+</body>
+</html>
