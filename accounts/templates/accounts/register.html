@@ -5,22 +5,22 @@
 
 {% block auth_panel_image %}{% static 'accounts/images/register-cow-calf.jpg' %}{% endblock %}
 {% block auth_panel_title %}Welcome to CowCalving{% endblock %}
-{% block auth_panel_text %}Create your account to start tracking calving activity with your team.{% endblock %}
+{% block auth_panel_text %}Create your farmer account to start tracking calving activity from the shared website.{% endblock %}
 {% block auth_panel_points %}
     <ul class="space-y-3 text-sm text-white/85">
         <li class="flex items-start gap-3">
             <span class="mt-2 h-2 w-2 rounded-full bg-white/80"></span>
-            Simple setup for your team.
+            Farmer access is self-service.
         </li>
         <li class="flex items-start gap-3">
             <span class="mt-2 h-2 w-2 rounded-full bg-white/80"></span>
-            Keep key records organized.
+            Veterinary accounts are created by admin.
         </li>
     </ul>
 {% endblock %}
 
-{% block auth_form_title %}Create account{% endblock %}
-{% block auth_form_subtitle %}Set up your CowCalving profile.{% endblock %}
+{% block auth_form_title %}Create farmer account{% endblock %}
+{% block auth_form_subtitle %}Set up your CowCalving farmer profile.{% endblock %}
 {% block auth_form_class %}auth-card--signup{% endblock %}
 
 {% block auth_form_fields %}
@@ -50,17 +50,14 @@
         {% if form.email.errors %}<small class="text-rose-600">{{ form.email.errors|striptags }}</small>{% endif %}
     </div>
 
-    <div class="auth-grid">
-        <div class="auth-field">
-            <label class="text-sm font-semibold text-forest" for="id_role">Role</label>
-            {{ form.role }}
-            {% if form.role.errors %}<small class="text-rose-600">{{ form.role.errors|striptags }}</small>{% endif %}
-        </div>
-        <div class="auth-field">
-            <label class="text-sm font-semibold text-forest" for="id_farm_name">Farm Name</label>
-            {{ form.farm_name }}
-            {% if form.farm_name.errors %}<small class="text-rose-600">{{ form.farm_name.errors|striptags }}</small>{% endif %}
-        </div>
+    <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+        This registration page is for farmers only. Veterinary doctors receive their access credentials from admin.
+    </div>
+
+    <div class="auth-field">
+        <label class="text-sm font-semibold text-forest" for="id_farm_name">Farm Name</label>
+        {{ form.farm_name }}
+        {% if form.farm_name.errors %}<small class="text-rose-600">{{ form.farm_name.errors|striptags }}</small>{% endif %}
     </div>
 
     <div class="auth-grid">
@@ -80,6 +77,6 @@
     </div>
 {% endblock %}
 
-{% block auth_submit_text %}Create Account{% endblock %}
+{% block auth_submit_text %}Create Farmer Account{% endblock %}
 {% block auth_switch_text %}Already have an account? <a class="text-forest font-semibold" href="{% url 'accounts:login' %}">Sign in</a>{% endblock %}
 {% block auth_legal_text %}By creating an account, you agree to proper handling of animal health data.{% endblock %}

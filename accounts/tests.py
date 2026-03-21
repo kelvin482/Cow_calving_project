@@ -15,28 +15,50 @@ from cow_calving_MAIN.context_processors import dev_static_version
 
 from .email_backends import BrevoAPIEmailBackend
 from .forms import CowCalvingRegisterForm
+from users.models import Profile, Role
 
 
 class AccountsViewTests(TestCase):
+    def setUp(self):
+        self.farmer_role, _ = Role.objects.get_or_create(
+            slug="farmer",
+            defaults={
+                "name": "Farmer",
+                "post_login_path": "/",
+                "dashboard_namespace": "farmers_dashboard",
+                "default_path": "/farmers/",
+            },
+        )
+        self.veterinary_role, _ = Role.objects.get_or_create(
+            slug="veterinary",
+            defaults={
+                "name": "Veterinary",
+                "post_login_path": "/veterinary/",
+                "dashboard_namespace": "veterinary_dashboard",
+                "default_path": "/veterinary/",
+            },
+        )
+
     def test_login_page_loads(self):
         response = self.client.get(reverse("accounts:login"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Continue with Google")
         self.assertContains(response, 'formaction="/accounts/google/login/"')
-        self.assertContains(response, "Use your account credentials to continue.")
-        self.assertContains(response, "Username")
+        self.assertContains(response, "Choose your account type to continue securely.")
+        self.assertContains(response, "Email")
+        self.assertContains(response, "Professional ID")
         self.assertContains(response, "accounts/feedback.js")
         self.assertContains(response, "Reimagining Dairy Farming")
 
     def test_register_page_loads(self):
         response = self.client.get(reverse("accounts:signup"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Set up your CowCalving profile.")
+        self.assertContains(response, "Set up your CowCalving farmer profile.")
         self.assertContains(response, "First Name")
         self.assertContains(response, "Last Name")
         self.assertContains(response, "Username")
-        self.assertContains(response, "Role")
         self.assertContains(response, "Farm Name")
+        self.assertContains(response, "This registration page is for farmers only.")
 
     def test_login_page_logs_out_authenticated_user(self):
         user = User.objects.create_user(
@@ -98,7 +120,7 @@ class AccountsViewTests(TestCase):
         self.assertContains(response, "Back to Sign In", status_code=403)
 
     @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
-    def test_register_redirects_to_ai_page_when_email_verification_is_mandatory(self):
+    def test_register_redirects_to_verification_page_when_email_verification_is_mandatory(self):
         response = self.client.post(
             reverse("accounts:signup"),
             {
@@ -106,7 +128,6 @@ class AccountsViewTests(TestCase):
                 "last_name": "Muriuki",
                 "username": "kelvin",
                 "email": "kelvin@example.com",
-                "role": "farmer",
                 "farm_name": "Demo Farm",
                 "password1": "StrongPass123!",
                 "password2": "StrongPass123!",
@@ -114,14 +135,131 @@ class AccountsViewTests(TestCase):
             follow=False,
         )
 
-        self.assertRedirects(response, "/app/", fetch_redirect_response=False)
+        self.assertRedirects(
+            response,
+            reverse("account_email_verification_sent"),
+            fetch_redirect_response=False,
+        )
         messages = list(get_messages(response.wsgi_request))
         self.assertTrue(
-            any("Check your email to verify your account." in str(message) for message in messages)
+            any("Check your email to verify your account" in str(message) for message in messages)
+        )
+
+    @override_settings(ACCOUNT_EMAIL_VERIFICATION="none")
+    def test_register_creates_farmer_profile_and_redirects_to_shared_router(self):
+        response = self.client.post(
+            reverse("accounts:signup"),
+            {
+                "first_name": "Kelvin",
+                "last_name": "Muriuki",
+                "username": "kelvin-profile",
+                "email": "kelvin-profile@example.com",
+                "farm_name": "Demo Farm",
+                "password1": "StrongPass123!",
+                "password2": "StrongPass123!",
+            },
+            follow=False,
+        )
+
+        self.assertRedirects(response, "/dashboard/", fetch_redirect_response=False)
+        user = User.objects.get(username="kelvin-profile")
+        profile = Profile.objects.get(user=user)
+        self.assertEqual(profile.role, self.farmer_role)
+        self.assertEqual(profile.farm_name, "Demo Farm")
+
+    def test_farmer_login_redirects_to_shared_router(self):
+        user = User.objects.create_user(
+            username="login-home-user",
+            email="login-home@example.com",
+            password="StrongPass123!",
+        )
+        Profile.objects.create(user=user, role=self.farmer_role)
+
+        response = self.client.post(
+            reverse("accounts:login"),
+            {
+                "login_type": "farmer",
+                "email": "login-home@example.com",
+                "password": "StrongPass123!",
+            },
+            follow=False,
+        )
+
+        self.assertRedirects(response, "/dashboard/", fetch_redirect_response=False)
+
+    def test_veterinary_login_redirects_to_veterinary_dashboard(self):
+        user = User.objects.create_user(
+            username="vet-login-user",
+            email="vet-login@example.com",
+            password="StrongPass123!",
+        )
+        Profile.objects.create(
+            user=user,
+            role=self.veterinary_role,
+            professional_id="VET-204",
+        )
+
+        response = self.client.post(
+            reverse("accounts:login"),
+            {
+                "login_type": "veterinary",
+                "professional_id": "vet-204",
+                "password": "StrongPass123!",
+            },
+            follow=False,
+        )
+
+        self.assertRedirects(response, "/dashboard/", fetch_redirect_response=False)
+
+    def test_veterinary_account_cannot_sign_in_through_farmer_login_path(self):
+        user = User.objects.create_user(
+            username="vet-username-user",
+            email="vet-username@example.com",
+            password="StrongPass123!",
+        )
+        Profile.objects.create(
+            user=user,
+            role=self.veterinary_role,
+            professional_id="VET-205",
+        )
+
+        response = self.client.post(
+            reverse("accounts:login"),
+            {
+                "login_type": "farmer",
+                "email": "vet-username@example.com",
+                "password": "StrongPass123!",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            "Veterinary accounts must sign in with the professional ID assigned by admin.",
         )
 
 
 class CowCalvingRegisterFormTests(TestCase):
+    def setUp(self):
+        self.farmer_role, _ = Role.objects.get_or_create(
+            slug="farmer",
+            defaults={
+                "name": "Farmer",
+                "post_login_path": "/",
+                "dashboard_namespace": "farmers_dashboard",
+                "default_path": "/farmers/",
+            },
+        )
+        self.veterinary_role, _ = Role.objects.get_or_create(
+            slug="veterinary",
+            defaults={
+                "name": "Veterinary",
+                "post_login_path": "/veterinary/",
+                "dashboard_namespace": "veterinary_dashboard",
+                "default_path": "/veterinary/",
+            },
+        )
+
     def test_register_form_rejects_duplicate_email(self):
         first_form = CowCalvingRegisterForm(
             data={
@@ -129,7 +267,6 @@ class CowCalvingRegisterFormTests(TestCase):
                 "last_name": "Njeri",
                 "username": "amina",
                 "email": "dupe@example.com",
-                "role": "farmer",
                 "farm_name": "North Farm",
                 "password1": "StrongPass123!",
                 "password2": "StrongPass123!",
@@ -144,7 +281,6 @@ class CowCalvingRegisterFormTests(TestCase):
                 "last_name": "Wambui",
                 "username": "faith",
                 "email": "dupe@example.com",
-                "role": "vet",
                 "farm_name": "South Farm",
                 "password1": "StrongPass123!",
                 "password2": "StrongPass123!",
@@ -153,6 +289,11 @@ class CowCalvingRegisterFormTests(TestCase):
 
         self.assertFalse(second_form.is_valid())
         self.assertIn("email", second_form.errors)
+
+    def test_register_form_is_farmer_only(self):
+        form = CowCalvingRegisterForm()
+
+        self.assertNotIn("role", form.fields)
 
 
 class DevStaticVersionTests(TestCase):

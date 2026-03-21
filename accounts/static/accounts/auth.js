@@ -13,6 +13,15 @@
 
     const passwordInput = document.querySelector("#id_password1");
     const strengthBar = document.querySelector(".password-strength-bar");
+    const loginTypeInputs = Array.from(
+        document.querySelectorAll('input[name="login_type"]')
+    );
+    const loginModePanels = Array.from(
+        document.querySelectorAll("[data-login-mode-panel]")
+    );
+    const googlePanels = Array.from(
+        document.querySelectorAll("[data-login-mode-google]")
+    );
 
     const resetActionButtons = () => {
         actionButtons.forEach((button) => {
@@ -104,12 +113,42 @@
             score >= 3 ? "#2c5a42" : score >= 2 ? "#c9b7a3" : "#d16b5f";
     };
 
+    const updateLoginMode = () => {
+        if (loginTypeInputs.length === 0) {
+            return;
+        }
+
+        const selectedInput = loginTypeInputs.find((input) => input.checked);
+        const selectedMode = selectedInput ? selectedInput.value : "farmer";
+
+        loginModePanels.forEach((panel) => {
+            if (!(panel instanceof HTMLElement)) {
+                return;
+            }
+            const shouldShow = panel.dataset.loginModePanel === selectedMode;
+            panel.hidden = !shouldShow;
+            panel.classList.toggle("hidden", !shouldShow);
+        });
+
+        googlePanels.forEach((panel) => {
+            if (!(panel instanceof HTMLElement)) {
+                return;
+            }
+            const shouldShow = selectedMode === "farmer";
+            panel.hidden = !shouldShow;
+            panel.classList.toggle("hidden", !shouldShow);
+        });
+    };
+
     document.addEventListener("input", (event) => {
         if (event.target.matches("[data-progress]")) {
             updateProgress();
         }
         if (event.target === passwordInput) {
             updateStrength();
+        }
+        if (event.target.matches('input[name="login_type"]')) {
+            updateLoginMode();
         }
     });
 
@@ -142,5 +181,6 @@
 
     updateProgress();
     updateStrength();
+    updateLoginMode();
     resetActionButtons();
 })();

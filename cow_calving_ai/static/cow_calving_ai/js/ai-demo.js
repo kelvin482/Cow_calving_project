@@ -7,6 +7,7 @@
     const statusEl = document.getElementById("status");
     const quickQuestions = document.getElementById("quick-questions");
     const chatLog = document.getElementById("chat-log");
+    const aiEndpoint = form?.dataset.aiEndpoint || "/app/ai/test/";
 
     function setStatus(message, isError = false) {
         statusEl.textContent = message;
@@ -173,12 +174,21 @@
             params.set("cow_id", cowId);
         }
 
-        const response = await fetch(`/ai/test/?${params.toString()}`, {
+        const response = await fetch(`${aiEndpoint}?${params.toString()}`, {
             method: "GET",
             headers: {
                 Accept: "application/json",
             },
         });
+
+        const contentType = response.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+            const body = await response.text();
+            if (body.includes("<!DOCTYPE") || body.includes("<html")) {
+                throw new Error("The AI endpoint returned an HTML page instead of JSON.");
+            }
+            throw new Error("The AI endpoint returned an unexpected response format.");
+        }
 
         const payload = await response.json();
         if (!response.ok || !payload.ok) {

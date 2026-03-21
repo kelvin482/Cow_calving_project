@@ -139,6 +139,7 @@ class AIViewTests(TestCase):
         self.assertContains(response, "Consultation Chat")
         self.assertContains(response, "Reimagining Dairy Farming")
         self.assertContains(response, "accounts/feedback.js")
+        self.assertContains(response, 'data-ai-endpoint="/app/ai/test/"')
 
     def test_ai_test_redirects_when_logged_out(self):
         response = self.client.get("/app/ai/test/?q=Check+cow")

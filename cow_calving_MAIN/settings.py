@@ -55,7 +55,11 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'Core_Web',
     'accounts',
+    'users',
+    'farmers_dashboard',
+    'veterinary_dashboard',
     'cow_calving_ai',
 ]
 
@@ -177,14 +181,18 @@ if google_client_id and google_client_secret:
     }
 
 AUTHENTICATION_BACKENDS = [
+    "accounts.auth_backends.ProfessionalIDBackend",
+    "accounts.auth_backends.EmailBackend",
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
-# Auth redirects are configurable to avoid hardcoded routing.
+# Auth redirects flow through the shared /dashboard/ handoff so each role can
+# land in the right place without duplicating redirect logic across auth views.
 LOGIN_URL = os.getenv("LOGIN_URL", "/accounts/login/")
-LOGIN_REDIRECT_URL = os.getenv("LOGIN_REDIRECT_URL", "/app/")
+LOGIN_REDIRECT_URL = os.getenv("LOGIN_REDIRECT_URL", "/dashboard/")
 LOGOUT_REDIRECT_URL = os.getenv("LOGOUT_REDIRECT_URL", "/accounts/login/")
+AUTHENTICATED_DEFAULT_URL = os.getenv("AUTHENTICATED_DEFAULT_URL", "/dashboard/profile/")
 CSRF_FAILURE_VIEW = "accounts.views.csrf_failure_view"
 
 # Email settings (Brevo SMTP by default).

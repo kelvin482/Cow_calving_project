@@ -8,16 +8,19 @@
 - Write clean, modular, production-quality code.
 - Avoid hard-coded values; prefer config/environment variables.
 - Do not hardcode features or behaviors that are expected to change; use configuration and flags.
+- Treat Django models plus committed migrations as the database source of truth; never rely on manual schema edits without a matching migration.
 - Keep responses concise and avoid repetition.
 - Keep code sections consistent and non-conflicting.
 - Use consistent naming and clear structure.
 - Write clean, readable code with clear, helpful comments where needed for understanding.
 - Add concise comments for custom flows, security-sensitive logic, and non-obvious decisions so a beginner can follow the code quickly.
 - Whenever code is updated, add or refresh concise comments around the changed non-obvious parts so the latest behavior stays understandable.
+- For role-based features, keep role definitions and dashboard routing scalable; do not hardcode business logic around a fixed set of roles in views, templates, or redirects.
 - Frontend and template changes must be responsive by default and checked against small, medium, and large screen layouts before completion.
 - Ask clarifying questions when requirements are unclear.
 - Provide solutions that run with minimal modification.
 - Always use a roadmap and split work into small tasks.
 - Always run relevant checks and verify errors before completion.
+- For any persistent feature, plan the schema change up front, generate/review migrations, prefer additive changes first, and resolve migration conflicts intentionally instead of deleting migration files.
 - Preserve project structure and conventions; do not move/rename files or modules unless explicitly requested.
 - Focus on one task at a time and complete it before starting another.

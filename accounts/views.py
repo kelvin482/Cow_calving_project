@@ -20,6 +20,7 @@ from .forms import (
 )
 from allauth.account import app_settings as allauth_settings
 from allauth.account.utils import setup_user_email
+from django.urls import reverse
 
 PASSWORD_RESET_SESSION_KEY = "password_reset_code_state"
 PASSWORD_RESET_CODE_LENGTH = 6
@@ -143,16 +144,17 @@ def register_view(request):
             allauth_settings.EMAIL_VERIFICATION
             == allauth_settings.EmailVerificationMethod.MANDATORY
         ):
-            # Keep the post-signup flow simple: users land on the app page and
-            # can verify their email in parallel instead of getting stuck on a
-            # bare allauth intermediate screen.
+            # Mandatory verification should land on the styled confirmation page
+            # until the user verifies and signs in for role-based routing.
             messages.success(
                 request,
-                "Check your email to verify your account. You can continue to the AI page while you wait.",
+                "Check your email to verify your account before signing in to your dashboard.",
             )
-            return redirect(settings.LOGIN_REDIRECT_URL)
+            return redirect(reverse("account_email_verification_sent"))
 
-        auth_login(request, user)
+        # New users do not carry an auth backend on the model instance yet, so
+        # select the primary configured backend explicitly before login().
+        auth_login(request, user, backend=settings.AUTHENTICATION_BACKENDS[0])
         return redirect(settings.LOGIN_REDIRECT_URL)
 
     return render(request, "accounts/register.html", {"form": form})

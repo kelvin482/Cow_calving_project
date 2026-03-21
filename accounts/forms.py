@@ -1,23 +1,15 @@
 from django import forms
-from django.contrib.auth.forms import (
-    AuthenticationForm,
-    SetPasswordForm,
-    UserCreationForm,
-)
+from django.contrib.auth import authenticate
+from django.contrib.auth.forms import SetPasswordForm, UserCreationForm
 from django.contrib.auth.models import User
+
+from users.models import Profile, Role
+from users.services import get_or_create_profile
 
 try:
     from allauth.account.models import EmailAddress
 except ImportError:  # pragma: no cover - fallback if allauth account app changes
     EmailAddress = None
-
-
-ROLE_CHOICES = [
-    ("farmer", "Farmer"),
-    ("vet", "Veterinarian"),
-    ("manager", "Farm Manager"),
-    ("assistant", "Farm Assistant"),
-]
 
 
 def _apply_widget_attrs(field, placeholder, extra_classes=""):
@@ -37,13 +29,82 @@ def _apply_widget_attrs(field, placeholder, extra_classes=""):
     )
 
 
-class CowCalvingLoginForm(AuthenticationForm):
-    def __init__(self, *args, **kwargs):
+class CowCalvingLoginForm(forms.Form):
+    LOGIN_TYPE_FARMER = "farmer"
+    LOGIN_TYPE_VETERINARY = "veterinary"
+    LOGIN_TYPE_CHOICES = (
+        (LOGIN_TYPE_FARMER, "Farmer"),
+        (LOGIN_TYPE_VETERINARY, "Veterinary"),
+    )
+
+    login_type = forms.ChoiceField(
+        choices=LOGIN_TYPE_CHOICES,
+        initial=LOGIN_TYPE_FARMER,
+        widget=forms.RadioSelect,
+    )
+    email = forms.EmailField(required=False)
+    professional_id = forms.CharField(required=False)
+    password = forms.CharField(required=True, strip=False, widget=forms.PasswordInput)
+
+    def __init__(self, request=None, *args, **kwargs):
+        self.request = request
+        self.user_cache = None
         super().__init__(*args, **kwargs)
-        # Restore the original username/password sign-in fields from the
-        # earlier auth flow while keeping the newer page structure intact.
-        _apply_widget_attrs(self.fields["username"], "Enter your username")
+
+        self.fields["login_type"].widget.attrs.update(
+            {"class": "auth-login-type", "data-login-type-toggle": "true"}
+        )
+        _apply_widget_attrs(self.fields["email"], "name@example.com")
+        _apply_widget_attrs(self.fields["professional_id"], "Enter your professional ID")
         _apply_widget_attrs(self.fields["password"], "Enter your password")
+
+    def clean(self):
+        cleaned_data = super().clean()
+        login_type = (cleaned_data.get("login_type") or self.LOGIN_TYPE_FARMER).strip()
+        password = cleaned_data.get("password") or ""
+
+        if login_type == self.LOGIN_TYPE_VETERINARY:
+            professional_id = (cleaned_data.get("professional_id") or "").strip()
+            if not professional_id:
+                self.add_error("professional_id", "Enter the professional ID provided by admin.")
+                return cleaned_data
+
+            self.user_cache = authenticate(
+                self.request,
+                professional_id=professional_id,
+                password=password,
+            )
+            if self.user_cache is None:
+                raise forms.ValidationError("Professional ID or password is incorrect.")
+        else:
+            email = (cleaned_data.get("email") or "").strip()
+            if not email:
+                self.add_error("email", "Enter your email address.")
+                return cleaned_data
+
+            self.user_cache = authenticate(
+                self.request,
+                email=email,
+                password=password,
+            )
+            if self.user_cache is None:
+                raise forms.ValidationError("Email or password is incorrect.")
+
+            profile = Profile.objects.select_related("role").filter(user=self.user_cache).first()
+            if profile and profile.role and profile.role.slug == self.LOGIN_TYPE_VETERINARY:
+                self.user_cache = None
+                raise forms.ValidationError(
+                    "Veterinary accounts must sign in with the professional ID assigned by admin."
+                )
+
+        if self.user_cache is not None and not self.user_cache.is_active:
+            self.user_cache = None
+            raise forms.ValidationError("This account is inactive.")
+
+        return cleaned_data
+
+    def get_user(self):
+        return self.user_cache
 
 
 class PasswordResetCodeRequestForm(forms.Form):
@@ -75,7 +136,6 @@ class CowCalvingRegisterForm(UserCreationForm):
     first_name = forms.CharField(max_length=150, required=True)
     last_name = forms.CharField(max_length=150, required=True)
     email = forms.EmailField(required=True)
-    role = forms.ChoiceField(choices=ROLE_CHOICES, required=False)
     farm_name = forms.CharField(max_length=200, required=False)
 
     class Meta(UserCreationForm.Meta):
@@ -85,7 +145,6 @@ class CowCalvingRegisterForm(UserCreationForm):
             "last_name",
             "username",
             "email",
-            "role",
             "farm_name",
             "password1",
             "password2",
@@ -93,12 +152,10 @@ class CowCalvingRegisterForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["role"].choices = [("", "Select role")] + list(ROLE_CHOICES)
         _apply_widget_attrs(self.fields["first_name"], "First name")
         _apply_widget_attrs(self.fields["last_name"], "Last name")
         _apply_widget_attrs(self.fields["username"], "Choose a username")
         _apply_widget_attrs(self.fields["email"], "name@example.com")
-        _apply_widget_attrs(self.fields["role"], "Select role")
         _apply_widget_attrs(self.fields["farm_name"], "Optional farm name")
         _apply_widget_attrs(self.fields["password1"], "Create a password")
         _apply_widget_attrs(self.fields["password2"], "Confirm your password")
@@ -121,6 +178,15 @@ class CowCalvingRegisterForm(UserCreationForm):
 
         return email
 
+    def clean(self):
+        cleaned_data = super().clean()
+        farmer_role = Role.objects.filter(slug="farmer", is_active=True).first()
+        if not farmer_role:
+            raise forms.ValidationError(
+                "Farmer registration is temporarily unavailable. Ask the admin to restore the farmer role."
+            )
+        return cleaned_data
+
     def save(self, commit=True):
         user = super().save(commit=False)
         user.first_name = self.cleaned_data.get("first_name", "")
@@ -129,6 +195,10 @@ class CowCalvingRegisterForm(UserCreationForm):
 
         if commit:
             user.save()
-        # role and farm_name stay on the form for now until a dedicated profile
-        # model is added for storing those extra signup details.
+            profile = get_or_create_profile(user)
+            profile.role = Role.objects.get(slug="farmer")
+            profile.farm_name = self.cleaned_data.get("farm_name", "")
+            # Treat role assignment as the first milestone of profile setup.
+            profile.is_profile_complete = bool(profile.role)
+            profile.save()
         return user

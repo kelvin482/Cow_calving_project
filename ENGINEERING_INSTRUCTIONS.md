@@ -17,6 +17,7 @@ Act as a senior software engineer.
 - Write clean, readable code with clear, helpful comments where needed for understanding.
 - Add concise comments around custom flows, security-sensitive logic, and non-obvious decisions; optimize comments for teammate understanding, not narration.
 - Whenever behavior is changed, add or refresh concise comments around the updated non-obvious code so the current implementation remains easy to follow.
+- For multi-role architecture, prefer role metadata/configuration and redirect maps over hardcoded per-role branching so new roles can be added safely later.
 - Frontend and template work must be responsive by default and verified across small, medium, and large viewport layouts.
 - Ask clarification questions if requirements are unclear.
 - Provide solutions that can run with minimal modification.
@@ -32,6 +33,7 @@ Act as a senior software engineer.
 - Add or update tests for behavior changes.
 - Document assumptions, tradeoffs, and known limitations.
 - Use deterministic, repeatable setup and execution steps.
+- Treat Django models and committed migrations as the database source of truth; use additive schema changes, data migrations, and deliberate conflict resolution instead of manual database drift.
 
 ## Roadmap-First Workflow
 Always follow a roadmap and break work into small tasks.
@@ -59,6 +61,23 @@ For Django projects, run as applicable:
 - `python manage.py makemigrations --check --dry-run`
 - `python manage.py migrate`
 - `python manage.py test`
+
+## Database Evolution Workflow
+- Follow [DATABASE_CHANGE_RULES.md](./DATABASE_CHANGE_RULES.md) for every model, migration, or persistence change.
+- If a feature needs stored data, include the model and migration plan in the same task unless the user explicitly defers it.
+- Prefer backward-compatible schema changes first:
+  - add nullable/defaulted fields
+  - backfill with a data migration if needed
+  - tighten constraints later
+- If migration conflicts appear, resolve them intentionally with the Django migration graph; do not delete committed migrations as a shortcut.
+
+## Role Dashboard Blueprint
+- Keep one shared public website and one shared authentication flow.
+- Route authenticated users to dashboards based on stored role metadata, not template-only role labels.
+- Start with two roles only for now: `farmer` and `veterinary`.
+- Design the persistence layer so more roles can be added later without rewriting redirect logic.
+- Use lowercase Django app package names for dashboards, for example `farmers_dashboard` and `veterinary_dashboard`.
+- Record architecture decisions in [ROLE_DASHBOARD_BLUEPRINT.md](./ROLE_DASHBOARD_BLUEPRINT.md) before implementing new role-sensitive apps or redirects.
 
 ## Output Quality Bar
 - Keep output structured and concise.

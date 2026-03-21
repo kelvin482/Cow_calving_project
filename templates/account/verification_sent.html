@@ -140,16 +140,16 @@
                         </div>
 
                         <div class="rounded-3xl border border-sage/40 bg-mist/60 px-5 py-4 text-sm text-slate-700 space-y-2">
-                            <p>You can continue exploring the AI page while you wait for the email.</p>
+                            <p>Verify your email first, then sign in and we will route you to the correct dashboard.</p>
                             <p>If you do not receive the email in a few minutes, check spam or sign up again carefully.</p>
                         </div>
 
                         <div class="space-y-3">
-                            <a href="/app/" class="block w-full rounded-2xl bg-forest py-3 text-center text-white font-semibold tracking-wide shadow-md shadow-forest/20 hover:bg-pine hover:shadow-lg transition">
-                                Continue to AI Page
-                            </a>
-                            <a href="{% url 'accounts:login' %}" class="block w-full rounded-2xl border border-sage/50 py-3 text-center font-semibold text-forest hover:bg-mist transition">
+                            <a href="{% url 'accounts:login' %}" class="block w-full rounded-2xl bg-forest py-3 text-center text-white font-semibold tracking-wide shadow-md shadow-forest/20 hover:bg-pine hover:shadow-lg transition">
                                 Back to Sign In
+                            </a>
+                            <a href="{% url 'accounts:signup' %}" class="block w-full rounded-2xl border border-sage/50 py-3 text-center font-semibold text-forest hover:bg-mist transition">
+                                Create Another Account
                             </a>
                         </div>
                     </div>

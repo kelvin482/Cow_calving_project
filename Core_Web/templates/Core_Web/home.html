@@ -1,0 +1,118 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home | CowCalving</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        forest: "#1f4030",
+                        pine: "#2c5a42",
+                        sage: "#b7c4b4",
+                        mist: "#eef2ec",
+                        oat: "#f8f6f1"
+                    },
+                    fontFamily: {
+                        display: ["Cormorant Garamond", "serif"],
+                        body: ["Plus Jakarta Sans", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-mist via-oat to-emerald-50 font-body text-slate-900">
+    <main class="mx-auto flex min-h-screen max-w-7xl items-center px-4 py-10 sm:px-6 lg:px-8">
+        <section class="grid w-full gap-6 overflow-hidden rounded-[2rem] border border-white/80 bg-white/85 shadow-2xl shadow-slate-200/60 backdrop-blur lg:grid-cols-[1.08fr_0.92fr]">
+            <div class="relative overflow-hidden bg-emerald-950 px-6 py-10 text-white sm:px-10 sm:py-12 lg:px-12">
+                <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.18),transparent_42%),linear-gradient(150deg,rgba(7,24,17,0.95),rgba(25,71,47,0.86))]"></div>
+                <div class="relative space-y-6">
+                    {% include "includes/cow_calving_logo.html" with logo_wrap_class="inline-flex flex-col gap-2 rounded-[1.5rem] bg-white/92 px-4 py-3 shadow-lg shadow-black/10" logo_icon_wrap_class="flex items-center justify-center" logo_icon_class="h-14 w-14 text-[#a45d19]" logo_text_class="font-display text-3xl text-[#8f4e17]" logo_tagline_class="mt-1 text-base italic text-[#b68459]" %}
+                    <div class="space-y-4">
+                        <p class="text-sm font-semibold uppercase tracking-[0.28em] text-emerald-200">Shared website</p>
+                        <h1 class="font-display text-5xl font-bold leading-[0.95] text-white sm:text-6xl">
+                            One website for farmers, veterinary teams, and AI-guided workflows.
+                        </h1>
+                        <p class="max-w-2xl text-base leading-8 text-white/78">
+                            CowCalving brings public pages, shared account access, role-aware dashboards, and AI support together without splitting your users across different websites.
+                        </p>
+                    </div>
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="rounded-2xl border border-white/12 bg-white/8 p-4">
+                            <p class="text-sm font-semibold text-white">Role-based dashboards</p>
+                            <p class="mt-2 text-sm leading-7 text-white/70">
+                                Users sign in once and the system routes them to the correct workspace using database-backed roles.
+                            </p>
+                        </div>
+                        <div class="rounded-2xl border border-white/12 bg-white/8 p-4">
+                            <p class="text-sm font-semibold text-white">Scalable architecture</p>
+                            <p class="mt-2 text-sm leading-7 text-white/70">
+                                The project is ready for more roles later without hardcoding business logic across templates and views.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center px-6 py-8 sm:px-10 sm:py-10">
+                <div class="w-full space-y-6">
+                    <div class="space-y-3">
+                        <p class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-400">Website & Public Pages</p>
+                        <h2 class="font-display text-4xl font-bold leading-tight text-slate-900 sm:text-5xl">
+                            Start from one clean entry point.
+                        </h2>
+                        <p class="text-base leading-8 text-slate-600">
+                            This home page is now the first stop after sign-in. From here, users can move into the dashboard that matches their role through a simple, familiar layout.
+                        </p>
+                    </div>
+
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        {% if request.user.is_authenticated %}
+                            <a href="{{ dashboard_url }}" class="inline-flex items-center justify-center rounded-2xl bg-forest px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-pine">
+                                {{ dashboard_label }}
+                            </a>
+                            <a href="/dashboard/profile/" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-5 py-3.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                                Manage Profile
+                            </a>
+                        {% else %}
+                            <a href="/accounts/login/" class="inline-flex items-center justify-center rounded-2xl bg-forest px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-pine">
+                                Sign In
+                            </a>
+                            <a href="/accounts/signup/" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-5 py-3.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                                Create Account
+                            </a>
+                        {% endif %}
+                    </div>
+
+                    <div class="rounded-3xl border border-slate-200 bg-slate-50/80 p-5">
+                        <p class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-400">Current structure</p>
+                        <ul class="mt-4 space-y-3 text-sm leading-7 text-slate-600">
+                            <li>Public website pages live in the new <span class="font-semibold text-slate-900">Core_Web</span> app.</li>
+                            <li>Authentication remains in <span class="font-semibold text-slate-900">accounts</span>.</li>
+                            <li>Profiles and role routing remain in <span class="font-semibold text-slate-900">users</span>.</li>
+                            <li>Role dashboards stay separate so future designs can grow without conflicts.</li>
+                        </ul>
+                    </div>
+
+                    {% if request.user.is_authenticated %}
+                        <div class="rounded-3xl border border-emerald-200 bg-emerald-50/80 p-5">
+                            <p class="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-700">Next Step</p>
+                            <p class="mt-3 text-sm leading-7 text-slate-700">
+                                Use the main action above to enter your role dashboard. If your role details need changes first, open your profile and update them there.
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

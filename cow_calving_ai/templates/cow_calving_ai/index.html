@@ -88,7 +88,7 @@
                         </article>
                     </div>
 
-                    <form id="ai-form" class="composer">
+                    <form id="ai-form" class="composer" data-ai-endpoint="{% url 'cow_calving_ai:ai_test' %}">
                         <label class="sr-only" for="question">Question</label>
                         <div class="composer-shell">
                             <textarea id="question" name="q" rows="1" placeholder="Ask about calving risk, labor progress, or calf care..." class="composer-input" required></textarea>
