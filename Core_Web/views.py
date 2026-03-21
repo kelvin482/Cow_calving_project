@@ -4,12 +4,13 @@ from django.shortcuts import render
 from users.services import get_dashboard_url_for_user, get_or_create_profile
 
 
-def home_view(request):
-    # Keep one public home page for everyone, then add small role-aware hints
-    # for signed-in users so navigation stays obvious without extra training.
+def _build_site_context(request, page_key):
+    # Keep the public website pages on one shared context so navigation and
+    # role-aware actions stay consistent across the website.
     dashboard_url = ""
     dashboard_label = ""
     profile_url = "/dashboard/profile/"
+    role_slug = ""
 
     if request.user.is_authenticated:
         profile = get_or_create_profile(request.user)
@@ -17,18 +18,42 @@ def home_view(request):
             request.user,
             fallback=profile_url,
         )
+        role_slug = profile.role.slug if profile.role else ""
         dashboard_label = (
-            f"Open {profile.role.name} Dashboard"
+            f"{profile.role.name} Dashboard"
             if profile.role
             else "Complete Your Profile"
         )
 
+    return {
+        "authenticated_default_url": settings.AUTHENTICATED_DEFAULT_URL,
+        "dashboard_url": dashboard_url,
+        "dashboard_label": dashboard_label,
+        "profile_url": profile_url,
+        "page_key": page_key,
+        "role_slug": role_slug,
+    }
+
+
+def _render_site_page(request, template_name, page_key):
     return render(
         request,
-        "Core_Web/home.html",
-        {
-            "authenticated_default_url": settings.AUTHENTICATED_DEFAULT_URL,
-            "dashboard_url": dashboard_url,
-            "dashboard_label": dashboard_label,
-        },
+        template_name,
+        _build_site_context(request, page_key=page_key),
     )
+
+
+def home_view(request):
+    return _render_site_page(request, "Core_Web/home.html", page_key="home")
+
+
+def guide_view(request):
+    return _render_site_page(request, "Core_Web/guide.html", page_key="guide")
+
+
+def checklist_view(request):
+    return _render_site_page(request, "Core_Web/checklist.html", page_key="checklist")
+
+
+def support_view(request):
+    return _render_site_page(request, "Core_Web/support.html", page_key="support")

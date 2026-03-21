@@ -256,6 +256,8 @@ class ProfileViewTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Profile details")
+        self.assertContains(response, "Open Menu")
+        self.assertContains(response, "Logout")
         self.assertContains(response, "Demo Farm")
         self.assertContains(response, "Veterinary")
 
@@ -289,3 +291,4 @@ class ProfileViewTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Save Profile")
+        self.assertContains(response, "Open Menu")

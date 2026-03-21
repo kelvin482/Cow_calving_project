@@ -33,6 +33,9 @@ class VeterinaryDashboardViewTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Veterinary Dashboard")
+        self.assertContains(response, "Open Menu")
+        self.assertContains(response, "My Profile")
+        self.assertContains(response, "AI Workspace")
         self.assertContains(response, '<form method="post" action="/accounts/logout/">', html=False)
         self.assertNotContains(response, 'href="/accounts/logout/"', html=False)
 

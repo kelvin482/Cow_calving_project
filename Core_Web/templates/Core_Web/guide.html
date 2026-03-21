@@ -1,0 +1,816 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CowCalving.farm - Complete Calving Guide</title>
+  <meta name="description"
+    content="Read the full CowCalving.farm calving guide for warning signs, labor stages, colostrum management, calf care, and troubleshooting.">
+  <link rel="stylesheet" href="{% static 'Core_Web/styles.css' %}{% if dev_static_version %}?v={{ dev_static_version }}{% endif %}">
+  <style>
+    .auth-context {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav>
+    <a href="{% url 'Core_Web:home' %}" class="nav-logo">
+      <div class="logo-icon" aria-hidden="true">
+        <span class="logo-icon-shell">
+          <span class="logo-mark">{% include "includes/cow_calving_logo_mark.html" %}</span>
+        </span>
+      </div>
+      <span class="logo-text">CowCalving.farm</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="{% url 'Core_Web:home' %}">Home</a></li>
+      <li class="nav-item dropdown">
+        <button class="nav-dropdown-toggle nav-cta" type="button" aria-expanded="false" aria-haspopup="true">
+          Guide <span class="nav-caret">&#9662;</span>
+        </button>
+        <ul class="nav-dropdown" aria-label="Guide sections">
+          <li><a href="{% url 'Core_Web:guide' %}" class="nav-dropdown-main">Guide Overview</a></li>
+          <li><a href="#quickstart">Quick Start</a></li>
+          <li><a href="#signs">Signs Of Calving</a></li>
+          <li><a href="#stages">Stages Of Labor</a></li>
+          <li><a href="#colostrum">Colostrum</a></li>
+          <li><a href="#calf">First 24 Hours</a></li>
+          <li><a href="#daily">Daily Management</a></li>
+          <li><a href="#trouble">Troubleshooting</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </li>
+      <li><a href="{% url 'Core_Web:checklist' %}">Checklist</a></li>
+      <li><a href="{% url 'Core_Web:support' %}">Support</a></li>
+    </ul>
+  </nav>
+
+  <div class="auth-context">
+    <span>Complete Calving Guide</span>
+    {% if request.user.is_authenticated %}
+      <a href="{{ dashboard_url|default:profile_url }}">{{ dashboard_label|default:"Complete Your Profile" }}</a>
+      <a href="{{ profile_url }}">Profile</a>
+    {% else %}
+      <a href="{% url 'accounts:login' %}">Sign In</a>
+      <a href="{% url 'accounts:signup' %}">Farmer Register</a>
+    {% endif %}
+  </div>
+
+  <div class="stats-strip">
+    <div class="stats-inner">
+      <div class="stat-item">
+        <div class="stat-label">Gestation</div>
+        <div class="stat-value">280 days</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Labor Stages</div>
+        <div class="stat-value">3</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">First Colostrum</div>
+        <div class="stat-value">2 hrs</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Urgent Review</div>
+        <div class="stat-value">30 min</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-wrap">
+    <div class="intro-section">
+      <div class="intro-text">
+        <div class="section-tag">Why This Matters</div>
+        <h2>Why Every Farmer Needs To Understand Calving</h2>
+        <p>Calving is the most critical event in the cattle farming calendar. A healthy delivery sets the foundation for
+          a productive cow and a thriving calf, while poor management at calving can lead directly to lost calves,
+          reduced fertility, and avoidable veterinary costs.</p>
+        <p>Each lost calf represents months of feeding cost, lost income, and real pressure on the farm. That is why
+          this guide keeps the deeper information in one place instead of scattering it across the site.</p>
+
+        <div class="challenges-box">
+          <h3>Key Challenges Farmers Face</h3>
+          <p>Even experienced farmers run into the same high-stakes questions every season:</p>
+          <ul>
+            <li>Recognizing early signs of labor before it progresses</li>
+            <li>Knowing when to intervene versus when to wait quietly</li>
+            <li>Making sure the calf receives colostrum in time</li>
+            <li>Handling retained placenta without causing harm</li>
+            <li>Managing weak or cold calves in the first hours after birth</li>
+            <li>Responding safely to night-time or difficult calvings</li>
+          </ul>
+        </div>
+      </div>
+
+      <div>
+        <div class="intro-image">
+          <img src="{% static 'Core_Web/images/286aa99925f3186fc15680800fa372e6.jpg' %}" alt="Newborn calf after birth">
+        </div>
+        <div class="quote-block">
+          <blockquote>A calf that misses its colostrum window starts life at an avoidable disadvantage. The first hours
+            are where good preparation pays off.</blockquote>
+          <div class="quote-attr">
+            <div class="quote-attr-text">
+              <div class="name">Calving Management Principle</div>
+              <div class="title">Preparation and timing matter more than rushing late</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-wrap">
+    <div class="section-work">
+      <div class="section-tag">What This Guide Covers</div>
+      <h2>Your Complete Calving Resource</h2>
+      <p>This guide walks through the warning signs before calving, the three stages of labor, colostrum management,
+        newborn calf care, daily management, and common problems that require intervention.</p>
+      <p>It is the detailed page in the new structure, so the missing field detail and veterinary context live here
+        instead of being partially copied onto every other page.</p>
+
+      <div class="highlight-stat">
+        <span class="big-num">30 min</span>
+        <span class="caption">If a mature cow shows no progress in Stage 2 after 30 minutes of active straining, stop
+          waiting and reassess immediately. For heifers, the working limit is 1 hour.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="quickstart-section" id="quickstart">
+    <div class="main-wrap">
+      <div class="section-tag">Quick Start</div>
+      <h2>A Simple 5-Step Calving Flow</h2>
+      <p>Use this short flow when you need a fast, clear decision path with no extra reading.</p>
+
+      <div class="quickstart-grid">
+        <div class="quickstart-card">
+          <div class="quickstart-step">1</div>
+          <h3>Watch The Signs</h3>
+          <p>Look for udder fill, vulva swelling, and behavior change to time movement to the calving pen.</p>
+        </div>
+        <div class="quickstart-card">
+          <div class="quickstart-step">2</div>
+          <h3>Start Timing</h3>
+          <p>When the water bag appears, begin timing Stage 2 and track progress every few contractions.</p>
+        </div>
+        <div class="quickstart-card">
+          <div class="quickstart-step">3</div>
+          <h3>Act On The Rule</h3>
+          <p>No progress after 30 minutes in cows or 1 hour in heifers means reassess or call for help.</p>
+        </div>
+        <div class="quickstart-card">
+          <div class="quickstart-step">4</div>
+          <h3>Protect The Calf</h3>
+          <p>Clear airways, dry the calf, dip the navel, and feed colostrum within 2 hours.</p>
+        </div>
+        <div class="quickstart-card">
+          <div class="quickstart-step">5</div>
+          <h3>Monitor Both</h3>
+          <p>Watch cow and calf for bleeding, weakness, chilling, or delayed placenta after birth.</p>
+        </div>
+      </div>
+
+      <div class="quickstart-note">
+        <strong>Need more detail?</strong> Jump to the section links in the Guide menu above for deeper steps.
+      </div>
+    </div>
+  </div>
+
+  <div class="signs-section" id="signs">
+    <div class="main-wrap">
+      <div class="section-tag">Preparation Phase</div>
+      <h2>Signs Your Cow Is About To Calve</h2>
+      <p>Watch for changes in the udder, vulva, pelvis, and behavior so you can move the cow at the right time and
+        increase observation without disturbing labor.</p>
+
+      <div class="signs-grid">
+        <div class="sign-card">
+          <span class="sign-timing">2-3 weeks before</span>
+          <span class="sign-emoji">1</span>
+          <h3>Udder Development</h3>
+          <p>The udder fills and teats enlarge. This usually becomes more obvious as calving approaches.</p>
+        </div>
+        <div class="sign-card">
+          <span class="sign-timing">1-2 weeks before</span>
+          <span class="sign-emoji">2</span>
+          <h3>Vulva Swelling</h3>
+          <p>The vulva relaxes and swells. Mucus discharge often appears as the cervix begins to open.</p>
+        </div>
+        <div class="sign-card">
+          <span class="sign-timing">24-48 hours before</span>
+          <span class="sign-emoji">3</span>
+          <h3>Pelvic Relaxation</h3>
+          <p>The ligaments beside the tailhead sink and the tail seems more lifted or dropped.</p>
+        </div>
+        <div class="sign-card">
+          <span class="sign-timing">12-24 hours before</span>
+          <span class="sign-emoji">4</span>
+          <h3>Behavior Change</h3>
+          <p>The cow may isolate herself, stop eating, look at her flank, and stand up and lie down repeatedly.</p>
+        </div>
+        <div class="sign-card">
+          <span class="sign-timing">Hours before</span>
+          <span class="sign-emoji">5</span>
+          <h3>Restlessness</h3>
+          <p>Tail switching, pawing, and repeated shifting suggest contractions are becoming more organized.</p>
+        </div>
+        <div class="sign-card">
+          <span class="sign-timing">Just before</span>
+          <span class="sign-emoji">6</span>
+          <h3>Visible Straining</h3>
+          <p>Once abdominal straining becomes obvious, the cow should already be in a clean calving area.</p>
+        </div>
+        <div class="sign-card">
+          <span class="sign-timing">Stage 2 begins</span>
+          <span class="sign-emoji">7</span>
+          <h3>Water Bag</h3>
+          <p>The water bag at the vulva marks active labor. Start timing progress from this point.</p>
+        </div>
+        <div class="sign-card">
+          <span class="sign-timing">Management tip</span>
+          <span class="sign-emoji">8</span>
+          <h3>More Daytime Births</h3>
+          <p>Shifting the main feed later in the day can help move more calvings into daylight hours.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stages-section" id="stages">
+    <div class="main-wrap">
+      <div class="section-tag">Step By Step</div>
+      <h2>The 3 Stages Of Calving</h2>
+      <p>Understanding normal progress helps you avoid two costly mistakes: intervening too early and waiting too long.
+      </p>
+
+      <div class="stage-cards">
+        <div class="stage-card">
+          <div class="stage-card-header">
+            <div class="stage-num-badge">
+              <div class="stage-circle s1">1</div>
+              <span class="stage-label-text">Stage One</span>
+            </div>
+            <h3>Cervix Dilation</h3>
+            <div class="stage-duration">2-24 hours</div>
+          </div>
+          <div class="stage-card-body">
+            <p>The cow becomes restless as the cervix opens. Move her to the calving area and check quietly at regular
+              intervals.</p>
+            <ul class="stage-signs">
+              <li>Isolation from the herd</li>
+              <li>Standing and lying down repeatedly</li>
+              <li>Mucus discharge</li>
+              <li>Tail carried away from the body</li>
+              <li>Reduced appetite</li>
+            </ul>
+            <div class="stage-warning-box"><strong>Farmer note:</strong> Observe without crowding the cow. Stress can
+              slow progress.</div>
+          </div>
+        </div>
+
+        <div class="stage-card">
+          <div class="stage-card-header">
+            <div class="stage-num-badge">
+              <div class="stage-circle s2">2</div>
+              <span class="stage-label-text">Stage Two</span>
+            </div>
+            <h3>Active Delivery</h3>
+            <div class="stage-duration">30 min-2 hrs for cows</div>
+          </div>
+          <div class="stage-card-body">
+            <p>The water bag appears and strong contractions begin. In a normal presentation, two front feet and the
+              nose follow.</p>
+            <ul class="stage-signs">
+              <li>Water bag visible</li>
+              <li>Strong abdominal contractions</li>
+              <li>Two feet and nose in correct order</li>
+              <li>Progress with each contraction</li>
+            </ul>
+            <div class="stage-warning-box"><strong>Intervene or escalate:</strong> no progress after 30 minutes in a
+              mature cow, no progress after 1 hour in a heifer, or any abnormal presentation.</div>
+          </div>
+        </div>
+
+        <div class="stage-card">
+          <div class="stage-card-header">
+            <div class="stage-num-badge">
+              <div class="stage-circle s3">3</div>
+              <span class="stage-label-text">Stage Three</span>
+            </div>
+            <h3>Placenta Expulsion</h3>
+            <div class="stage-duration">3-12 hours after birth</div>
+          </div>
+          <div class="stage-card-body">
+            <p>The calf is born, the cow bonds, and the placenta should pass naturally. Focus on the calf while
+              monitoring the cow.</p>
+            <ul class="stage-signs">
+              <li>Placenta passes naturally</li>
+              <li>Cow begins bonding with the calf</li>
+              <li>Calf should attempt to stand within 1-2 hours</li>
+              <li>First colostrum must be planned immediately</li>
+            </ul>
+            <div class="stage-warning-box"><strong>Do not pull the placenta:</strong> retained membranes need veterinary
+              management, not force.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert-strip">
+    <div class="alert-strip-inner">
+      <div class="alert-item">
+        <div class="alert-item-label">Mature cow</div>
+        <div class="alert-item-val">30 minutes</div>
+        <div class="alert-item-desc">If Stage 2 is active with no progress, reassess immediately.</div>
+      </div>
+      <div class="alert-item">
+        <div class="alert-item-label">First-calf heifer</div>
+        <div class="alert-item-val">1 hour</div>
+        <div class="alert-item-desc">Allow more time than a mature cow, but do not wait indefinitely.</div>
+      </div>
+      <div class="alert-item">
+        <div class="alert-item-label">Any abnormal sign</div>
+        <div class="alert-item-val">Call now</div>
+        <div class="alert-item-desc">Backward calf, one leg, swollen tongue, or exhausted cow should trigger rapid
+          escalation.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="colostrum-section" id="colostrum">
+    <div class="main-wrap">
+      <div class="section-tag">Colostrum</div>
+      <h2>Colostrum Is The First Major Management Decision</h2>
+      <p>The newborn calf depends on colostrum for early immunity. The quality, quantity, and timing of the first feed
+        have a direct effect on calf survival and later performance.</p>
+
+      <div class="three-qs">
+        <div class="q-item">
+          <div class="q-big">Q1</div>
+          <div class="q-title">Quantity</div>
+          <div class="q-desc">Aim for about 10 percent of body weight in the first feeding.</div>
+        </div>
+        <div class="q-item">
+          <div class="q-big">Q2</div>
+          <div class="q-title">Quality</div>
+          <div class="q-desc">Use the best colostrum available and test quality where possible.</div>
+        </div>
+        <div class="q-item">
+          <div class="q-big">Q3</div>
+          <div class="q-title">Quickness</div>
+          <div class="q-desc">Feed as early as possible, ideally within the first 2 hours.</div>
+        </div>
+      </div>
+
+      <div class="colos-grid">
+        <div class="colos-card">
+          <div class="colos-card-top">
+            <div class="colos-icon-box">A</div>
+            <div>
+              <h3>Use Herd Colostrum First</h3>
+              <span class="colos-card-tag">Best practice</span>
+            </div>
+          </div>
+          <p>Colostrum from healthy cows in your own herd is usually the best first option for disease protection.</p>
+        </div>
+        <div class="colos-card">
+          <div class="colos-card-top">
+            <div class="colos-icon-box">B</div>
+            <div>
+              <h3>Store Emergency Supply</h3>
+              <span class="colos-card-tag">Preparedness</span>
+            </div>
+          </div>
+          <p>Keep backup colostrum stored safely so a weak calf or poor-quality first milk does not leave you unready.
+          </p>
+        </div>
+        <div class="colos-card">
+          <div class="colos-card-top">
+            <div class="colos-icon-box">C</div>
+            <div>
+              <h3>Test When Possible</h3>
+              <span class="colos-card-tag">Quality control</span>
+            </div>
+          </div>
+          <p>Testing removes guesswork and helps ensure the calf receives enough antibody protection from the first
+            feeding.</p>
+        </div>
+        <div class="colos-card">
+          <div class="colos-card-top">
+            <div class="colos-icon-box">D</div>
+            <div>
+              <h3>Do Not Delay Feeding</h3>
+              <span class="colos-card-tag">Timing</span>
+            </div>
+          </div>
+          <p>If the calf cannot suckle promptly, use the right feeding method instead of waiting too long.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="firsthours-section" id="calf">
+    <div class="main-wrap">
+      <div class="section-tag">Newborn Calf Care</div>
+      <h2>The Critical First 24 Hours</h2>
+      <p>The first hours after birth shape calf survival, temperature control, immunity, and early feeding success.</p>
+
+      <div class="hours-grid">
+        <div class="hour-card">
+          <span class="hour-emoji">1</span>
+          <div class="hour-time">0-5 minutes</div>
+          <h3>Clear Airways</h3>
+          <p>Dry the calf, clear mucus, and confirm steady breathing immediately after delivery.</p>
+        </div>
+        <div class="hour-card">
+          <span class="hour-emoji">2</span>
+          <div class="hour-time">Within 30 minutes</div>
+          <h3>Navel Care</h3>
+          <p>Dip the navel to reduce the risk of infection and future joint or navel problems.</p>
+        </div>
+        <div class="hour-card">
+          <span class="hour-emoji">3</span>
+          <div class="hour-time">Within 2 hours</div>
+          <h3>First Colostrum</h3>
+          <p>Prioritize the first feed while the calf is most able to absorb protective antibodies.</p>
+        </div>
+        <div class="hour-card">
+          <span class="hour-emoji">4</span>
+          <div class="hour-time">1-2 hours</div>
+          <h3>Standing And Nursing</h3>
+          <p>A healthy calf should attempt to stand and seek the udder shortly after birth.</p>
+        </div>
+        <div class="hour-card">
+          <span class="hour-emoji">5</span>
+          <div class="hour-time">8-12 hours</div>
+          <h3>Second Feeding</h3>
+          <p>A second high-quality feeding adds more protection and supports the calf through the first day.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="daily-section" id="daily">
+    <div class="main-wrap">
+      <div class="section-tag">Daily Management</div>
+      <h2>Daily Cow And Calf Care</h2>
+      <p>Good outcomes depend on routine management before and after calving, not only on what happens during labor.</p>
+
+      <div class="daily-grid">
+        <div class="daily-card">
+          <div class="daily-card-icon">1</div>
+          <h3>Late Pregnancy Nutrition</h3>
+          <p>Feed for body condition, calf vigor, and colostrum quality rather than over-conditioning the cow.</p>
+          <ul class="daily-tips">
+            <li>Watch body condition before calving</li>
+            <li>Balance minerals carefully</li>
+            <li>Avoid oversized calves from overfeeding</li>
+          </ul>
+        </div>
+        <div class="daily-card">
+          <div class="daily-card-icon">2</div>
+          <h3>Observation Routine</h3>
+          <p>Check close-up cows consistently and record signs instead of relying on memory.</p>
+          <ul class="daily-tips">
+            <li>Morning, midday, and evening checks</li>
+            <li>More frequent review for heifers</li>
+            <li>Record due dates and behavior changes</li>
+          </ul>
+        </div>
+        <div class="daily-card">
+          <div class="daily-card-icon">3</div>
+          <h3>Calving Pen Hygiene</h3>
+          <p>Clean bedding and a safe calving space reduce infections and make assistance easier.</p>
+          <ul class="daily-tips">
+            <li>Refresh bedding between cows</li>
+            <li>Disinfect key surfaces</li>
+            <li>Keep lighting and access ready</li>
+          </ul>
+        </div>
+        <div class="daily-card">
+          <div class="daily-card-icon">4</div>
+          <h3>Feeding Calves</h3>
+          <p>After colostrum, consistency, cleanliness, and observation matter every day.</p>
+          <ul class="daily-tips">
+            <li>Keep equipment clean</li>
+            <li>Offer water early</li>
+            <li>Monitor intake and energy closely</li>
+          </ul>
+        </div>
+        <div class="daily-card">
+          <div class="daily-card-icon">5</div>
+          <h3>Hygiene And Tools</h3>
+          <p>Feed buckets, bottles, and assistance equipment can spread disease if cleaning slips.</p>
+          <ul class="daily-tips">
+            <li>Wash after every use</li>
+            <li>Disinfect thoroughly</li>
+            <li>Replace worn equipment when needed</li>
+          </ul>
+        </div>
+        <div class="daily-card">
+          <div class="daily-card-icon">6</div>
+          <h3>Health Follow-Up</h3>
+          <p>Watch both the cow and calf after the event so complications are found early.</p>
+          <ul class="daily-tips">
+            <li>Watch for scours and weakness</li>
+            <li>Track cow recovery after delivery</li>
+            <li>Follow the herd health plan consistently</li>
+          </ul>
+        </div>
+      </div>
+      <a href="{% url 'Core_Web:checklist' %}#checklist" class="view-all-link">Open Farmer Checklist &#8594;</a>
+    </div>
+  </div>
+
+  <div class="testimonials">
+    <div class="main-wrap">
+      <div>
+        <div class="testimonial-card">
+          <blockquote>The first time I lost a calf to scours, I did not understand what I was missing. Once I fixed my
+            colostrum timing and quality checks, the results on the farm changed completely.</blockquote>
+          <div class="testimonial-attr">
+            <div class="name">James Mwangi</div>
+            <div class="desc">Dairy farmer using stricter colostrum routines and record keeping</div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <blockquote>Learning the 30-minute rule for Stage 2 changed how I respond to difficult calvings. Acting early
+            saved a heifer and calf I would have lost if I had kept waiting.</blockquote>
+          <div class="testimonial-attr">
+            <div class="name">Grace Atieno</div>
+            <div class="desc">Smallholder farmer focused on earlier intervention decisions</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="photos-collage">
+        <img src="{% static 'Core_Web/images/a7938517ea1668247cd5f0170c0b23e4.jpg' %}" alt="Cow with twin calves in calving pen">
+        <img src="{% static 'Core_Web/images/00ac73aa5aaaecf17fae41d83e028216.jpg' %}" alt="Farmer bottle-feeding newborn calf">
+        <img src="{% static 'Core_Web/images/1490fe2cbb1e219d53027e4d8c7cf644.jpg' %}" alt="Veterinarian inspecting dairy cows">
+      </div>
+    </div>
+  </div>
+
+  <div class="trouble-section" id="trouble">
+    <div class="main-wrap">
+      <div class="section-tag">Problem Solving</div>
+      <h2>Common Calving Problems And What To Do</h2>
+      <p>Recognize the warning signs early and escalate before the condition of the cow or calf deteriorates.</p>
+
+      <div class="trouble-grid">
+        <div class="trouble-card">
+          <div class="trouble-icon urgent">1</div>
+          <div>
+            <div class="trouble-level urgent">Urgent</div>
+            <h3>Backward Or Abnormal Presentation</h3>
+            <p>If the visible presentation is not normal, treat it as an immediate escalation point rather than a delay
+              problem.</p>
+          </div>
+        </div>
+        <div class="trouble-card">
+          <div class="trouble-icon urgent">2</div>
+          <div>
+            <div class="trouble-level urgent">Intervene Now</div>
+            <h3>No Progress In Stage 2</h3>
+            <p>Use the timing rules. Reassess quickly and do not keep waiting once the threshold is crossed.</p>
+          </div>
+        </div>
+        <div class="trouble-card">
+          <div class="trouble-icon caution">3</div>
+          <div>
+            <div class="trouble-level caution">Monitor</div>
+            <h3>Retained Placenta</h3>
+            <p>Do not pull retained membranes. Keep the cow clean and involve a veterinarian when they do not pass.</p>
+          </div>
+        </div>
+        <div class="trouble-card">
+          <div class="trouble-icon caution">4</div>
+          <div>
+            <div class="trouble-level caution">Act Quickly</div>
+            <h3>Milk Fever</h3>
+            <p>Wobbling, weakness, and inability to stand after calving require fast professional treatment.</p>
+          </div>
+        </div>
+        <div class="trouble-card">
+          <div class="trouble-icon watch">5</div>
+          <div>
+            <div class="trouble-level watch">Watch And Treat</div>
+            <h3>Weak Or Cold Calf</h3>
+            <p>Dry the calf, restore warmth, and do not delay colostrum when weakness or chilling is obvious.</p>
+          </div>
+        </div>
+        <div class="trouble-card">
+          <div class="trouble-icon watch">6</div>
+          <div>
+            <div class="trouble-level watch">Treat Early</div>
+            <h3>Calf Scours</h3>
+            <p>Respond to dehydration and weakness quickly. Good colostrum management remains the strongest prevention.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="faq-section" id="faq">
+    <div class="main-wrap">
+      <div class="section-tag">Common Questions</div>
+      <h2>Frequently Asked Questions</h2>
+      <p>Use these quick answers when you need a short reminder without reading the whole section again.</p>
+
+      <div class="faq-grid">
+        <div class="faq-item">
+          <div class="faq-q">How long is a cow pregnant? <span class="faq-arrow">&#9660;</span></div>
+          <div class="faq-a">Around 280 days is a common average, but the exact date can vary by breed and individual
+            cow.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">What does a normal presentation look like? <span class="faq-arrow">&#9660;</span></div>
+          <div class="faq-a">Two front feet with the nose following in the correct position is the expected normal
+            presentation.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">How much colostrum should a calf receive first? <span class="faq-arrow">&#9660;</span>
+          </div>
+          <div class="faq-a">A useful rule is about 10 percent of body weight as the first feeding, delivered as early
+            as possible.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">What if the cow rejects the calf? <span class="faq-arrow">&#9660;</span></div>
+          <div class="faq-a">Keep the pair safe, support feeding, and continue supervised bonding attempts while the
+            calf gets the care it needs.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">What causes difficult calving most often? <span class="faq-arrow">&#9660;</span></div>
+          <div class="faq-a">Large calves, heifer size, and abnormal presentation are among the most common causes.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">When is scours an emergency? <span class="faq-arrow">&#9660;</span></div>
+          <div class="faq-a">When the calf becomes weak, dehydrated, or unable to stand, the situation has moved beyond
+            routine monitoring.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-wrap">
+    <div class="two-col-teasers">
+      <div class="teaser-card">
+        <h3>Veterinary Services</h3>
+        <p>If the guide confirms that a case is no longer routine, move to the support page to organize escalation,
+          follow-up, and the next contact quickly.</p>
+        <a href="{% url 'Core_Web:support' %}#support-team" class="btn-outline">Open Support Options</a>
+      </div>
+      <div class="teaser-card">
+        <h3>Farmer Marketplace</h3>
+        <p>Once you know what the farm needs, move to the checklist and support flow to confirm equipment, hygiene
+          supplies, feeding tools, and readiness before the next case begins.</p>
+        <a href="{% url 'Core_Web:checklist' %}#checklist" class="btn-outline">Review Checklist</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-wrap">
+    <div class="features-section" style="background: transparent; border: none; padding-bottom: 40px;">
+      <h2>Why This Guide Still Matters</h2>
+      <p class="subtitle">The split site is cleaner, but the field detail still needs one strong reference page.</p>
+      <div class="features-grid" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="feature-card">
+          <div class="feature-icon">&#128046;</div>
+          <h3 style="font-size: 18px;">Better calving decisions</h3>
+          <p style="font-size: 14px;">Know what is normal, what is not, and when the farm needs to move faster.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#128202;</div>
+          <h3 style="font-size: 18px;">Stronger calf starts</h3>
+          <p style="font-size: 14px;">Tie timing, colostrum, and early care together instead of treating them separately.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#127806;</div>
+          <h3 style="font-size: 18px;">Smarter daily routines</h3>
+          <p style="font-size: 14px;">Connect dry cow management, pen hygiene, and observation to better outcomes.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#129658;</div>
+          <h3 style="font-size: 18px;">Earlier escalation</h3>
+          <p style="font-size: 14px;">Use the guide before delay turns a manageable case into an emergency.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="where-next">
+    <div class="main-wrap">
+      <h2>Use The Other Pages For The Next Step</h2>
+      <div class="next-grid">
+        <a href="{% url 'Core_Web:home' %}" class="next-card">
+          <div class="next-card-icon">&#8962;</div>
+          <div class="next-card-body">
+            <h3>Home</h3>
+            <p>Return to the main overview and the site-level page map.</p>
+          </div>
+        </a>
+        <a href="{% url 'Core_Web:guide' %}" class="next-card">
+          <div class="next-card-icon">&#128214;</div>
+          <div class="next-card-body">
+            <h3>Guide</h3>
+            <p>Stay here for the full learning flow and stage-by-stage explanations.</p>
+          </div>
+        </a>
+        <a href="{% url 'Core_Web:checklist' %}" class="next-card">
+          <div class="next-card-icon">&#10003;</div>
+          <div class="next-card-body">
+            <h3>Checklist</h3>
+            <p>Move to the practical action page when the next step is preparation and execution.</p>
+          </div>
+        </a>
+        <a href="{% url 'Core_Web:support' %}" class="next-card">
+          <div class="next-card-icon">&#128222;</div>
+          <div class="next-card-body">
+            <h3>Support</h3>
+            <p>Open support when the problem needs escalation or outside help.</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta-strip" style="background: linear-gradient(135deg, var(--green-dark), var(--green-light));">
+    <h2>Use The Guide For The Deep Detail</h2>
+    <p>The other pages are now lighter on purpose. This page holds the longer reference content for training and review.
+    </p>
+    <div class="cta-btns">
+      <a href="{% url 'Core_Web:checklist' %}" class="cta-btn-primary">Open Checklist</a>
+      <a href="{% url 'Core_Web:support' %}" class="cta-btn-secondary">Open Support</a>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand-name">
+          <span class="footer-brand-mark" aria-hidden="true">
+            <span class="logo-mark">{% include "includes/cow_calving_logo_mark.html" %}</span>
+          </span>
+          CowCalving.farm
+        </div>
+        <p class="footer-desc">Evidence-based, practical guidance for farmers on cow calving, calf management, and
+          daily herd care.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Pages</h4>
+        <ul>
+          <li><a href="{% url 'Core_Web:home' %}">Home</a></li>
+          <li><a href="{% url 'Core_Web:guide' %}">Guide</a></li>
+          <li><a href="{% url 'Core_Web:checklist' %}">Checklist</a></li>
+          <li><a href="{% url 'Core_Web:support' %}">Support</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Guide</h4>
+        <ul>
+          <li><a href="#quickstart">Quick Start</a></li>
+          <li><a href="#signs">Signs Of Calving</a></li>
+          <li><a href="#stages">Stages Of Labor</a></li>
+          <li><a href="#colostrum">Colostrum</a></li>
+          <li><a href="#trouble">Troubleshooting</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Action</h4>
+        <ul>
+          <li><a href="{% url 'Core_Web:checklist' %}#checklist">Season Checklist</a></li>
+          <li><a href="{% url 'Core_Web:checklist' %}#faq">Checklist FAQ</a></li>
+          <li><a href="{% url 'Core_Web:support' %}#support-team">Support Options</a></li>
+          <li><a href="{% url 'Core_Web:support' %}#support-faq">Support FAQ</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 CowCalving.farm - For educational purposes. Always consult a qualified veterinarian for medical
+        decisions affecting your animals.</span>
+      <span>Built for farmers</span>
+    </div>
+  </footer>
+
+  <script src="{% static 'Core_Web/main.js' %}{% if dev_static_version %}?v={{ dev_static_version }}{% endif %}"></script>
+</body>
+
+</html>

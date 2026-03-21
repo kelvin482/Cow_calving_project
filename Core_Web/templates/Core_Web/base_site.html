@@ -1,0 +1,904 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CowCalving.farm{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        green: "#1F5D3B",
+                        "green-light": "#2f8656",
+                        "green-dark": "#16422a",
+                        forest: "#1F5D3B",
+                        pine: "#16422a",
+                        amber: "#F28C28",
+                        "amber-light": "#F6C343",
+                        cream: "#F5F2E8",
+                        "warm-gray": "#E5E7EB",
+                        muted: "#6B7280",
+                    },
+                    fontFamily: {
+                        display: ["Poppins", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
+                    },
+                    boxShadow: {
+                        sm: "0 2px 8px rgba(0,0,0,.05)",
+                        md: "0 6px 24px rgba(0,0,0,.08)",
+                        lg: "0 16px 48px rgba(0,0,0,.12)",
+                        soft: "0 8px 30px rgba(15,23,42,.08)",
+                    },
+                    borderRadius: {
+                        sm: "6px",
+                        md: "12px",
+                        lg: "20px",
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer components {
+            .main-wrap {
+                @apply mx-auto w-full max-w-[1100px] px-7 lg:px-12;
+            }
+
+            .hero-inner-wide {
+                @apply mx-auto w-full max-w-[1460px] px-7 lg:px-12;
+            }
+
+            .nav-link-base {
+                @apply rounded-sm px-3.5 py-2 text-[13px] font-medium tracking-[0.3px] text-white/80 transition;
+            }
+
+            .nav-link-passive {
+                @apply nav-link-base hover:bg-white/10 hover:text-amber-light;
+            }
+
+            .nav-link-active {
+                @apply nav-link-base bg-[linear-gradient(135deg,#F28C28,#F6C343)] font-semibold text-white shadow-[0_4px_14px_rgba(240,167,51,.35)];
+            }
+
+            .site-auth-link {
+                @apply rounded-sm border border-white/15 px-3.5 py-2 text-[12px] font-semibold tracking-[0.2px] text-white/85 transition hover:bg-white/10 hover:text-white;
+            }
+
+            .mobile-nav-link {
+                @apply block rounded-md px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-cream hover:text-green-dark;
+            }
+
+            .btn-outline {
+                @apply inline-flex items-center justify-center rounded-md border border-warm-gray bg-white px-5 py-3 text-sm font-semibold text-green-dark transition hover:border-amber hover:bg-amber hover:text-white;
+            }
+
+            .section-title {
+                @apply font-display text-[32px] font-semibold text-green-dark;
+            }
+
+            .feature-card-base {
+                @apply rounded-md border border-warm-gray bg-white p-6 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-md;
+            }
+
+            .next-card {
+                @apply flex items-start gap-4 rounded-md border border-warm-gray bg-white p-6 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-md;
+            }
+
+            .cta-btn-primary {
+                @apply inline-block rounded-sm bg-white px-8 py-3.5 text-[15px] font-bold text-amber shadow-[0_6px_20px_rgba(0,0,0,.15)] transition hover:-translate-y-0.5 hover:bg-cream hover:shadow-[0_10px_28px_rgba(0,0,0,.2)];
+            }
+
+            .cta-btn-secondary {
+                @apply inline-block rounded-sm border-2 border-white/65 px-8 py-3 text-[15px] font-semibold text-white transition hover:-translate-y-0.5 hover:border-white hover:bg-white/10;
+            }
+        }
+    </style>
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: #ffffff;
+            color: #1A1A1A;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        #progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 300;
+            height: 4px;
+            width: 0;
+            background: linear-gradient(135deg, #F28C28, #F6C343);
+            box-shadow: 0 2px 10px rgba(242,140,40,.35);
+        }
+
+        #back-to-top {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 220;
+            width: 46px;
+            height: 46px;
+            border: none;
+            border-radius: 9999px;
+            background: #16422a;
+            color: #fff;
+            font-size: 20px;
+            box-shadow: 0 12px 28px rgba(0,0,0,.2);
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(8px);
+            pointer-events: none;
+            transition: opacity .22s ease, transform .22s ease, background .22s ease;
+        }
+
+        #back-to-top:hover {
+            background: #1F5D3B;
+        }
+
+        #back-to-top.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .site-nav {
+            background: #16422a;
+            box-shadow: 0 2px 20px rgba(0,0,0,.35);
+        }
+
+        .site-dropdown {
+            opacity: 0;
+            transform: translateY(6px);
+            pointer-events: none;
+            transition: opacity .22s ease, transform .22s ease;
+        }
+
+        .site-dropdown-item.open .site-dropdown {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .site-dropdown-item:hover .site-dropdown {
+                opacity: 1;
+                transform: translateY(0);
+                pointer-events: auto;
+            }
+        }
+
+        .hero-home {
+            position: relative;
+            overflow: hidden;
+            background: #F5F2E8;
+            min-height: 610px;
+            display: flex;
+            align-items: center;
+            padding: 90px 0 80px;
+        }
+
+        .hero-home::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            width: 48%;
+            background:
+                linear-gradient(rgba(31, 93, 59, 0.2), rgba(31, 93, 59, 0.4)),
+                var(--hero-image);
+            background-size: cover, 115%;
+            background-position: center, 56% center;
+            border-top-left-radius: 300px 420px;
+            border-bottom-left-radius: 180px 260px;
+            box-shadow: -18px 0 48px rgba(0,0,0,.12);
+            z-index: 0;
+        }
+
+        .hero-graphic {
+            min-height: 440px;
+        }
+
+        .hero-copy {
+            max-width: 720px;
+        }
+
+        .hero-title {
+            font-size: 56px;
+            line-height: 1.1;
+            max-width: 700px;
+        }
+
+        .hero-copy p {
+            max-width: 600px;
+        }
+
+        .feature-orbit::before {
+            content: "";
+            position: absolute;
+            left: clamp(150px, 18vw, 214px);
+            top: 37%;
+            transform: translate(-50%, -50%);
+            width: 540px;
+            aspect-ratio: 1 / 1;
+            border-radius: 9999px;
+            border: 1px solid #d8d2bf;
+            background:
+                radial-gradient(circle at center, rgba(255,255,255,.98) 0%, rgba(255,255,255,.98) 35%, #f7f3e8 36%, #f7f3e8 56%, #e4ddc8 57%, #e4ddc8 59%, transparent 60%);
+            box-shadow: inset 0 0 0 24px rgba(14,76,58,.04);
+            z-index: 0;
+        }
+
+        .feature-orbit::after {
+            content: "";
+            position: absolute;
+            left: clamp(150px, 18vw, 214px);
+            top: 37%;
+            transform: translate(-50%, -50%);
+            width: 270px;
+            aspect-ratio: 1 / 1;
+            border-radius: 9999px;
+            background:
+                radial-gradient(circle at 35% 35%, rgba(246,195,67,.9), rgba(242,140,40,.92)),
+                linear-gradient(135deg, #1F5D3B, #16422a);
+            box-shadow: 0 16px 36px rgba(0,0,0,.12);
+            z-index: 1;
+        }
+
+        .feature-orbit-core {
+            position: absolute;
+            left: clamp(150px, 18vw, 214px);
+            top: 37%;
+            z-index: 2;
+            width: 270px;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #fff;
+        }
+
+        .platform-card-stack {
+            position: relative;
+            z-index: 2;
+            display: grid;
+            gap: 20px;
+            padding-left: min(430px, 38vw);
+        }
+
+        .platform-card {
+            position: relative;
+            max-width: 620px;
+            margin-left: auto;
+            grid-column: 2;
+            border-radius: 999px;
+            border: 1px solid rgba(90,132,112,.34);
+            background: linear-gradient(135deg, #f7fcfb 0%, #d8ebe4 100%);
+            padding: 18px 30px 18px 74px;
+            box-shadow: 0 16px 32px rgba(24,44,34,.10);
+            transition: transform .25s ease, box-shadow .25s ease, opacity .35s ease;
+        }
+
+        .platform-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(24,44,34,.14);
+        }
+
+        .platform-card.is-hidden {
+            opacity: 0;
+            transform: translateY(14px) scale(.985);
+        }
+
+        .platform-card-icon {
+            position: absolute;
+            left: -18px;
+            top: 50%;
+            width: 56px;
+            height: 56px;
+            transform: translateY(-50%);
+            border-radius: 9999px;
+            border: 4px solid #ece7d9;
+            background: linear-gradient(145deg, #26332b 0%, #152019 100%);
+            box-shadow: 0 10px 22px rgba(0,0,0,.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .platform-card::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: calc(-1 * (var(--line-len, 46px) + var(--connector-shift, 4px) + var(--node-size, 18px)));
+            width: calc(var(--line-len, 46px) + var(--connector-shift, 4px) + var(--node-size, 18px));
+            height: var(--node-size, 18px);
+            transform: translateY(-50%);
+            background:
+                radial-gradient(circle at calc(var(--node-size, 18px) / 2) 50%, #214f38 0 4px, #eef7f4 4.5px 8px, transparent 8.5px),
+                linear-gradient(#8ca99b, #8ca99b);
+            background-position: left center, right center;
+            background-repeat: no-repeat;
+            background-size: var(--node-size, 18px) var(--node-size, 18px), calc(100% - var(--node-size, 18px) + 2px) 2px;
+        }
+
+        .platform-card::before {
+            content: "";
+            position: absolute;
+            left: calc(-1 * (var(--line-len, 46px) + var(--curve-len, 34px) + var(--connector-shift, 4px) + var(--node-size, 18px)));
+            width: var(--curve-len, 34px);
+            height: var(--curve-h, 34px);
+            border-left: 2px solid #8ca99b;
+            background: transparent;
+        }
+
+        .platform-card:nth-child(1) {
+            --line-len: 62px;
+            --curve-len: 42px;
+            --curve-h: 40px;
+            margin-left: 34px;
+        }
+
+        .platform-card:nth-child(2) {
+            --line-len: 54px;
+            --curve-len: 38px;
+            --curve-h: 34px;
+            margin-left: 18px;
+        }
+
+        .platform-card:nth-child(3),
+        .platform-card:nth-child(4) {
+            --line-len: 44px;
+            --curve-len: 32px;
+            --curve-h: 30px;
+            margin-left: 0;
+        }
+
+        .platform-card:nth-child(5) {
+            --line-len: 54px;
+            --curve-len: 38px;
+            --curve-h: 34px;
+            margin-left: 18px;
+        }
+
+        .platform-card:nth-child(6) {
+            --line-len: 62px;
+            --curve-len: 42px;
+            --curve-h: 40px;
+            margin-left: 34px;
+        }
+
+        .platform-card:nth-child(1)::before,
+        .platform-card:nth-child(2)::before,
+        .platform-card:nth-child(3)::before {
+            top: calc(50% - 1px);
+            border-bottom: 2px solid #8ca99b;
+            border-bottom-left-radius: var(--curve-h, 34px);
+        }
+
+        .platform-card:nth-child(4)::before,
+        .platform-card:nth-child(5)::before,
+        .platform-card:nth-child(6)::before {
+            top: calc(50% - var(--curve-h, 34px) + 1px);
+            border-top: 2px solid #8ca99b;
+            border-top-left-radius: var(--curve-h, 34px);
+        }
+
+        .how-it-works {
+            padding: 120px 0 130px;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .steps-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 32px;
+            position: relative;
+        }
+
+        .step-item {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-number {
+            width: 56px;
+            height: 56px;
+            background: #F28C28;
+            color: #FFFFFF;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            margin: 0 auto 20px;
+            box-shadow: 0 4px 12px rgba(242,140,40,.18);
+        }
+
+        .step-item h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: #16422a;
+        }
+
+        .step-item p {
+            color: #6B7280;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .preview-section {
+            background: #16422a;
+        }
+
+        .preview-wrapper {
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .where-next {
+            padding: 80px 0;
+            border-bottom: 1px solid #E5E7EB;
+            background: #f7f3e8;
+        }
+
+        .where-next h2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 36px;
+            color: #16422a;
+            margin-bottom: 36px;
+            text-align: center;
+        }
+
+        .next-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+        }
+
+        .next-grid .next-card {
+            display: block;
+            text-decoration: none;
+            overflow: hidden;
+        }
+
+        .next-card-icon {
+            width: 100%;
+            height: 96px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            background: linear-gradient(135deg, #16422a 0%, #1e3d2c 100%);
+            color: #fff;
+        }
+
+        .next-card-body {
+            padding: 18px;
+        }
+
+        .next-card-body h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 17px;
+            color: #16422a;
+            line-height: 1.35;
+            margin-bottom: 8px;
+        }
+
+        .next-card-body p {
+            font-size: 13px;
+            color: #6B7280;
+            line-height: 1.55;
+        }
+
+        .section-work {
+            padding: 70px 0;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .section-work h2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 36px;
+            color: #16422a;
+            margin-bottom: 20px;
+        }
+
+        .section-work p {
+            color: #444444;
+            margin-bottom: 16px;
+            max-width: 740px;
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        .highlight-stat {
+            display: inline-flex;
+            align-items: center;
+            gap: 20px;
+            background: #E5E7EB;
+            border-left: 5px solid #F28C28;
+            padding: 22px 28px;
+            border-radius: 0 12px 12px 0;
+            margin: 28px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,.05);
+        }
+
+        .highlight-stat .big-num {
+            font-family: 'Poppins', sans-serif;
+            font-size: 54px;
+            color: #F28C28;
+            font-weight: 700;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        .highlight-stat .caption {
+            font-size: 14.5px;
+            color: #555555;
+            max-width: 340px;
+            line-height: 1.6;
+        }
+
+        .two-col-teasers {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            padding: 80px 0;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .teaser-card {
+            background: #F5F2E8;
+            border-radius: 12px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border: 1px solid rgba(0,0,0,.03);
+            box-shadow: 0 2px 8px rgba(0,0,0,.05);
+        }
+
+        .teaser-card h3 {
+            font-size: 28px;
+            color: #16422a;
+            margin-bottom: 16px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .teaser-card p {
+            color: #6B7280;
+            font-size: 16px;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .cta-strip {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-strip::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='30' cy='30' r='4' fill='%23fff' fill-opacity='0.08'/%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+
+        .cta-btns {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+            position: relative;
+        }
+
+        .footer-shell {
+            background: #0f1a13;
+            color: rgba(255,255,255,.6);
+        }
+
+        .footer-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 50px;
+            padding-bottom: 40px;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+            margin-bottom: 26px;
+        }
+
+        .footer-brand-name {
+            font-family: 'Poppins', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: #F6C343;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .footer-desc {
+            font-size: 14px;
+            line-height: 1.7;
+            color: rgba(255,255,255,.4);
+        }
+
+        .footer-col h4 {
+            color: rgba(255,255,255,.85);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .footer-col ul {
+            list-style: none;
+        }
+
+        .footer-col li {
+            margin-bottom: 9px;
+        }
+
+        .footer-col a {
+            color: rgba(255,255,255,.48);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color .22s ease;
+        }
+
+        .footer-col a:hover {
+            color: #F6C343;
+        }
+
+        .footer-bottom {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12.5px;
+            color: rgba(255,255,255,.3);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .reveal-up {
+            opacity: 0;
+            transform: translateY(18px);
+            transition: opacity .45s ease, transform .45s ease;
+        }
+
+        .reveal-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 1100px) {
+            .feature-orbit::before,
+            .feature-orbit::after,
+            .feature-orbit-core {
+                position: static;
+                transform: none;
+                width: auto;
+                margin: 0 auto 24px;
+            }
+
+            .feature-orbit::before,
+            .feature-orbit::after {
+                display: none;
+            }
+
+            .platform-card {
+                max-width: none;
+                margin-left: 0;
+                border-radius: 28px;
+            }
+
+            .platform-card::before,
+            .platform-card::after {
+                display: none;
+            }
+
+            .feature-orbit {
+                min-height: auto !important;
+            }
+
+            .platform-card-stack {
+                padding-left: 0;
+            }
+
+            .next-grid,
+            .footer-inner {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-home {
+                min-height: 560px;
+                padding: 70px 0 60px;
+            }
+
+            .hero-home::before {
+                width: 46%;
+            }
+
+            .hero-title {
+                font-size: 40px;
+            }
+
+            .steps-container,
+            .two-col-teasers {
+                display: grid;
+                grid-template-columns: 1fr;
+            }
+
+            .highlight-stat {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .next-grid,
+            .footer-inner {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="font-body">
+    <div id="progress-bar"></div>
+    <button id="back-to-top" aria-label="Back to top">&uarr;</button>
+
+    <nav class="site-nav sticky top-0 z-[200] h-[74px]">
+        <div class="main-wrap flex h-full items-center justify-between gap-6">
+            <a href="{% url 'Core_Web:home' %}" class="flex items-center gap-3 no-underline">
+                <span class="flex h-[46px] w-[46px] items-center justify-center rounded-sm bg-[linear-gradient(135deg,#F28C28,#F6C343)] shadow-[0_4px_12px_rgba(240,167,51,.3)]" aria-hidden="true">
+                    <span class="flex h-[34px] w-[34px] items-center justify-center rounded-[13px] bg-[linear-gradient(160deg,rgba(255,255,255,.98),rgba(246,232,205,.96))] shadow-[inset_0_1px_0_rgba(255,255,255,.8)]">
+                        <span class="h-6 w-6 text-[#a45d19]">{% include "includes/cow_calving_logo_mark.html" %}</span>
+                    </span>
+                </span>
+                <span class="font-display text-[21px] font-bold tracking-[0.2px] text-white">CowCalving.farm</span>
+            </a>
+
+            <div class="flex items-center gap-4">
+                <ul class="hidden items-center gap-[6px] lg:flex">
+                    <li><a href="{% url 'Core_Web:home' %}" class="{% if page_key == 'home' %}nav-link-active{% else %}nav-link-passive{% endif %}">Home</a></li>
+                    <li class="site-dropdown-item relative">
+                        <button type="button" class="{% if page_key == 'guide' %}nav-link-active{% else %}nav-link-passive{% endif %} inline-flex items-center gap-1 border-none bg-transparent" aria-expanded="false" aria-haspopup="true" data-nav-dropdown-toggle>
+                            Guide <span class="text-[10px] opacity-80">&#9662;</span>
+                        </button>
+                        <ul class="site-dropdown absolute right-0 top-[calc(100%+10px)] z-[300] min-w-[220px] list-none rounded-md border border-warm-gray bg-white p-2 shadow-[0_16px_40px_rgba(0,0,0,.14)]">
+                            <li><a href="{% url 'Core_Web:guide' %}" class="block rounded-lg px-3 py-2 text-[13px] font-bold text-green-dark hover:bg-cream">Guide Overview</a></li>
+                            <li><a href="{% url 'Core_Web:guide' %}#quickstart" class="block rounded-lg px-3 py-2 text-[13px] font-medium text-slate-900 hover:bg-cream hover:text-green-dark">Quick Start</a></li>
+                            <li><a href="{% url 'Core_Web:guide' %}#signs" class="block rounded-lg px-3 py-2 text-[13px] font-medium text-slate-900 hover:bg-cream hover:text-green-dark">Signs Of Calving</a></li>
+                            <li><a href="{% url 'Core_Web:guide' %}#stages" class="block rounded-lg px-3 py-2 text-[13px] font-medium text-slate-900 hover:bg-cream hover:text-green-dark">Stages Of Labor</a></li>
+                            <li><a href="{% url 'Core_Web:guide' %}#colostrum" class="block rounded-lg px-3 py-2 text-[13px] font-medium text-slate-900 hover:bg-cream hover:text-green-dark">Colostrum</a></li>
+                            <li><a href="{% url 'Core_Web:guide' %}#calf" class="block rounded-lg px-3 py-2 text-[13px] font-medium text-slate-900 hover:bg-cream hover:text-green-dark">First 24 Hours</a></li>
+                            <li><a href="{% url 'Core_Web:guide' %}#daily" class="block rounded-lg px-3 py-2 text-[13px] font-medium text-slate-900 hover:bg-cream hover:text-green-dark">Daily Management</a></li>
+                            <li><a href="{% url 'Core_Web:guide' %}#trouble" class="block rounded-lg px-3 py-2 text-[13px] font-medium text-slate-900 hover:bg-cream hover:text-green-dark">Troubleshooting</a></li>
+                            <li><a href="{% url 'Core_Web:guide' %}#faq" class="block rounded-lg px-3 py-2 text-[13px] font-medium text-slate-900 hover:bg-cream hover:text-green-dark">FAQ</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="{% url 'Core_Web:checklist' %}" class="{% if page_key == 'checklist' %}nav-link-active{% else %}nav-link-passive{% endif %}">Checklist</a></li>
+                    <li><a href="{% url 'Core_Web:support' %}" class="{% if page_key == 'support' %}nav-link-active{% else %}nav-link-passive{% endif %}">Support</a></li>
+                </ul>
+
+                <div class="hidden items-center gap-2 lg:flex">
+                    {% if request.user.is_authenticated %}
+                        <a href="{{ dashboard_url|default:profile_url }}" class="site-auth-link">Dashboard</a>
+                        <a href="{{ profile_url }}" class="site-auth-link">Profile</a>
+                        <form method="post" action="{% url 'accounts:logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="site-auth-link">Sign out</button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}" class="site-auth-link">Sign In</a>
+                        <a href="{% url 'accounts:signup' %}" class="site-auth-link">Farmer Register</a>
+                    {% endif %}
+                </div>
+
+                <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-md border border-white/10 text-white transition hover:bg-white/10 lg:hidden" aria-label="Open navigation" aria-expanded="false" data-mobile-menu-toggle>
+                    <span class="text-xl leading-none">&#9776;</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="hidden border-t border-white/10 bg-white" data-mobile-menu>
+            <div class="main-wrap py-4">
+                <div class="space-y-1">
+                    <a href="{% url 'Core_Web:home' %}" class="mobile-nav-link">Home</a>
+                    <a href="{% url 'Core_Web:guide' %}" class="mobile-nav-link">Guide</a>
+                    <a href="{% url 'Core_Web:checklist' %}" class="mobile-nav-link">Checklist</a>
+                    <a href="{% url 'Core_Web:support' %}" class="mobile-nav-link">Support</a>
+                </div>
+                <div class="mt-4 flex flex-col gap-2 border-t border-slate-200 pt-4">
+                    {% if request.user.is_authenticated %}
+                        <a href="{{ dashboard_url|default:profile_url }}" class="mobile-nav-link">Dashboard</a>
+                        <a href="{{ profile_url }}" class="mobile-nav-link">Profile</a>
+                        <form method="post" action="{% url 'accounts:logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="mobile-nav-link w-full text-left">Sign out</button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}" class="mobile-nav-link">Sign In</a>
+                        <a href="{% url 'accounts:signup' %}" class="mobile-nav-link">Farmer Register</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer-shell px-7 py-[60px] pb-9 text-white lg:px-12">
+        <div class="footer-inner">
+            <div>
+                <div class="footer-brand-name">
+                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-[12px] bg-[linear-gradient(135deg,rgba(242,140,40,.18),rgba(246,195,67,.28))]" aria-hidden="true">
+                        <span class="h-[21px] w-[21px] text-amber-light">{% include "includes/cow_calving_logo_mark.html" %}</span>
+                    </span>
+                    CowCalving.farm
+                </div>
+                <p class="footer-desc">
+                    Evidence-based, practical guidance for farmers on cow calving, calf management, and daily herd care.
+                </p>
+            </div>
+            <div class="footer-col">
+                <h4>Pages</h4>
+                <ul>
+                    <li><a href="{% url 'Core_Web:home' %}">Home</a></li>
+                    <li><a href="{% url 'Core_Web:guide' %}">Guide</a></li>
+                    <li><a href="{% url 'Core_Web:checklist' %}">Checklist</a></li>
+                    <li><a href="{% url 'Core_Web:support' %}">Support</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Guide</h4>
+                <ul>
+                    <li><a href="{% url 'Core_Web:guide' %}#signs">Signs Of Calving</a></li>
+                    <li><a href="{% url 'Core_Web:guide' %}#stages">Stages Of Labor</a></li>
+                    <li><a href="{% url 'Core_Web:guide' %}#colostrum">Colostrum</a></li>
+                    <li><a href="{% url 'Core_Web:guide' %}#trouble">Troubleshooting</a></li>
+                    <li><a href="{% url 'Core_Web:guide' %}#faq">FAQ</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Action</h4>
+                <ul>
+                    <li><a href="{% url 'Core_Web:checklist' %}#checklist">Season Checklist</a></li>
+                    <li><a href="{% url 'Core_Web:checklist' %}#faq">Checklist FAQ</a></li>
+                    <li><a href="{% url 'Core_Web:support' %}#support-team">Support Options</a></li>
+                    <li><a href="{% url 'Core_Web:support' %}#support-faq">Support FAQ</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>&copy; 2026 CowCalving.farm - For educational purposes. Always consult a qualified veterinarian for medical decisions affecting your animals.</span>
+            <span>Built for farmers</span>
+        </div>
+    </footer>
+
+    <script src="{% static 'Core_Web/site.js' %}{% if dev_static_version %}?v={{ dev_static_version }}{% endif %}" defer></script>
+</body>
+</html>

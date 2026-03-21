@@ -9,6 +9,17 @@ from .services import get_post_login_url_for_user
 from .services import get_or_create_profile
 
 
+def _build_dashboard_page_context(request, profile, **extra):
+    return {
+        "dashboard_home_url": get_dashboard_url_for_user(
+            request.user,
+            fallback=settings.AUTHENTICATED_DEFAULT_URL,
+        ),
+        "profile": profile,
+        **extra,
+    }
+
+
 @login_required
 def dashboard_redirect_view(request):
     # Keep one shared redirect endpoint so login, social auth, and future
@@ -27,7 +38,7 @@ def profile_detail_view(request):
     return render(
         request,
         "users/profile_detail.html",
-        {"profile": profile},
+        _build_dashboard_page_context(request, profile),
     )
 
 
@@ -48,5 +59,9 @@ def profile_edit_view(request):
     return render(
         request,
         "users/profile_form.html",
-        {"form": form, "profile": profile},
+        _build_dashboard_page_context(
+            request,
+            profile,
+            form=form,
+        ),
     )

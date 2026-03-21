@@ -1,100 +1,73 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Profile | CowCalving</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50 text-slate-900">
-    <main class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        <section class="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white shadow-xl shadow-slate-200/40">
-            <div class="grid gap-0 lg:grid-cols-[0.95fr_1.05fr]">
-                <aside class="relative overflow-hidden bg-emerald-950 px-6 py-10 text-white sm:px-8 lg:px-10">
-                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.22),transparent_45%),linear-gradient(160deg,rgba(6,46,31,0.92),rgba(10,27,21,0.98))]"></div>
-                    <div class="relative space-y-5">
-                        {% include "includes/cow_calving_logo.html" with logo_wrap_class="inline-flex flex-col gap-2 rounded-[1.5rem] bg-white/92 px-4 py-3 shadow-lg shadow-black/10" logo_icon_wrap_class="flex items-center justify-center" logo_icon_class="h-14 w-14 text-[#a45d19]" logo_text_class="font-serif text-3xl text-[#8f4e17]" logo_tagline_class="mt-1 text-base italic text-[#b68459]" %}
-                        <div class="space-y-3">
-                            <p class="text-sm font-semibold uppercase tracking-[0.28em] text-emerald-200">Profile Overview</p>
-                            <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">Your dashboard identity.</h1>
-                            <p class="max-w-xl text-sm leading-7 text-white/75 sm:text-base">
-                                Keep your account details current so role routing, dashboard access, and future workflow tools stay aligned.
-                            </p>
-                        </div>
-                    </div>
-                </aside>
+{% extends "users/dashboard_shell.html" %}
 
-                <div class="px-6 py-8 sm:px-8 lg:px-10 lg:py-10">
-                    <div class="flex flex-col gap-5">
-                        {% if messages %}
-                            <div class="space-y-2">
-                                {% for message in messages %}
-                                    <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-                                        {{ message }}
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
+{% block title %}My Profile | CowCalving{% endblock %}
+{% block dashboard_eyebrow %}Profile Overview{% endblock %}
+{% block dashboard_heading %}Your dashboard identity{% endblock %}
+{% block dashboard_intro %}Keep your account details current so the farmer dashboard, AI tools, and future features all use one reliable profile source.{% endblock %}
 
-                        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                            <div>
-                                <p class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-400">Account Profile</p>
-                                <h2 class="mt-2 text-3xl font-bold tracking-tight text-slate-900">Profile details</h2>
-                                <p class="mt-2 text-sm text-slate-600">
-                                    These details are used for routing and future dashboard modules.
-                                </p>
-                            </div>
-                            <a href="{% url 'users:profile_edit' %}" class="inline-flex items-center justify-center rounded-2xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800">
-                                Edit Profile
-                            </a>
-                        </div>
-
-                        <div class="grid gap-4 sm:grid-cols-2">
-                            <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-5">
-                                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">First Name</p>
-                                <p class="mt-2 text-lg font-semibold text-slate-900">{{ request.user.first_name|default:"Not set" }}</p>
-                            </div>
-                            <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-5">
-                                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Last Name</p>
-                                <p class="mt-2 text-lg font-semibold text-slate-900">{{ request.user.last_name|default:"Not set" }}</p>
-                            </div>
-                            <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-5">
-                                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Email</p>
-                                <p class="mt-2 break-all text-lg font-semibold text-slate-900">{{ request.user.email|default:"Not set" }}</p>
-                            </div>
-                            <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-5">
-                                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Role</p>
-                                <p class="mt-2 text-lg font-semibold text-slate-900">{{ profile.role.name|default:"Not set" }}</p>
-                            </div>
-                            <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-5">
-                                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Farm Name</p>
-                                <p class="mt-2 text-lg font-semibold text-slate-900">{{ profile.farm_name|default:"Not set" }}</p>
-                            </div>
-                            <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-5">
-                                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Phone Number</p>
-                                <p class="mt-2 text-lg font-semibold text-slate-900">{{ profile.phone_number|default:"Not set" }}</p>
-                            </div>
-                            {% if profile.professional_id %}
-                                <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-5 sm:col-span-2">
-                                    <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Professional ID</p>
-                                    <p class="mt-2 text-lg font-semibold text-slate-900">{{ profile.professional_id }}</p>
-                                </div>
-                            {% endif %}
-                        </div>
-
-                        <div class="flex flex-col gap-3 pt-2 sm:flex-row">
-                            <a href="{% url 'users:dashboard' %}" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
-                                Return to Dashboard
-                            </a>
-                            <a href="/app/" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
-                                Open AI Workspace
-                            </a>
-                        </div>
-                    </div>
+{% block dashboard_content %}
+    {% if messages %}
+        <section class="mb-6 space-y-2">
+            {% for message in messages %}
+                <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                    {{ message }}
                 </div>
-            </div>
+            {% endfor %}
         </section>
-    </main>
-</body>
-</html>
+    {% endif %}
+
+    <section class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/40">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+                <p class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-400">Account Profile</p>
+                <h2 class="mt-2 text-3xl font-bold tracking-tight text-slate-900">Profile details</h2>
+                <p class="mt-2 text-sm text-slate-600">These details are used for role-aware routing and future dashboard modules.</p>
+            </div>
+            <a href="{% url 'users:profile_edit' %}" class="inline-flex items-center justify-center rounded-2xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800">
+                Edit Profile
+            </a>
+        </div>
+
+        <div class="mt-6 grid gap-4 sm:grid-cols-2">
+            <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-5">
+                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">First Name</p>
+                <p class="mt-2 text-lg font-semibold text-slate-900">{{ request.user.first_name|default:"Not set" }}</p>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-5">
+                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Last Name</p>
+                <p class="mt-2 text-lg font-semibold text-slate-900">{{ request.user.last_name|default:"Not set" }}</p>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-5">
+                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Email</p>
+                <p class="mt-2 break-all text-lg font-semibold text-slate-900">{{ request.user.email|default:"Not set" }}</p>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-5">
+                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Role</p>
+                <p class="mt-2 text-lg font-semibold text-slate-900">{{ profile.role.name|default:"Not set" }}</p>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-5">
+                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Farm Name</p>
+                <p class="mt-2 text-lg font-semibold text-slate-900">{{ profile.farm_name|default:"Not set" }}</p>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-5">
+                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Phone Number</p>
+                <p class="mt-2 text-lg font-semibold text-slate-900">{{ profile.phone_number|default:"Not set" }}</p>
+            </div>
+            {% if profile.professional_id %}
+                <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-5 sm:col-span-2">
+                    <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Professional ID</p>
+                    <p class="mt-2 text-lg font-semibold text-slate-900">{{ profile.professional_id }}</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="mt-6 flex flex-col gap-3 pt-2 sm:flex-row">
+            <a href="{{ dashboard_home_url }}" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                Return to Dashboard
+            </a>
+            <a href="{% url 'cow_calving_ai:index' %}" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                Open AI Workspace
+            </a>
+        </div>
+    </section>
+{% endblock %}

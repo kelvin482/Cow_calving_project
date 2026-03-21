@@ -1,0 +1,57 @@
+{% extends "Core_Web/base_site.html" %}
+
+{% block title %}CowCalving.farm | Support And Resources{% endblock %}
+
+{% block content %}
+    <section class="rounded-[2.25rem] border border-white/70 bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950 px-6 py-10 text-white shadow-soft sm:px-8 sm:py-12">
+        <p class="text-sm font-semibold uppercase tracking-[0.28em] text-cyan-200">Support And Resources</p>
+        <h1 class="mt-4 font-display text-5xl font-bold leading-[0.94] sm:text-6xl">A support page built for escalation, not delay.</h1>
+        <p class="mt-4 max-w-3xl text-base leading-8 text-white/78">
+            Use this page when the situation needs follow-up, outside help, or better coordination. It should move the farmer faster, not add another long lesson.
+        </p>
+    </section>
+
+    <section id="support-team" class="scroll-mt-28 mt-8 grid gap-6 lg:grid-cols-3">
+        <article class="rounded-[2rem] border border-white/70 bg-white/80 p-6 shadow-soft backdrop-blur">
+            <p class="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-700">Support Options</p>
+            <h2 class="mt-2 text-2xl font-bold text-slate-900">Veterinary coordination</h2>
+            <p class="mt-3 text-sm leading-7 text-slate-600">Use veterinary support when labor stalls, presentation looks wrong, or calf recovery is not progressing as expected.</p>
+        </article>
+        <article class="rounded-[2rem] border border-white/70 bg-white/80 p-6 shadow-soft backdrop-blur">
+            <p class="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-700">Support Options</p>
+            <h2 class="mt-2 text-2xl font-bold text-slate-900">Farm team follow-up</h2>
+            <p class="mt-3 text-sm leading-7 text-slate-600">Use support to organise next actions, handover notes, and the follow-up checks that still need to happen after the urgent moment.</p>
+        </article>
+        <article class="rounded-[2rem] border border-white/70 bg-white/80 p-6 shadow-soft backdrop-blur">
+            <p class="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-700">Support Options</p>
+            <h2 class="mt-2 text-2xl font-bold text-slate-900">Decision support</h2>
+            <p class="mt-3 text-sm leading-7 text-slate-600">This page helps the farmer decide when the guide is enough and when help should replace self-management.</p>
+        </article>
+    </section>
+
+    <section id="support-faq" class="scroll-mt-28 mt-8 grid gap-6 lg:grid-cols-2">
+        <article class="rounded-[2rem] border border-white/70 bg-white/80 p-6 shadow-soft backdrop-blur">
+            <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Support FAQ</p>
+            <h3 class="mt-2 text-3xl font-bold text-slate-900">When should support replace self-management?</h3>
+            <p class="mt-4 text-sm leading-7 text-slate-600">When progress stalls, the calf is weak, the cow is exhausted, presentation is abnormal, or the farm is no longer confident the case is routine.</p>
+        </article>
+        <article class="rounded-[2rem] border border-white/70 bg-white/80 p-6 shadow-soft backdrop-blur">
+            <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Support FAQ</p>
+            <h3 class="mt-2 text-3xl font-bold text-slate-900">How does this page fit with the guide?</h3>
+            <p class="mt-4 text-sm leading-7 text-slate-600">The guide explains what is happening. Support helps the farmer decide how to respond, who to contact, and what the next follow-up should be.</p>
+        </article>
+    </section>
+
+    <section class="mt-8 rounded-[2rem] border border-white/70 bg-white/80 p-6 shadow-soft backdrop-blur">
+        <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Keep Support Close To The Work</p>
+        <h2 class="mt-2 font-display text-4xl font-bold text-slate-900">Move between pages without losing structure.</h2>
+        <div class="mt-5 flex flex-col gap-3 sm:flex-row">
+            <a href="{% url 'Core_Web:guide' %}" class="inline-flex items-center justify-center rounded-full bg-forest px-5 py-3 text-sm font-semibold text-white transition hover:bg-pine">
+                Read The Guide
+            </a>
+            <a href="{% url 'Core_Web:checklist' %}" class="inline-flex items-center justify-center rounded-full border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                Open Checklist
+            </a>
+        </div>
+    </section>
+{% endblock %}

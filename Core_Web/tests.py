@@ -9,7 +9,7 @@ class CoreWebHomeTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "CowCalving")
-        self.assertContains(response, "Shared website")
+        self.assertContains(response, "Smart Livestock Management")
         self.assertContains(response, "/accounts/login/")
 
     def test_home_page_shows_profile_link_for_authenticated_user_without_role(self):
@@ -48,5 +48,26 @@ class CoreWebHomeTests(TestCase):
         response = self.client.get(reverse("Core_Web:home"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Open Farmer Dashboard")
+        self.assertContains(response, "Farmer Dashboard")
         self.assertContains(response, "/farmers/")
+
+    def test_guide_page_loads(self):
+        response = self.client.get(reverse("Core_Web:guide"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Complete Calving Guide")
+        self.assertContains(response, "The 3 Stages Of Calving")
+
+    def test_checklist_page_loads(self):
+        response = self.client.get(reverse("Core_Web:checklist"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Farmer Checklist")
+        self.assertContains(response, "Prepare before the first calf arrives.")
+
+    def test_support_page_loads(self):
+        response = self.client.get(reverse("Core_Web:support"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Support And Resources")
+        self.assertContains(response, "When should support replace self-management?")
