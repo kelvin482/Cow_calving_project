@@ -76,12 +76,22 @@ nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 48px;
-  height: 74px;
+  gap: 18px;
+  padding: 14px 48px;
+  min-height: 74px;
   position: sticky;
   top: 0;
   z-index: 200;
   box-shadow: 0 2px 20px rgba(0,0,0,.35);
+}
+
+.nav-shell {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-left: auto;
+  flex-wrap: wrap;
 }
 
 .nav-logo {
@@ -133,6 +143,13 @@ nav {
   gap: 6px;
   list-style: none;
   align-items: center;
+}
+
+.nav-current {
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.1);
+  color: var(--white) !important;
+  font-weight: 600 !important;
 }
 
 .nav-links a,
@@ -238,6 +255,56 @@ nav {
 .nav-cta:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(240,167,51,.45) !important;
+}
+
+.nav-auth {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-auth-link,
+.nav-auth-primary,
+.nav-auth-form button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  padding: 9px 15px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform var(--transition), background var(--transition), box-shadow var(--transition), color var(--transition), border-color var(--transition);
+}
+
+.nav-auth-primary {
+  background: linear-gradient(135deg, var(--amber), var(--amber-light));
+  color: var(--white);
+  box-shadow: 0 6px 18px rgba(240,167,51,.28);
+}
+
+.nav-auth-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(240,167,51,.34);
+}
+
+.nav-auth-link,
+.nav-auth-form button {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,.15);
+  color: rgba(255,255,255,.9);
+}
+
+.nav-auth-link:hover,
+.nav-auth-form button:hover {
+  background: rgba(255,255,255,.1);
+  color: var(--white);
+}
+
+.nav-auth-form {
+  margin: 0;
 }
 
 /* ----------------------------------------------------------------
@@ -2196,6 +2263,10 @@ footer {
   .footer-inner { grid-template-columns: 1fr 1fr; }
   .three-qs { grid-template-columns: 1fr; }
   .nav-links { display: none; }
+  .nav-shell {
+    width: 100%;
+    justify-content: flex-start;
+  }
   .hero h1 { font-size: 44px; }
   .hero--home-compact::before {
     width: 46%;
@@ -2211,6 +2282,20 @@ footer {
 }
 
 @media (max-width: 500px) {
+  nav {
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
+  .nav-auth {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .nav-auth-link,
+  .nav-auth-primary,
+  .nav-auth-form button {
+    width: 100%;
+  }
   .hero h1 { font-size: 34px; }
   .next-grid { grid-template-columns: 1fr; }
   .stats-inner { grid-template-columns: 1fr 1fr; }

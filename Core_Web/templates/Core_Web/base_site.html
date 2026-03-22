@@ -63,15 +63,23 @@
             }
 
             .nav-link-active {
-                @apply nav-link-base bg-[linear-gradient(135deg,#F28C28,#F6C343)] font-semibold text-white shadow-[0_4px_14px_rgba(240,167,51,.35)];
+                @apply nav-link-base border border-white/15 bg-white/10 font-semibold text-white;
             }
 
             .site-auth-link {
                 @apply rounded-sm border border-white/15 px-3.5 py-2 text-[12px] font-semibold tracking-[0.2px] text-white/85 transition hover:bg-white/10 hover:text-white;
             }
 
+            .site-auth-primary {
+                @apply inline-flex items-center justify-center rounded-sm bg-[linear-gradient(135deg,#F28C28,#F6C343)] px-4 py-2 text-[12px] font-bold tracking-[0.2px] text-white shadow-[0_6px_18px_rgba(240,167,51,.28)] transition hover:-translate-y-0.5 hover:shadow-[0_10px_22px_rgba(240,167,51,.34)];
+            }
+
             .mobile-nav-link {
                 @apply block rounded-md px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-cream hover:text-green-dark;
+            }
+
+            .mobile-nav-primary {
+                @apply inline-flex items-center justify-center rounded-md bg-green px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-green-dark;
             }
 
             .btn-outline {
@@ -782,41 +790,24 @@
             <div class="flex items-center gap-4">
                 <ul class="hidden items-center gap-[6px] lg:flex">
                     <li><a href="{% url 'Core_Web:home' %}" class="{% if page_key == 'home' %}nav-link-active{% else %}nav-link-passive{% endif %}">Home</a></li>
-                    <li class="site-dropdown-item relative">
-                        <button type="button" class="{% if page_key == 'guide' %}nav-link-active{% else %}nav-link-passive{% endif %} inline-flex items-center gap-1 border-none bg-transparent" aria-expanded="false" aria-haspopup="true" data-nav-dropdown-toggle>
-                            Guide <span class="text-[10px] opacity-80">&#9662;</span>
-                        </button>
-                        <ul class="site-dropdown absolute right-0 top-[calc(100%+10px)] z-[300] min-w-[220px] list-none rounded-md border border-warm-gray bg-white p-2 shadow-[0_16px_40px_rgba(0,0,0,.14)]">
-                            <li><a href="{% url 'Core_Web:guide' %}" class="block rounded-lg px-3 py-2 text-[13px] font-bold text-green-dark hover:bg-cream">Guide Overview</a></li>
-                            <li><a href="{% url 'Core_Web:guide' %}#quickstart" class="block rounded-lg px-3 py-2 text-[13px] font-medium text-slate-900 hover:bg-cream hover:text-green-dark">Quick Start</a></li>
-                            <li><a href="{% url 'Core_Web:guide' %}#signs" class="block rounded-lg px-3 py-2 text-[13px] font-medium text-slate-900 hover:bg-cream hover:text-green-dark">Signs Of Calving</a></li>
-                            <li><a href="{% url 'Core_Web:guide' %}#stages" class="block rounded-lg px-3 py-2 text-[13px] font-medium text-slate-900 hover:bg-cream hover:text-green-dark">Stages Of Labor</a></li>
-                            <li><a href="{% url 'Core_Web:guide' %}#colostrum" class="block rounded-lg px-3 py-2 text-[13px] font-medium text-slate-900 hover:bg-cream hover:text-green-dark">Colostrum</a></li>
-                            <li><a href="{% url 'Core_Web:guide' %}#calf" class="block rounded-lg px-3 py-2 text-[13px] font-medium text-slate-900 hover:bg-cream hover:text-green-dark">First 24 Hours</a></li>
-                            <li><a href="{% url 'Core_Web:guide' %}#daily" class="block rounded-lg px-3 py-2 text-[13px] font-medium text-slate-900 hover:bg-cream hover:text-green-dark">Daily Management</a></li>
-                            <li><a href="{% url 'Core_Web:guide' %}#trouble" class="block rounded-lg px-3 py-2 text-[13px] font-medium text-slate-900 hover:bg-cream hover:text-green-dark">Troubleshooting</a></li>
-                            <li><a href="{% url 'Core_Web:guide' %}#faq" class="block rounded-lg px-3 py-2 text-[13px] font-medium text-slate-900 hover:bg-cream hover:text-green-dark">FAQ</a></li>
-                        </ul>
-                    </li>
+                    <li><a href="{% url 'Core_Web:guide' %}" class="{% if page_key == 'guide' %}nav-link-active{% else %}nav-link-passive{% endif %}">Guide</a></li>
                     <li><a href="{% url 'Core_Web:checklist' %}" class="{% if page_key == 'checklist' %}nav-link-active{% else %}nav-link-passive{% endif %}">Checklist</a></li>
-                    <li><a href="{% url 'Core_Web:support' %}" class="{% if page_key == 'support' %}nav-link-active{% else %}nav-link-passive{% endif %}">Support</a></li>
                 </ul>
 
-                <div class="hidden items-center gap-2 lg:flex">
+                <div class="hidden items-center gap-2 md:flex">
                     {% if request.user.is_authenticated %}
-                        <a href="{{ dashboard_url|default:profile_url }}" class="site-auth-link">Dashboard</a>
-                        <a href="{{ profile_url }}" class="site-auth-link">Profile</a>
+                        <a href="{{ dashboard_url|default:profile_url }}" class="site-auth-primary">Open Dashboard</a>
                         <form method="post" action="{% url 'accounts:logout' %}">
                             {% csrf_token %}
                             <button type="submit" class="site-auth-link">Sign out</button>
                         </form>
                     {% else %}
-                        <a href="{% url 'accounts:login' %}" class="site-auth-link">Sign In</a>
-                        <a href="{% url 'accounts:signup' %}" class="site-auth-link">Farmer Register</a>
+                        <a href="{% url 'accounts:login' %}" class="site-auth-primary">Sign In</a>
+                        <a href="{% url 'accounts:signup' %}" class="site-auth-link">Create Account</a>
                     {% endif %}
                 </div>
 
-                <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-md border border-white/10 text-white transition hover:bg-white/10 lg:hidden" aria-label="Open navigation" aria-expanded="false" data-mobile-menu-toggle>
+                <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-md border border-white/10 text-white transition hover:bg-white/10 md:hidden" aria-label="Open navigation" aria-expanded="false" data-mobile-menu-toggle>
                     <span class="text-xl leading-none">&#9776;</span>
                 </button>
             </div>
@@ -824,24 +815,24 @@
 
         <div class="hidden border-t border-white/10 bg-white" data-mobile-menu>
             <div class="main-wrap py-4">
-                <div class="space-y-1">
-                    <a href="{% url 'Core_Web:home' %}" class="mobile-nav-link">Home</a>
-                    <a href="{% url 'Core_Web:guide' %}" class="mobile-nav-link">Guide</a>
-                    <a href="{% url 'Core_Web:checklist' %}" class="mobile-nav-link">Checklist</a>
-                    <a href="{% url 'Core_Web:support' %}" class="mobile-nav-link">Support</a>
-                </div>
-                <div class="mt-4 flex flex-col gap-2 border-t border-slate-200 pt-4">
+                <div class="flex flex-col gap-2">
                     {% if request.user.is_authenticated %}
-                        <a href="{{ dashboard_url|default:profile_url }}" class="mobile-nav-link">Dashboard</a>
-                        <a href="{{ profile_url }}" class="mobile-nav-link">Profile</a>
+                        <a href="{{ dashboard_url|default:profile_url }}" class="mobile-nav-primary">Open Dashboard</a>
+                        <a href="{{ profile_url }}" class="mobile-nav-link">My Profile</a>
                         <form method="post" action="{% url 'accounts:logout' %}">
                             {% csrf_token %}
                             <button type="submit" class="mobile-nav-link w-full text-left">Sign out</button>
                         </form>
                     {% else %}
-                        <a href="{% url 'accounts:login' %}" class="mobile-nav-link">Sign In</a>
+                        <a href="{% url 'accounts:login' %}" class="mobile-nav-primary">Sign In</a>
                         <a href="{% url 'accounts:signup' %}" class="mobile-nav-link">Farmer Register</a>
                     {% endif %}
+                </div>
+                <div class="mt-4 space-y-1 border-t border-slate-200 pt-4">
+                    <a href="{% url 'Core_Web:home' %}" class="mobile-nav-link">Home</a>
+                    <a href="{% url 'Core_Web:guide' %}" class="mobile-nav-link">Guide</a>
+                    <a href="{% url 'Core_Web:checklist' %}" class="mobile-nav-link">Checklist</a>
+                    <a href="{% url 'Core_Web:support' %}" class="mobile-nav-link">Support</a>
                 </div>
             </div>
         </div>

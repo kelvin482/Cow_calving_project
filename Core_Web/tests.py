@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 
@@ -11,6 +11,8 @@ class CoreWebHomeTests(TestCase):
         self.assertContains(response, "CowCalving")
         self.assertContains(response, "Smart Livestock Management")
         self.assertContains(response, "/accounts/login/")
+        self.assertContains(response, "Sign In")
+        self.assertContains(response, "Create Account")
 
     def test_home_page_shows_profile_link_for_authenticated_user_without_role(self):
         user = User.objects.create_user(
@@ -57,6 +59,7 @@ class CoreWebHomeTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Complete Calving Guide")
         self.assertContains(response, "The 3 Stages Of Calving")
+        self.assertContains(response, "Sign In")
 
     def test_checklist_page_loads(self):
         response = self.client.get(reverse("Core_Web:checklist"))
@@ -64,6 +67,7 @@ class CoreWebHomeTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Farmer Checklist")
         self.assertContains(response, "Prepare before the first calf arrives.")
+        self.assertContains(response, "Sign In")
 
     def test_support_page_loads(self):
         response = self.client.get(reverse("Core_Web:support"))
@@ -71,3 +75,22 @@ class CoreWebHomeTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Support And Resources")
         self.assertContains(response, "When should support replace self-management?")
+
+    @override_settings(DEBUG=True)
+    def test_home_page_disables_html_caching_in_debug(self):
+        response = self.client.get(reverse("Core_Web:home"))
+
+        self.assertEqual(
+            response["Cache-Control"],
+            "no-store, no-cache, must-revalidate, max-age=0",
+        )
+        self.assertEqual(response["Pragma"], "no-cache")
+        self.assertEqual(response["Expires"], "0")
+
+    @override_settings(DEBUG=False)
+    def test_home_page_leaves_html_cache_headers_unchanged_outside_debug(self):
+        response = self.client.get(reverse("Core_Web:home"))
+
+        self.assertNotIn("Cache-Control", response)
+        self.assertNotIn("Pragma", response)
+        self.assertNotIn("Expires", response)

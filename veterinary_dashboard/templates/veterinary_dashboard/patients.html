@@ -1,0 +1,348 @@
+{% extends "veterinary_dashboard/base_dashboard.html" %}
+
+{% block veterinary_dashboard_content %}
+    <section class="grid gap-4 xl:grid-cols-[0.78fr_1.22fr]">
+        <article class="rounded-[1.75rem] border border-emerald-100 bg-white/95 p-6 shadow-[0_14px_36px_rgba(116,145,132,0.12)] sm:p-7">
+            <div class="flex flex-col gap-4 border-b border-emerald-100 pb-5">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">Patient queue</p>
+                        <h2 class="mt-2 text-2xl font-semibold tracking-tight text-slate-950">Cases that need action</h2>
+                        <p class="mt-2 text-sm leading-6 text-slate-600">Keep the list short, open one case, then move only to the next required page.</p>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        {% for stat in patient_stats %}
+                            <div class="rounded-[1rem] border border-emerald-100 bg-emerald-50/45 px-3 py-3">
+                                <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-700">{{ stat.label }}</p>
+                                <p class="mt-2 text-lg font-semibold tracking-tight text-slate-950">{{ stat.value }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <label class="flex items-center gap-3 rounded-[1rem] border border-emerald-100 bg-emerald-50/35 px-4 py-3 text-sm text-slate-500">
+                    <svg class="h-4 w-4 text-emerald-700/45" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 3.473 9.765l3.63 3.63a.75.75 0 1 0 1.06-1.06l-3.629-3.63A5.5 5.5 0 0 0 9 3.5ZM5 9a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" clip-rule="evenodd"></path>
+                    </svg>
+                    <input id="patient-search" type="text" placeholder="Search patient, farm, or farmer" class="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400">
+                </label>
+
+                <div class="flex flex-wrap gap-2">
+                    <button type="button" class="patient-filter inline-flex items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700" data-filter="all">All cases</button>
+                    <button type="button" class="patient-filter inline-flex items-center justify-center rounded-full border border-emerald-100 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-emerald-50" data-filter="rose">Urgent</button>
+                    <button type="button" class="patient-filter inline-flex items-center justify-center rounded-full border border-emerald-100 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-emerald-50" data-filter="amber">Review</button>
+                    <button type="button" class="patient-filter inline-flex items-center justify-center rounded-full border border-emerald-100 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-emerald-50" data-filter="navy">Lab linked</button>
+                </div>
+            </div>
+
+            <div id="patient-list" class="mt-5 space-y-3"></div>
+        </article>
+
+        <article class="rounded-[1.75rem] border border-emerald-100 bg-white/95 p-6 shadow-[0_14px_36px_rgba(116,145,132,0.12)] sm:p-7">
+            <div class="flex flex-col gap-4 border-b border-emerald-100 pb-5 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">Selected case</p>
+                    <h2 id="patient-name" class="mt-2 text-3xl font-semibold tracking-tight text-slate-950">{{ patient_seed_record.name }}</h2>
+                    <p id="patient-summary" class="mt-2 max-w-3xl text-sm leading-6 text-slate-600">{{ patient_seed_record.summary }}</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <span id="patient-status" class="inline-flex items-center justify-center rounded-full bg-rose-100 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] text-rose-700">{{ patient_seed_record.status }}</span>
+                    <span id="patient-last-update" class="inline-flex items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-600">{{ patient_seed_record.last_update }}</span>
+                </div>
+            </div>
+
+            <div class="mt-5 grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
+                <section class="space-y-4">
+                    <div class="rounded-[1.2rem] border border-emerald-100 bg-emerald-50/35 p-5">
+                        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700">Identity</p>
+                                <p id="patient-meta" class="mt-2 text-sm leading-6 text-slate-700">{{ patient_seed_record.farm }} · {{ patient_seed_record.owner }} · {{ patient_seed_record.location }}</p>
+                                <p id="patient-issue" class="mt-2 text-lg font-semibold text-slate-950">{{ patient_seed_record.issue }}</p>
+                                <p id="patient-next-step" class="mt-2 text-sm leading-6 text-slate-600">{{ patient_seed_record.next_step }}</p>
+                            </div>
+                            <div class="rounded-[1rem] border border-emerald-100 bg-white px-4 py-3 text-sm text-slate-600">
+                                <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-700">Tag / Breed</p>
+                                <p id="patient-tag-breed" class="mt-2 font-semibold text-slate-950">#{{ patient_seed_record.tag_number }} · {{ patient_seed_record.breed }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" id="patient-stats"></div>
+
+                    <div class="rounded-[1.2rem] border border-emerald-100 bg-white p-5">
+                        <div class="flex items-center justify-between gap-4">
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700">Case history</p>
+                                <h3 class="mt-2 text-xl font-semibold tracking-tight text-slate-950">Recent timeline</h3>
+                            </div>
+                            <a href="{% url 'veterinary_dashboard:schedule' %}" class="inline-flex items-center justify-center rounded-full border border-emerald-200 px-4 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50">
+                                View schedule
+                            </a>
+                        </div>
+                        <div id="patient-history" class="mt-5 space-y-3"></div>
+                    </div>
+                </section>
+
+                <section class="space-y-4">
+                    <div class="rounded-[1.2rem] border border-emerald-100 bg-white p-5">
+                        <p class="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700">Next actions</p>
+                        <h3 class="mt-2 text-xl font-semibold tracking-tight text-slate-950">Open only what is needed</h3>
+                        <div class="mt-5 grid gap-3">
+                            <a id="patient-primary-action" href="{{ patient_seed_record.primary_url }}" class="inline-flex items-center justify-center rounded-full bg-[linear-gradient(135deg,#1e6f5c,#2f8a6d)] px-5 py-3 text-sm font-semibold text-white transition hover:brightness-105">{{ patient_seed_record.primary_label }}</a>
+                            <a id="patient-secondary-action" href="{{ patient_seed_record.secondary_url }}" class="inline-flex items-center justify-center rounded-full border border-emerald-200 px-5 py-3 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50">{{ patient_seed_record.secondary_label }}</a>
+                            <a id="patient-extra-action" href="{{ patient_seed_record.extra_url }}" class="inline-flex items-center justify-center rounded-full border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">{{ patient_seed_record.extra_label }}</a>
+                        </div>
+                    </div>
+
+                    <div class="rounded-[1.2rem] border border-emerald-100 bg-emerald-50/35 p-5">
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <p class="text-sm font-semibold text-slate-950">Draft note for this case</p>
+                                <p class="mt-1 text-sm leading-6 text-slate-600">Keep a short note here during the demo before saving the final diagnosis.</p>
+                            </div>
+                            <span class="rounded-full bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-700">Local</span>
+                        </div>
+                        <form id="patient-note-form" class="mt-4 space-y-3">
+                            <textarea id="patient-note-input" rows="5" placeholder="Type a short clinical note or next step..." class="w-full rounded-[1rem] border border-emerald-100 bg-white px-4 py-3 text-sm text-slate-800 outline-none focus:border-emerald-300"></textarea>
+                            <div class="flex flex-wrap items-center gap-3">
+                                <button type="submit" class="inline-flex items-center justify-center rounded-full bg-[linear-gradient(135deg,#1e6f5c,#2f8a6d)] px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-105">
+                                    Save local note
+                                </button>
+                                <span id="patient-note-status" class="text-sm text-slate-500">No draft saved yet.</span>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="rounded-[1.2rem] border border-emerald-100 bg-white p-5">
+                        <p class="text-sm font-semibold text-slate-950">Keep this page simple</p>
+                        <ul class="mt-3 space-y-2 text-sm leading-6 text-slate-600">
+                            {% for note in patient_page_notes %}
+                                <li class="flex items-start gap-2">
+                                    <span class="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-emerald-400"></span>
+                                    <span>{{ note }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </section>
+            </div>
+        </article>
+    </section>
+
+    {{ patient_records|json_script:"patient-records-data" }}
+    <script>
+        (() => {
+            const seedElement = document.getElementById('patient-records-data');
+            if (!seedElement) return;
+
+            const patients = JSON.parse(seedElement.textContent);
+            const searchInput = document.getElementById('patient-search');
+            const listContainer = document.getElementById('patient-list');
+            const filterButtons = Array.from(document.querySelectorAll('.patient-filter'));
+            const noteForm = document.getElementById('patient-note-form');
+            const noteInput = document.getElementById('patient-note-input');
+            const noteStatus = document.getElementById('patient-note-status');
+            const storageKey = 'vet-patient-note-drafts';
+
+            let activeFilter = 'all';
+            let selectedId = patients[0]?.id || '';
+
+            const nameEl = document.getElementById('patient-name');
+            const summaryEl = document.getElementById('patient-summary');
+            const statusEl = document.getElementById('patient-status');
+            const lastUpdateEl = document.getElementById('patient-last-update');
+            const metaEl = document.getElementById('patient-meta');
+            const issueEl = document.getElementById('patient-issue');
+            const nextStepEl = document.getElementById('patient-next-step');
+            const tagBreedEl = document.getElementById('patient-tag-breed');
+            const statsEl = document.getElementById('patient-stats');
+            const historyEl = document.getElementById('patient-history');
+            const primaryActionEl = document.getElementById('patient-primary-action');
+            const secondaryActionEl = document.getElementById('patient-secondary-action');
+            const extraActionEl = document.getElementById('patient-extra-action');
+
+            function toneClasses(tone) {
+                if (tone === 'rose') return 'bg-rose-100 text-rose-700 border-rose-200';
+                if (tone === 'amber') return 'bg-amber-100 text-amber-700 border-amber-200';
+                if (tone === 'navy') return 'bg-slate-100 text-slate-700 border-slate-200';
+                return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+            }
+
+            function loadNotes() {
+                try {
+                    return JSON.parse(localStorage.getItem(storageKey) || '{}');
+                } catch {
+                    return {};
+                }
+            }
+
+            function saveNotes(notes) {
+                localStorage.setItem(storageKey, JSON.stringify(notes));
+            }
+
+            function visiblePatients() {
+                const term = (searchInput?.value || '').trim().toLowerCase();
+                return patients.filter((patient) => {
+                    const matchesFilter = activeFilter === 'all' || patient.tone === activeFilter;
+                    const haystack = [
+                        patient.name,
+                        patient.farm,
+                        patient.owner,
+                        patient.issue,
+                        patient.summary,
+                    ].join(' ').toLowerCase();
+                    const matchesSearch = !term || haystack.includes(term);
+                    return matchesFilter && matchesSearch;
+                });
+            }
+
+            function ensureSelectedPatient(filtered) {
+                if (!filtered.some((patient) => patient.id === selectedId)) {
+                    selectedId = filtered[0]?.id || '';
+                }
+                return filtered.find((patient) => patient.id === selectedId) || null;
+            }
+
+            function renderList() {
+                const filtered = visiblePatients();
+                const selected = ensureSelectedPatient(filtered);
+
+                filterButtons.forEach((button) => {
+                    const on = button.dataset.filter === activeFilter;
+                    button.classList.toggle('bg-emerald-50', on);
+                    button.classList.toggle('border-emerald-200', on);
+                    button.classList.toggle('text-emerald-700', on);
+                    button.classList.toggle('text-slate-600', !on);
+                });
+
+                if (!filtered.length) {
+                    listContainer.innerHTML = `
+                        <div class="rounded-[1rem] border border-dashed border-emerald-200 bg-emerald-50/35 px-4 py-5 text-sm text-slate-600">
+                            No patient files match this search yet.
+                        </div>
+                    `;
+                    renderDetail(null);
+                    return;
+                }
+
+                listContainer.innerHTML = filtered.map((patient) => `
+                    <button type="button" class="patient-row w-full rounded-[1rem] border px-4 py-4 text-left transition ${patient.id === selectedId ? 'border-emerald-300 bg-emerald-50/55 shadow-sm' : 'border-emerald-100 bg-white hover:border-emerald-200 hover:bg-emerald-50/35'}" data-patient-id="${patient.id}">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="min-w-0">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <p class="text-base font-semibold text-slate-950">${patient.name}</p>
+                                    <span class="rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${toneClasses(patient.tone)}">${patient.status}</span>
+                                </div>
+                                <p class="mt-2 text-sm leading-6 text-slate-600">${patient.issue} · ${patient.farm} · ${patient.owner}</p>
+                                <p class="mt-1 text-sm leading-6 text-slate-500">${patient.summary}</p>
+                            </div>
+                            <span class="pt-0.5 text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">${patient.last_update}</span>
+                        </div>
+                    </button>
+                `).join('');
+
+                renderDetail(selected);
+            }
+
+            function renderDetail(patient) {
+                if (!patient) {
+                    nameEl.textContent = 'No case selected';
+                    summaryEl.textContent = 'Choose a patient file from the list.';
+                    statusEl.textContent = 'Queue empty';
+                    statusEl.className = 'inline-flex items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-600';
+                    lastUpdateEl.textContent = '';
+                    metaEl.textContent = '';
+                    issueEl.textContent = '';
+                    nextStepEl.textContent = '';
+                    tagBreedEl.textContent = '';
+                    statsEl.innerHTML = '';
+                    historyEl.innerHTML = '';
+                    primaryActionEl.href = '#';
+                    secondaryActionEl.href = '#';
+                    extraActionEl.href = '#';
+                    primaryActionEl.textContent = 'Open diagnosis';
+                    secondaryActionEl.textContent = 'Open telehealth';
+                    extraActionEl.textContent = 'View schedule';
+                    noteInput.value = '';
+                    noteInput.disabled = true;
+                    noteStatus.textContent = 'No draft available.';
+                    return;
+                }
+
+                nameEl.textContent = patient.name;
+                summaryEl.textContent = patient.summary;
+                statusEl.textContent = patient.status;
+                statusEl.className = `inline-flex items-center justify-center rounded-full px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] ${toneClasses(patient.tone)}`;
+                lastUpdateEl.textContent = patient.last_update;
+                metaEl.textContent = `${patient.farm} · ${patient.owner} · ${patient.location}`;
+                issueEl.textContent = patient.issue;
+                nextStepEl.textContent = patient.next_step;
+                tagBreedEl.textContent = `#${patient.tag_number} · ${patient.breed}`;
+
+                statsEl.innerHTML = patient.stats.map((stat) => `
+                    <div class="rounded-[1rem] border border-emerald-100 bg-white px-4 py-4">
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-700">${stat.label}</p>
+                        <p class="mt-2 text-lg font-semibold tracking-tight text-slate-950">${stat.value}</p>
+                    </div>
+                `).join('');
+
+                historyEl.innerHTML = patient.history.map((entry) => `
+                    <div class="rounded-[1rem] border border-emerald-100 bg-emerald-50/30 px-4 py-4">
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <p class="text-sm font-semibold text-slate-950">${entry.title}</p>
+                                <p class="mt-1 text-sm leading-6 text-slate-600">${entry.detail}</p>
+                            </div>
+                            <span class="rounded-full bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">${entry.date}</span>
+                        </div>
+                    </div>
+                `).join('');
+
+                primaryActionEl.href = patient.primary_url;
+                primaryActionEl.textContent = patient.primary_label;
+                secondaryActionEl.href = patient.secondary_url;
+                secondaryActionEl.textContent = patient.secondary_label;
+                extraActionEl.href = patient.extra_url;
+                extraActionEl.textContent = patient.extra_label;
+
+                noteInput.disabled = false;
+                const notes = loadNotes();
+                noteInput.value = notes[patient.id] || '';
+                noteStatus.textContent = notes[patient.id]
+                    ? `Draft saved for ${patient.name}.`
+                    : 'No draft saved yet.';
+            }
+
+            listContainer?.addEventListener('click', (event) => {
+                const row = event.target.closest('.patient-row');
+                if (!row) return;
+                selectedId = row.dataset.patientId;
+                renderList();
+            });
+
+            searchInput?.addEventListener('input', renderList);
+
+            filterButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    activeFilter = button.dataset.filter || 'all';
+                    renderList();
+                });
+            });
+
+            noteForm?.addEventListener('submit', (event) => {
+                event.preventDefault();
+                if (!selectedId) return;
+                const notes = loadNotes();
+                notes[selectedId] = noteInput.value.trim();
+                saveNotes(notes);
+                const patient = patients.find((item) => item.id === selectedId);
+                noteStatus.textContent = patient
+                    ? `Draft saved for ${patient.name}.`
+                    : 'Draft saved.';
+            });
+
+            renderList();
+        })();
+    </script>
+{% endblock %}

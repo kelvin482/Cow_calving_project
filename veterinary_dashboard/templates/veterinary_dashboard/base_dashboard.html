@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            color-scheme: light;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-[linear-gradient(180deg,#f6faf7_0%,#eef5f0_100%)] text-slate-900">
+    <div class="mx-auto max-w-[1440px] px-4 py-4 sm:px-6 lg:px-8">
+        <div class="grid gap-4 xl:grid-cols-[15rem_minmax(0,1fr)]">
+            <aside class="overflow-hidden rounded-[1.75rem] bg-[linear-gradient(180deg,#0b1714_0%,#10231d_56%,#163129_100%)] text-white shadow-[0_20px_50px_rgba(15,23,42,0.22)]">
+                <div class="flex h-full flex-col p-6">
+                    <a href="{{ dashboard_home_url }}" class="inline-flex items-center gap-3 text-lg font-bold tracking-tight text-white">
+                        <span class="flex h-10 w-10 items-center justify-center rounded-[0.95rem] bg-[linear-gradient(135deg,rgba(242,140,40,.94),rgba(246,195,67,.98))] shadow-[0_8px_18px_rgba(242,140,40,0.22)]">
+                            <span class="flex h-7 w-7 items-center justify-center rounded-[0.7rem] bg-[linear-gradient(160deg,rgba(255,255,255,.98),rgba(246,232,205,.96))] text-[#a45d19]">
+                                <span class="h-4 w-4">{% include "includes/cow_calving_logo_mark.html" %}</span>
+                            </span>
+                        </span>
+                        <span class="min-w-0">
+                            <span class="block">HerdIQ</span>
+                            <span class="mt-0.5 block text-[10px] font-medium uppercase tracking-[0.24em] text-emerald-100/60">CowCalving.farm</span>
+                        </span>
+                        <span class="rounded-full bg-emerald-500/90 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-white">Vet</span>
+                    </a>
+
+                    <div class="mt-7 flex items-center gap-3 rounded-[1.2rem] border border-white/10 bg-emerald-400/[0.08] px-4 py-4">
+                        <div class="flex h-11 w-11 items-center justify-center rounded-[0.95rem] bg-emerald-400 text-sm font-bold text-slate-950">
+                            {{ vet_initials }}
+                        </div>
+                        <div class="min-w-0">
+                            <p class="truncate text-sm font-semibold text-white">{{ display_name }}</p>
+                            <p class="mt-1 text-[11px] uppercase tracking-[0.22em] text-emerald-100/70">Clinical workspace</p>
+                        </div>
+                    </div>
+
+                    <nav class="mt-6 space-y-2">
+                        {% for item in primary_navigation %}
+                            <a
+                                href="{{ item.url }}"
+                                class="group block rounded-[1.1rem] border px-4 py-3 transition {% if request.resolver_match.view_name == item.view_name %}border-emerald-400/35 bg-emerald-400/[0.12] text-white{% else %}border-white/8 bg-white/[0.02] text-slate-300 hover:border-white/15 hover:bg-white/[0.05] hover:text-white{% endif %}"
+                            >
+                                <div class="text-sm font-semibold">{{ item.label }}</div>
+                            </a>
+                        {% endfor %}
+                    </nav>
+
+                    <div class="mt-6 border-t border-white/10 pt-5">
+                        <p class="px-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">More</p>
+                        <nav class="mt-3 space-y-1.5">
+                            {% for item in secondary_navigation %}
+                                <a
+                                    href="{{ item.url }}"
+                                    class="flex items-center justify-between rounded-[0.95rem] px-3 py-2 text-sm transition {% if request.resolver_match.view_name == item.view_name %}bg-white/10 text-white{% else %}text-slate-400 hover:bg-white/[0.04] hover:text-white{% endif %}"
+                                >
+                                    <span>{{ item.label }}</span>
+                                    <span class="text-slate-600">&rsaquo;</span>
+                                </a>
+                            {% endfor %}
+                        </nav>
+                    </div>
+                </div>
+            </aside>
+
+            <div class="space-y-4">
+                <header class="rounded-[1.75rem] border border-emerald-100 bg-white/95 p-6 shadow-[0_14px_36px_rgba(116,145,132,0.12)] sm:p-8">
+                    <div class="flex flex-col gap-4 2xl:flex-row 2xl:items-start 2xl:justify-between">
+                            <div class="max-w-3xl">
+                                <p class="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-700">{{ page_eyebrow }}</p>
+                                <h1 class="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">{{ page_heading }}</h1>
+                                <p class="mt-3 text-sm leading-7 text-slate-600 sm:text-base">{{ page_intro }}</p>
+                            </div>
+
+                            <div class="grid gap-3 md:min-w-[24rem] md:grid-cols-[minmax(0,1fr)_auto]">
+                                <label class="flex items-center gap-3 rounded-[1rem] border border-emerald-100 bg-emerald-50/50 px-4 py-3 text-sm text-slate-500">
+                                    <svg class="h-4 w-4 text-emerald-700/45" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 3.473 9.765l3.63 3.63a.75.75 0 1 0 1.06-1.06l-3.629-3.63A5.5 5.5 0 0 0 9 3.5ZM5 9a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <input type="text" placeholder="Search workspace" class="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400">
+                                </label>
+
+                                <details class="relative">
+                                    <summary class="flex cursor-pointer items-center gap-3 rounded-[1rem] border border-emerald-100 bg-white px-4 py-2.5 text-left shadow-sm transition hover:border-emerald-200 hover:bg-emerald-50/40 marker:content-none">
+                                        <span class="flex h-10 w-10 items-center justify-center rounded-[0.9rem] bg-[linear-gradient(160deg,#163129,#1e6f5c)] text-sm font-bold text-white">
+                                            {{ vet_initials }}
+                                        </span>
+                                        <span class="min-w-0 flex-1">
+                                            <span class="block truncate text-sm font-semibold text-slate-950">{{ display_name }}</span>
+                                            <span class="mt-0.5 block text-xs uppercase tracking-[0.22em] text-emerald-700/70">Workspace</span>
+                                        </span>
+                                        <svg class="h-4 w-4 flex-shrink-0 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.51a.75.75 0 0 1-1.08 0l-4.25-4.51a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    </summary>
+
+                                    <div class="absolute right-0 top-[calc(100%+0.75rem)] z-30 w-[19.5rem] overflow-hidden rounded-[1.25rem] border border-emerald-100 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.12)]">
+                                        <div class="border-b border-emerald-100 px-4 py-4">
+                                            <div class="flex items-center gap-3">
+                                                <span class="flex h-11 w-11 items-center justify-center rounded-[0.95rem] bg-emerald-400 text-sm font-bold text-slate-950">
+                                                    {{ vet_initials }}
+                                                </span>
+                                                <div class="min-w-0">
+                                                    <p class="truncate text-sm font-semibold text-slate-950">{{ display_name }}</p>
+                                                    <p class="mt-1 text-[11px] uppercase tracking-[0.22em] text-emerald-700/70">Veterinary workspace</p>
+                                                </div>
+                                            </div>
+                                            <div class="mt-3 rounded-[0.95rem] bg-emerald-50/60 px-3 py-2.5">
+                                                <p class="text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-700/70">Professional ID</p>
+                                                <p class="mt-1 font-mono text-sm text-slate-800">{{ professional_id_display }}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="p-2">
+                                            {% for section in workspace_menu_sections %}
+                                                <div class="{% if not forloop.first %}mt-2 border-t border-emerald-50 pt-2{% endif %}">
+                                                    <p class="px-2 pb-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">{{ section.label }}</p>
+                                                    <div class="space-y-1">
+                                                        {% for item in section.items %}
+                                                            <a href="{{ item.url }}" class="flex items-start justify-between gap-3 rounded-[0.95rem] px-3 py-2.5 transition hover:bg-emerald-50/50">
+                                                                <span class="min-w-0">
+                                                                    <span class="block text-sm font-semibold text-slate-900">{{ item.label }}</span>
+                                                                    <span class="mt-0.5 block text-xs leading-5 text-slate-500">{{ item.description }}</span>
+                                                                </span>
+                                                                <span class="pt-0.5 text-slate-300">&rsaquo;</span>
+                                                            </a>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+
+                                        <div class="border-t border-emerald-100 p-2">
+                                            <p class="px-2 pb-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">Session</p>
+                                            <form method="post" action="{% url 'accounts:logout' %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="flex w-full items-start justify-between gap-3 rounded-[0.95rem] px-3 py-2.5 text-left transition hover:bg-rose-50">
+                                                    <span class="min-w-0">
+                                                        <span class="block text-sm font-semibold text-rose-700">Sign out</span>
+                                                        <span class="mt-0.5 block text-xs leading-5 text-rose-600">End this session safely.</span>
+                                                    </span>
+                                                    <span class="pt-0.5 text-rose-300">&rsaquo;</span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </details>
+                            </div>
+                        </div>
+                </header>
+
+                <main class="space-y-4">
+                    {% block veterinary_dashboard_content %}{% endblock %}
+                </main>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

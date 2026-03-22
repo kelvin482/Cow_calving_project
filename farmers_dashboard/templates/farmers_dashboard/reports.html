@@ -1,0 +1,74 @@
+{% extends "farmers_dashboard/base_dashboard.html" %}
+
+{% block farmer_highlight_heading %}Reports deserve a presentation layer{% endblock %}
+{% block farmer_highlight_text %}
+    Instead of squeezing charts into the overview, this page gives reports their own layout, which makes the dashboard look more professional and easier to evolve.
+{% endblock %}
+
+{% block farmer_page_aside %}
+    <div class="rounded-[1.75rem] border border-white/15 bg-white/10 p-5">
+        <p class="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-100">Reporting note</p>
+        <h3 class="mt-3 text-2xl font-bold">Prepared for live data</h3>
+        <p class="mt-3 text-sm leading-7 text-white/75">
+            These report blocks establish the visual system now, while the real chart values can be connected later when herd records exist.
+        </p>
+        <div class="mt-5 space-y-3">
+            {% for item in report_highlights %}
+                <div class="rounded-2xl border border-white/10 bg-black/10 px-4 py-3">
+                    <p class="text-sm font-semibold text-white">{{ item.label }}</p>
+                    <p class="mt-1 text-sm text-white/65">{{ item.detail }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block farmer_dashboard_content %}
+    <section class="grid gap-4 md:grid-cols-3">
+        {% for item in report_highlights %}
+            <article class="rounded-[1.75rem] border border-white/70 bg-white p-5 shadow-[0_16px_40px_rgba(148,163,184,0.16)]">
+                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">{{ item.label }}</p>
+                <p class="mt-4 text-2xl font-bold tracking-tight text-slate-950">{{ item.value }}</p>
+                <p class="mt-2 text-sm leading-6 text-slate-600">{{ item.detail }}</p>
+            </article>
+        {% endfor %}
+    </section>
+
+    <section class="grid gap-4 2xl:grid-cols-[1fr_0.9fr]">
+        <article class="rounded-[2rem] border border-white/70 bg-white p-6 shadow-[0_18px_48px_rgba(148,163,184,0.14)] sm:p-7">
+            <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Trend layout</p>
+            <h2 class="mt-2 text-2xl font-bold tracking-tight text-slate-950">Weekly production view</h2>
+            <p class="mt-2 text-sm leading-7 text-slate-600">
+                This chart block is ready for future milk totals or other farmer-facing trend data.
+            </p>
+            <div class="mt-8 grid grid-cols-7 items-end gap-3 rounded-[1.75rem] border border-slate-200 bg-slate-50 px-5 py-6">
+                {% for bar in report_bars %}
+                    <div class="flex flex-col items-center gap-3">
+                        <div class="flex h-44 items-end">
+                            <div class="w-8 rounded-t-2xl bg-[linear-gradient(180deg,#22c55e_0%,#166534_100%)] {{ bar.height_class }}"></div>
+                        </div>
+                        <span class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{{ bar.label }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        </article>
+
+        <article class="rounded-[2rem] border border-white/70 bg-white p-6 shadow-[0_18px_48px_rgba(148,163,184,0.14)] sm:p-7">
+            <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Top performers</p>
+            <h2 class="mt-2 text-2xl font-bold tracking-tight text-slate-950">Leaderboard pattern</h2>
+            <div class="mt-6 space-y-3">
+                {% for item in report_leaderboard %}
+                    <div class="flex flex-col gap-3 rounded-[1.5rem] border border-slate-200 bg-slate-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <p class="text-sm font-semibold text-slate-950">{{ item.name }}</p>
+                            <p class="mt-1 text-sm text-slate-600">{{ item.detail }}</p>
+                        </div>
+                        <div class="rounded-full bg-emerald-100 px-3 py-2 text-sm font-semibold text-emerald-700">
+                            {{ item.value }}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </article>
+    </section>
+{% endblock %}

@@ -17,10 +17,13 @@
 - Whenever code is updated, add or refresh concise comments around the changed non-obvious parts so the latest behavior stays understandable.
 - For role-based features, keep role definitions and dashboard routing scalable; do not hardcode business logic around a fixed set of roles in views, templates, or redirects.
 - Frontend and template changes must be responsive by default and checked against small, medium, and large screen layouts before completion.
+- For website and template UI work in this repository, use Tailwind CSS as the primary styling approach unless the user explicitly requests a different styling system.
+- For this hackathon project, prefer fewer working features over many partial features; prioritize clarity, demo reliability, and user value.
 - Ask clarifying questions when requirements are unclear.
 - Provide solutions that run with minimal modification.
 - Always use a roadmap and split work into small tasks.
 - Always run relevant checks and verify errors before completion.
+- Improve one page/workflow at a time; do not spread effort across many unfinished screens in a single pass.
 - For any persistent feature, plan the schema change up front, generate/review migrations, prefer additive changes first, and resolve migration conflicts intentionally instead of deleting migration files.
 - Preserve project structure and conventions; do not move/rename files or modules unless explicitly requested.
 - Focus on one task at a time and complete it before starting another.

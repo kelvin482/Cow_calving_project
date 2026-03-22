@@ -240,27 +240,25 @@
       </div>
       <span class="logo-text">CowCalving.farm</span>
     </a>
-    <ul class="nav-links">
-      <li><a href="{% url 'Core_Web:home' %}" class="nav-cta">Home</a></li>
-      <li class="nav-item dropdown">
-        <button class="nav-dropdown-toggle" type="button" aria-expanded="false" aria-haspopup="true">
-          Guide <span class="nav-caret">&#9662;</span>
-        </button>
-        <ul class="nav-dropdown" aria-label="Guide sections">
-          <li><a href="{% url 'Core_Web:guide' %}" class="nav-dropdown-main">Guide Overview</a></li>
-          <li><a href="{% url 'Core_Web:guide' %}#quickstart">Quick Start</a></li>
-          <li><a href="{% url 'Core_Web:guide' %}#signs">Signs Of Calving</a></li>
-          <li><a href="{% url 'Core_Web:guide' %}#stages">Stages Of Labor</a></li>
-          <li><a href="{% url 'Core_Web:guide' %}#colostrum">Colostrum</a></li>
-          <li><a href="{% url 'Core_Web:guide' %}#calf">First 24 Hours</a></li>
-          <li><a href="{% url 'Core_Web:guide' %}#daily">Daily Management</a></li>
-          <li><a href="{% url 'Core_Web:guide' %}#trouble">Troubleshooting</a></li>
-          <li><a href="{% url 'Core_Web:guide' %}#faq">FAQ</a></li>
-        </ul>
-      </li>
-      <li><a href="{% url 'Core_Web:checklist' %}">Checklist</a></li>
-      <li><a href="{% url 'Core_Web:support' %}">Support</a></li>
-    </ul>
+    <div class="nav-shell">
+      <ul class="nav-links">
+        <li><a href="{% url 'Core_Web:home' %}" class="nav-current">Home</a></li>
+        <li><a href="{% url 'Core_Web:guide' %}">Guide</a></li>
+        <li><a href="{% url 'Core_Web:checklist' %}">Checklist</a></li>
+      </ul>
+      <div class="nav-auth">
+        {% if request.user.is_authenticated %}
+          <a href="{{ dashboard_url|default:profile_url }}" class="nav-auth-primary">{{ dashboard_label|default:"Open Dashboard" }}</a>
+          <form method="post" action="{% url 'accounts:logout' %}" class="nav-auth-form">
+            {% csrf_token %}
+            <button type="submit">Sign out</button>
+          </form>
+        {% else %}
+          <a href="{% url 'accounts:login' %}" class="nav-auth-primary">Sign In</a>
+          <a href="{% url 'accounts:signup' %}" class="nav-auth-link">Create Account</a>
+        {% endif %}
+      </div>
+    </div>
   </nav>
 
   <div class="auth-context">

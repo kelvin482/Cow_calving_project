@@ -19,6 +19,8 @@ Act as a senior software engineer.
 - Whenever behavior is changed, add or refresh concise comments around the updated non-obvious code so the current implementation remains easy to follow.
 - For multi-role architecture, prefer role metadata/configuration and redirect maps over hardcoded per-role branching so new roles can be added safely later.
 - Frontend and template work must be responsive by default and verified across small, medium, and large viewport layouts.
+- For website and template UI work in this repository, use Tailwind CSS as the default styling system unless the user explicitly requests a different approach.
+- For this hackathon project, optimize for a strong end-to-end demo: fewer polished flows, simpler interfaces, and clearly useful outcomes beat feature breadth.
 - Ask clarification questions if requirements are unclear.
 - Provide solutions that can run with minimal modification.
 - Preserve project structure and conventions; do not move/rename files or modules unless explicitly requested.
@@ -45,6 +47,12 @@ Always follow a roadmap and break work into small tasks.
 5. Validate after each task.
 6. Run final end-to-end checks.
 7. Summarize what changed, what was verified, and any open risks.
+
+## Hackathon Product Focus
+- Default to one high-value workflow per page rather than many low-confidence cards or sections.
+- Prefer working actions, realistic data flow, and community relevance over decorative or speculative features.
+- Each page should answer one main user question and expose only the actions needed for that workflow.
+- When choosing between multiple ideas, prioritize the one that is easiest to demo clearly and most likely to solve a real farmer or veterinary pain point.
 
 ## Error-Check Policy
 Always check for errors before declaring completion.
