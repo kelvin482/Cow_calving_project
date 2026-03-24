@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HerdIQ — Wireframe Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-900: #0f2b1a;
+    --green-800: #1a3d28;
+    --green-700: #1f5c36;
+    --green-600: #2d7a4a;
+    --green-500: #3a9e60;
+    --green-400: #52c47e;
+    --green-300: #85d9a3;
+    --green-100: #d6f5e2;
+    --green-50:  #edfaf3;
+    --amber-500: #e8930a;
+    --amber-100: #fef0cc;
+    --red-500:   #d94040;
+    --red-100:   #fce8e8;
+    --blue-500:  #2d6eea;
+    --blue-100:  #dde9fd;
+    --earth-900: #1c1410;
+    --earth-700: #4a3728;
+    --earth-400: #9a7d66;
+    --earth-200: #d9c9bc;
+    --earth-100: #f0e8e0;
+    --earth-50:  #faf6f2;
+    --white: #ffffff;
+    --shadow-sm: 0 1px 4px rgba(15,43,26,.08);
+    --shadow-md: 0 4px 20px rgba(15,43,26,.12);
+    --shadow-lg: 0 12px 40px rgba(15,43,26,.18);
+    --r-sm: 10px;
+    --r-md: 16px;
+    --r-lg: 22px;
+    --r-xl: 30px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Sora', sans-serif;
+    background: #1a1a18;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 40px;
+  }
+
+  /* TOP BAR */
+  .proto-header {
+    width: 100%;
+    max-width: 1100px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+  .proto-brand { color: #fff; font-size: 15px; font-weight: 600; letter-spacing: -.02em; }
+  .proto-brand span { color: var(--green-400); }
+  .screen-tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .screen-tab {
+    padding: 5px 13px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1.5px solid rgba(255,255,255,.15);
+    color: rgba(255,255,255,.55);
+    background: transparent;
+    transition: all .2s;
+    white-space: nowrap;
+  }
+  .screen-tab:hover { border-color: var(--green-400); color: var(--green-400); }
+  .screen-tab.active { background: var(--green-500); border-color: var(--green-500); color: #fff; }
+  .proto-label { color: rgba(255,255,255,.35); font-size: 11px; font-family: 'DM Mono', monospace; white-space: nowrap; }
+
+  /* DEVICE FRAME */
+  .device-wrap {
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;
+    justify-content: center;
+    width: 100%;
+    max-width: 1100px;
+  }
+  .device-frame {
+    width: 375px;
+    min-width: 375px;
+    background: #111;
+    border-radius: 48px;
+    padding: 14px;
+    box-shadow: 0 30px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.06);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .device-notch {
+    width: 120px; height: 32px;
+    background: #111;
+    border-radius: 0 0 20px 20px;
+    margin: 0 auto 8px;
+    position: relative;
+    z-index: 10;
+  }
+  .device-screen {
+    background: var(--earth-50);
+    border-radius: 36px;
+    overflow: hidden;
+    height: 720px;
+    position: relative;
+  }
+
+  /* ANNOTATION PANEL */
+  .annotation-panel {
+    flex: 1;
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .anno-title { color: rgba(255,255,255,.8); font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .anno-card {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 12px;
+    padding: 12px 14px;
+  }
+  .anno-tag {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-bottom: 6px;
+  }
+  .anno-tag.must { background: rgba(82,196,126,.2); color: var(--green-300); }
+  .anno-tag.win  { background: rgba(232,147,10,.2);  color: #f5c060; }
+  .anno-tag.ux   { background: rgba(45,110,234,.2);  color: #7eb5f5; }
+  .anno-text { font-size: 11.5px; color: rgba(255,255,255,.55); line-height: 1.6; }
+  .anno-text b { color: rgba(255,255,255,.85); font-weight: 500; }
+
+  /* ================================
+     SCREENS
+  ================================ */
+  .screen { 
+    position: absolute; inset: 0;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    animation: fadeIn .22s ease;
+  }
+  .screen.active { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* STATUS BAR */
+  .status-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 20px 6px;
+    font-size: 11px; font-weight: 600; color: var(--earth-700);
+    flex-shrink: 0;
+  }
+  .status-bar.dark { color: rgba(255,255,255,.9); }
+  .status-icons { display: flex; gap: 4px; align-items: center; font-size: 10px; }
+
+  /* COMMON NAV */
+  .bottom-nav {
+    display: flex;
+    padding: 10px 0 18px;
+    background: var(--white);
+    border-top: 1px solid var(--earth-200);
+    flex-shrink: 0;
+    margin-top: auto;
+  }
+  .nav-btn {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    gap: 3px; cursor: pointer; transition: opacity .15s;
+  }
+  .nav-btn:active { opacity: .6; }
+  .nav-icon-wrap {
+    width: 28px; height: 28px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .nav-icon-wrap.active { background: var(--green-100); }
+  .nav-label { font-size: 9px; font-weight: 500; color: var(--earth-400); }
+  .nav-label.active { color: var(--green-700); }
+
+  /* TOP HEADER BAR */
+  .top-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 20px 10px;
+    flex-shrink: 0;
+  }
+  .top-header.dark { background: var(--green-800); }
+  .header-title { font-size: 17px; font-weight: 700; color: var(--earth-900); letter-spacing: -.03em; }
+  .header-title.white { color: var(--white); }
+  .header-sub { font-size: 11px; color: var(--earth-400); font-weight: 400; }
+  .header-sub.white { color: rgba(255,255,255,.65); }
+  .notif-btn {
+    width: 36px; height: 36px; border-radius: 12px;
+    background: var(--earth-100); display: flex; align-items: center; justify-content: center;
+    font-size: 17px; cursor: pointer; position: relative;
+  }
+  .notif-dot {
+    position: absolute; top: 7px; right: 7px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--red-500); border: 2px solid var(--earth-50);
+  }
+  .back-btn {
+    width: 32px; height: 32px; border-radius: 10px;
+    background: rgba(255,255,255,.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; cursor: pointer; color: white;
+  }
+  .back-btn.dark-bg { background: var(--earth-100); color: var(--earth-700); }
+
+  /* SCROLL AREA */
+  .scroll-area {
+    flex: 1; overflow-y: auto; padding: 0 20px 16px;
+  }
+  .scroll-area::-webkit-scrollbar { display: none; }
+
+  /* METRIC CARDS */
+  .metrics-row {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-bottom: 18px;
+  }
+  .metric-card {
+    background: var(--white); border-radius: var(--r-md);
+    padding: 14px; box-shadow: var(--shadow-sm);
+    cursor: pointer; transition: transform .15s;
+  }
+  .metric-card:active { transform: scale(.97); }
+  .metric-card.full { grid-column: 1/-1; }
+  .metric-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .metric-label { font-size: 10px; font-weight: 500; color: var(--earth-400); text-transform: uppercase; letter-spacing: .05em; }
+  .metric-icon { font-size: 15px; }
+  .metric-val { font-size: 26px; font-weight: 700; color: var(--earth-900); letter-spacing: -.04em; line-height: 1; }
+  .metric-trend { font-size: 10px; font-weight: 500; margin-top: 4px; }
+  .trend-up { color: var(--green-600); }
+  .trend-down { color: var(--red-500); }
+  .trend-warn { color: var(--amber-500); }
+
+  /* SECTION HEADER */
+  .section-hd {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px; margin-top: 18px;
+  }
+  .section-hd-title { font-size: 13px; font-weight: 600; color: var(--earth-900); }
+  .see-all { font-size: 11px; font-weight: 500; color: var(--green-600); cursor: pointer; }
+
+  /* ALERT CARDS */
+  .alert-card {
+    border-radius: var(--r-md); padding: 12px 14px;
+    display: flex; align-items: flex-start; gap: 10px;
+    margin-bottom: 8px; cursor: pointer; transition: transform .15s;
+  }
+  .alert-card:active { transform: scale(.98); }
+  .alert-card.red { background: var(--red-100); border-left: 3px solid var(--red-500); }
+  .alert-card.amber { background: var(--amber-100); border-left: 3px solid var(--amber-500); }
+  .alert-card.green { background: var(--green-50); border-left: 3px solid var(--green-500); }
+  .alert-icon { font-size: 18px; margin-top: 1px; flex-shrink: 0; }
+  .alert-title { font-size: 12px; font-weight: 600; color: var(--earth-900); }
+  .alert-body { font-size: 10.5px; color: var(--earth-700); margin-top: 2px; line-height: 1.45; }
+  .alert-time { font-size: 9px; color: var(--earth-400); margin-top: 4px; font-family: 'DM Mono', monospace; }
+
+  /* MINI CHART */
+  .mini-chart-wrap {
+    background: var(--white); border-radius: var(--r-md);
+    padding: 14px; box-shadow: var(--shadow-sm); margin-bottom: 8px;
+  }
+  .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .chart-title { font-size: 12px; font-weight: 600; color: var(--earth-900); }
+  .chart-period { font-size: 10px; color: var(--earth-400); font-family: 'DM Mono', monospace; }
+  .bar-chart { display: flex; align-items: flex-end; gap: 5px; height: 60px; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .bar { border-radius: 4px 4px 0 0; width: 100%; background: var(--green-300); transition: background .2s; }
+  .bar.active { background: var(--green-600); }
+  .bar-lbl { font-size: 8px; color: var(--earth-400); font-family: 'DM Mono', monospace; }
+  .chart-total { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--earth-200); display: flex; justify-content: space-between; }
+  .chart-total-lbl { font-size: 10px; color: var(--earth-400); }
+  .chart-total-val { font-size: 12px; font-weight: 600; color: var(--green-700); }
+
+  /* COW LIST */
+  .cow-card {
+    background: var(--white); border-radius: var(--r-md);
+    padding: 12px; display: flex; align-items: center; gap: 12px;
+    margin-bottom: 8px; box-shadow: var(--shadow-sm);
+    cursor: pointer; transition: transform .15s;
+  }
+  .cow-card:active { transform: scale(.98); }
+  .cow-avatar-big {
+    width: 46px; height: 46px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .cow-info { flex: 1; }
+  .cow-name-big { font-size: 14px; font-weight: 600; color: var(--earth-900); }
+  .cow-meta { font-size: 10.5px; color: var(--earth-400); margin-top: 2px; }
+  .status-pill {
+    padding: 4px 10px; border-radius: 20px;
+    font-size: 10px; font-weight: 600; white-space: nowrap;
+  }
+  .pill-green { background: var(--green-100); color: var(--green-700); }
+  .pill-amber { background: var(--amber-100); color: #7a4e00; }
+  .pill-red { background: var(--red-100); color: var(--red-500); }
+  .pill-blue { background: var(--blue-100); color: var(--blue-500); }
+  .pill-gray { background: var(--earth-100); color: var(--earth-700); }
+
+  /* SEARCH BAR */
+  .search-bar {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--white); border-radius: 14px;
+    padding: 10px 14px; margin-bottom: 14px;
+    box-shadow: var(--shadow-sm); border: 1.5px solid transparent;
+  }
+  .search-icon { font-size: 14px; color: var(--earth-400); }
+  .search-input { background: none; border: none; outline: none; font-size: 13px; font-family: 'Sora', sans-serif; color: var(--earth-900); flex: 1; }
+  .search-input::placeholder { color: var(--earth-400); }
+
+  /* FILTER CHIPS */
+  .filter-row { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; }
+  .filter-row::-webkit-scrollbar { display: none; }
+  .chip {
+    padding: 5px 12px; border-radius: 20px; white-space: nowrap;
+    font-size: 11px; font-weight: 500; cursor: pointer;
+    border: 1.5px solid var(--earth-200); color: var(--earth-700);
+    background: var(--white); transition: all .15s;
+  }
+  .chip.active { background: var(--green-700); border-color: var(--green-700); color: var(--white); }
+
+  /* COW PROFILE SCREENS */
+  .profile-hero {
+    background: var(--green-800);
+    padding: 16px 20px 20px;
+    flex-shrink: 0;
+  }
+  .profile-hero-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .profile-avatar {
+    width: 60px; height: 60px; border-radius: 18px;
+    background: var(--green-600); display: flex; align-items: center;
+    justify-content: center; font-size: 30px; flex-shrink: 0;
+    border: 2.5px solid rgba(255,255,255,.2);
+  }
+  .profile-name { font-size: 18px; font-weight: 700; color: var(--white); letter-spacing: -.03em; }
+  .profile-breed { font-size: 11px; color: rgba(255,255,255,.6); margin-top: 2px; }
+  .profile-pills { display: flex; gap: 6px; }
+  .profile-pill {
+    font-size: 10px; font-weight: 600; padding: 3px 10px;
+    border-radius: 20px; background: rgba(255,255,255,.15); color: rgba(255,255,255,.9);
+  }
+  .profile-pill.highlight { background: var(--green-400); color: var(--green-900); }
+  .profile-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .pstat { background: rgba(255,255,255,.1); border-radius: 10px; padding: 8px; text-align: center; }
+  .pstat-val { font-size: 16px; font-weight: 700; color: var(--white); }
+  .pstat-lbl { font-size: 9px; color: rgba(255,255,255,.5); margin-top: 2px; }
+
+  /* TABS */
+  .tab-bar {
+    display: flex; background: var(--white);
+    border-bottom: 1px solid var(--earth-200);
+    flex-shrink: 0;
+  }
+  .tab {
+    flex: 1; padding: 11px 4px; text-align: center;
+    font-size: 11px; font-weight: 600; color: var(--earth-400);
+    cursor: pointer; border-bottom: 2.5px solid transparent;
+    transition: all .15s;
+  }
+  .tab.active { color: var(--green-700); border-bottom-color: var(--green-600); }
+
+  /* TIMELINE */
+  .timeline { padding: 0 20px; }
+  .tl-item { display: flex; gap: 12px; padding-bottom: 20px; position: relative; }
+  .tl-left { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+  .tl-dot {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 13px;
+    flex-shrink: 0; border: 2px solid var(--earth-200);
+    background: var(--white);
+  }
+  .tl-dot.done { background: var(--green-100); border-color: var(--green-400); }
+  .tl-dot.active { background: var(--green-600); border-color: var(--green-600); }
+  .tl-dot.future { background: var(--earth-100); border-color: var(--earth-200); }
+  .tl-line { width: 2px; flex: 1; background: var(--earth-200); margin-top: 4px; }
+  .tl-line.done { background: var(--green-300); }
+  .tl-content { flex: 1; padding-top: 4px; }
+  .tl-date { font-size: 9px; font-family: 'DM Mono', monospace; color: var(--earth-400); margin-bottom: 3px; }
+  .tl-title { font-size: 12px; font-weight: 600; color: var(--earth-900); }
+  .tl-body { font-size: 10.5px; color: var(--earth-700); margin-top: 3px; line-height: 1.45; }
+  .tl-badge { display: inline-block; margin-top: 5px; }
+
+  /* MILK LOG ROWS */
+  .milk-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 0; border-bottom: 1px solid var(--earth-200);
+  }
+  .milk-row:last-child { border-bottom: none; }
+  .milk-session { font-size: 11px; color: var(--earth-700); }
+  .milk-session strong { font-weight: 600; color: var(--earth-900); display: block; font-size: 13px; }
+  .milk-amount { font-size: 18px; font-weight: 700; color: var(--green-700); font-family: 'DM Mono', monospace; }
+  .milk-unit { font-size: 10px; color: var(--earth-400); font-weight: 400; }
+
+  /* FAB */
+  .fab {
+    position: absolute; bottom: 80px; right: 20px;
+    width: 52px; height: 52px; border-radius: 16px;
+    background: var(--green-600); display: flex; align-items: center; justify-content: center;
+    font-size: 24px; color: white; box-shadow: 0 6px 20px rgba(42,122,74,.45);
+    cursor: pointer; z-index: 20; transition: transform .15s;
+  }
+  .fab:active { transform: scale(.93); }
+
+  /* ADD COW FORM */
+  .form-section { margin-bottom: 18px; }
+  .form-label { font-size: 11px; font-weight: 600; color: var(--earth-700); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px; display: block; }
+  .form-field {
+    width: 100%; padding: 12px 14px; border-radius: 12px;
+    border: 1.5px solid var(--earth-200); background: var(--white);
+    font-family: 'Sora', sans-serif; font-size: 13px; color: var(--earth-900);
+    margin-bottom: 8px; outline: none; transition: border-color .15s;
+  }
+  .form-field:focus { border-color: var(--green-500); }
+  .form-field.filled { border-color: var(--green-300); background: var(--green-50); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .photo-upload {
+    border: 2px dashed var(--earth-200); border-radius: 14px;
+    padding: 20px; text-align: center; cursor: pointer;
+    background: var(--earth-50); margin-bottom: 8px; transition: all .15s;
+  }
+  .photo-upload:hover { border-color: var(--green-400); background: var(--green-50); }
+  .upload-icon { font-size: 28px; margin-bottom: 6px; }
+  .upload-text { font-size: 12px; color: var(--earth-400); }
+  .primary-btn {
+    width: 100%; padding: 15px; border-radius: 14px;
+    background: var(--green-700); color: white;
+    font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 600;
+    border: none; cursor: pointer; transition: transform .15s, background .15s;
+    margin-top: 8px;
+  }
+  .primary-btn:active { transform: scale(.98); background: var(--green-800); }
+  .step-indicator {
+    display: flex; gap: 6px; justify-content: center; margin-bottom: 16px;
+  }
+  .step-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--earth-200); }
+  .step-dot.active { background: var(--green-600); width: 20px; border-radius: 3px; }
+
+  /* ANALYTICS */
+  .line-chart-wrap { padding: 8px 0; }
+  .line-svg { width: 100%; height: 80px; overflow: visible; }
+  .rank-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px; background: var(--white); border-radius: var(--r-sm);
+    margin-bottom: 6px; box-shadow: var(--shadow-sm);
+  }
+  .rank-num { font-size: 12px; font-weight: 700; color: var(--earth-400); font-family: 'DM Mono', monospace; width: 18px; }
+  .rank-name { flex: 1; font-size: 12px; font-weight: 600; color: var(--earth-900); }
+  .rank-bar-wrap { width: 80px; height: 6px; background: var(--earth-100); border-radius: 3px; overflow: hidden; }
+  .rank-bar { height: 100%; border-radius: 3px; background: var(--green-500); }
+  .rank-val { font-size: 12px; font-weight: 600; color: var(--green-700); font-family: 'DM Mono', monospace; width: 36px; text-align: right; }
+
+  /* ALERTS SCREEN */
+  .big-alert {
+    background: var(--white); border-radius: var(--r-md); padding: 14px;
+    margin-bottom: 10px; box-shadow: var(--shadow-sm); cursor: pointer;
+    border: 1.5px solid transparent; transition: all .15s;
+  }
+  .big-alert.urgent { border-color: var(--red-500); }
+  .big-alert.warning { border-color: var(--amber-500); }
+  .big-alert-top { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .big-alert-icon {
+    width: 38px; height: 38px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center; font-size: 19px;
+    flex-shrink: 0;
+  }
+  .big-alert-icon.red { background: var(--red-100); }
+  .big-alert-icon.amber { background: var(--amber-100); }
+  .big-alert-icon.green { background: var(--green-50); }
+  .big-alert-title { font-size: 13px; font-weight: 600; color: var(--earth-900); }
+  .big-alert-sub { font-size: 10.5px; color: var(--earth-400); margin-top: 2px; }
+  .big-alert-body { font-size: 11px; color: var(--earth-700); line-height: 1.5; }
+  .action-btn {
+    display: inline-block; margin-top: 8px; padding: 6px 14px;
+    border-radius: 8px; background: var(--green-100); color: var(--green-800);
+    font-size: 11px; font-weight: 600; cursor: pointer;
+  }
+
+  /* CALVING LIVE */
+  .calving-live {
+    background: var(--red-500); padding: 16px 20px;
+    flex-shrink: 0;
+  }
+  .calving-live-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .live-badge {
+    display: flex; align-items: center; gap: 5px;
+    background: rgba(255,255,255,.2); padding: 4px 10px; border-radius: 20px;
+  }
+  .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #fff; animation: pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+  .live-text { font-size: 10px; font-weight: 700; color: white; letter-spacing: .08em; }
+  .live-cow-name { font-size: 20px; font-weight: 700; color: white; }
+  .live-timer { font-family: 'DM Mono', monospace; font-size: 34px; font-weight: 500; color: white; letter-spacing: .05em; }
+  .live-timer-label { font-size: 10px; color: rgba(255,255,255,.6); letter-spacing: .04em; }
+  .live-stage {
+    display: flex; gap: 6px; margin-top: 10px;
+  }
+  .stage-dot { flex: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,.25); }
+  .stage-dot.done { background: rgba(255,255,255,.8); }
+  .stage-dot.active { background: white; }
+
+  /* HEALTH RECORDS */
+  .health-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0; border-bottom: 1px solid var(--earth-100);
+  }
+  .health-icon { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .health-info { flex: 1; }
+  .health-name { font-size: 12px; font-weight: 600; color: var(--earth-900); }
+  .health-date { font-size: 10px; color: var(--earth-400); font-family: 'DM Mono', monospace; }
+  .health-status { font-size: 10px; font-weight: 500; }
+
+  /* SWAHILI BANNER */
+  .swahili-banner {
+    background: var(--green-800); border-radius: var(--r-sm);
+    padding: 10px 12px; display: flex; align-items: center; gap: 8px;
+    margin-bottom: 12px;
+  }
+  .swahili-flag { font-size: 16px; }
+  .swahili-text { font-size: 11px; color: rgba(255,255,255,.8); }
+  .swahili-text strong { color: white; font-weight: 600; }
+
+  /* ONBOARDING */
+  .onboard-hero {
+    background: var(--green-800); flex: 1;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 24px; text-align: center;
+  }
+  .onboard-emoji { font-size: 64px; margin-bottom: 16px; }
+  .onboard-title { font-size: 24px; font-weight: 700; color: white; letter-spacing: -.04em; margin-bottom: 8px; }
+  .onboard-sub { font-size: 13px; color: rgba(255,255,255,.6); line-height: 1.6; max-width: 260px; }
+  .onboard-bottom { background: var(--earth-50); padding: 24px 20px 32px; flex-shrink: 0; }
+  .lang-row { display: flex; gap: 8px; margin-bottom: 14px; }
+  .lang-chip {
+    flex: 1; padding: 10px; border-radius: 12px; text-align: center;
+    font-size: 12px; font-weight: 600; cursor: pointer; border: 1.5px solid var(--earth-200);
+    background: var(--white); color: var(--earth-700);
+  }
+  .lang-chip.active { background: var(--green-700); border-color: var(--green-700); color: white; }
+
+  /* AI ASSISTANT */
+  .ai-header {
+    background: linear-gradient(135deg, var(--green-800), var(--green-700));
+    padding: 14px 20px 16px; flex-shrink: 0;
+  }
+  .ai-name { font-size: 15px; font-weight: 700; color: white; }
+  .ai-status { font-size: 10px; color: rgba(255,255,255,.6); display: flex; align-items: center; gap: 4px; }
+  .ai-online-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green-400); }
+  .chat-area { flex: 1; padding: 12px 16px; overflow-y: auto; }
+  .chat-area::-webkit-scrollbar { display: none; }
+  .bubble {
+    max-width: 82%; border-radius: 16px; padding: 10px 13px;
+    font-size: 12px; line-height: 1.55; margin-bottom: 8px;
+  }
+  .bubble.bot { background: var(--white); color: var(--earth-900); border-bottom-left-radius: 4px; box-shadow: var(--shadow-sm); }
+  .bubble.user { background: var(--green-700); color: white; margin-left: auto; border-bottom-right-radius: 4px; }
+  .bubble.bot strong { color: var(--green-700); }
+  .chat-suggestions { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .suggest-chip {
+    font-size: 10px; font-weight: 500; padding: 6px 11px;
+    border-radius: 20px; background: var(--green-50); color: var(--green-800);
+    border: 1px solid var(--green-200); cursor: pointer; transition: all .15s;
+  }
+  .suggest-chip:active { background: var(--green-100); }
+  .chat-input-row {
+    display: flex; gap: 8px; padding: 10px 14px;
+    background: var(--white); border-top: 1px solid var(--earth-200);
+    flex-shrink: 0;
+  }
+  .chat-input {
+    flex: 1; padding: 10px 12px; border-radius: 12px;
+    border: 1.5px solid var(--earth-200); background: var(--earth-50);
+    font-family: 'Sora', sans-serif; font-size: 12px; outline: none;
+  }
+  .send-btn {
+    width: 38px; height: 38px; border-radius: 11px;
+    background: var(--green-700); display: flex; align-items: center;
+    justify-content: center; font-size: 16px; cursor: pointer;
+    flex-shrink: 0; border: none;
+  }
+
+  /* QUICK ADD INSEMINATION */
+  .insem-calc {
+    background: var(--green-50); border-radius: var(--r-md); padding: 14px;
+    border: 1.5px solid var(--green-200); margin-top: 12px;
+  }
+  .insem-calc-title { font-size: 11px; font-weight: 600; color: var(--green-800); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .insem-date-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+  .insem-date-item { text-align: center; }
+  .insem-date-label { font-size: 9px; color: var(--earth-400); text-transform: uppercase; letter-spacing: .04em; }
+  .insem-date-value { font-size: 12px; font-weight: 600; color: var(--earth-900); font-family: 'DM Mono', monospace; margin-top: 2px; }
+  .insem-arrow { color: var(--green-500); font-size: 16px; display: flex; align-items: center; padding-top: 12px; }
+  .progress-track { background: var(--earth-200); border-radius: 3px; height: 6px; margin-top: 10px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 3px; background: var(--green-500); }
+  .progress-label { font-size: 9px; color: var(--earth-400); margin-top: 4px; }
+
+  /* REPORTS */
+  .conception-card {
+    background: var(--green-800); border-radius: var(--r-md); padding: 16px;
+    display: flex; align-items: center; gap: 14px; margin-bottom: 10px;
+  }
+  .conception-num { font-size: 40px; font-weight: 700; color: white; font-family: 'DM Mono', monospace; line-height: 1; }
+  .conception-label { font-size: 11px; color: rgba(255,255,255,.6); line-height: 1.5; }
+  .conception-badge { display: inline-block; background: var(--green-400); color: var(--green-900); font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-top: 4px; }
+
+  /* ================================
+     NAV HELPER
+  ================================ */
+  .screens { position: relative; }
+</style>
+</head>
+<body>
+
+<div class="proto-header">
+  <div class="proto-brand">Herd<span>IQ</span> — Wireframe Prototype</div>
+  <div class="screen-tabs" id="screenTabs">
+    <div class="screen-tab active" onclick="showScreen('dashboard')">Dashboard</div>
+    <div class="screen-tab" onclick="showScreen('cows')">My Cows</div>
+    <div class="screen-tab" onclick="showScreen('profile')">Cow Profile</div>
+    <div class="screen-tab" onclick="showScreen('calving')">Calving Live</div>
+    <div class="screen-tab" onclick="showScreen('alerts')">Alerts</div>
+    <div class="screen-tab" onclick="showScreen('addcow')">Add Cow</div>
+    <div class="screen-tab" onclick="showScreen('reports')">Reports</div>
+    <div class="screen-tab" onclick="showScreen('ai')">AI Assistant</div>
+    <div class="screen-tab" onclick="showScreen('onboard')">Onboarding</div>
+  </div>
+  <div class="proto-label">9 screens · interactive</div>
+</div>
+
+<div class="device-wrap">
+  <div class="device-frame">
+    <div class="device-notch"></div>
+    <div class="device-screen">
+
+      <!-- ======================== DASHBOARD ======================== -->
+      <div class="screen active" id="screen-dashboard">
+        <div class="status-bar"><span>9:41</span><div class="status-icons">📶 🔋</div></div>
+        <div class="top-header">
+          <div>
+            <div class="header-title">Habari, John 👋</div>
+            <div class="header-sub">Moi Farm · Kisii County · Fri 20 Mar</div>
+          </div>
+          <div class="notif-btn" onclick="showScreen('alerts')">🔔<div class="notif-dot"></div></div>
+        </div>
+        <div class="scroll-area">
+
+          <div class="swahili-banner">
+            <div class="swahili-flag">🇰🇪</div>
+            <div class="swahili-text"><strong>Mgawanyiko wa leo:</strong> 142L — Chini ya jana kwa 8L</div>
+          </div>
+
+          <div class="metrics-row">
+            <div class="metric-card" onclick="showScreen('cows')">
+              <div class="metric-top"><div class="metric-label">Total Cows</div><div class="metric-icon">🐄</div></div>
+              <div class="metric-val">24</div>
+              <div class="metric-trend trend-up">↑ 1 calf this week</div>
+            </div>
+            <div class="metric-card" onclick="showScreen('reports')">
+              <div class="metric-top"><div class="metric-label">Milk Today</div><div class="metric-icon">🥛</div></div>
+              <div class="metric-val">142<span style="font-size:14px;font-weight:400;color:var(--earth-400)">L</span></div>
+              <div class="metric-trend trend-down">↓ 8L vs yesterday</div>
+            </div>
+            <div class="metric-card" onclick="showScreen('calving')">
+              <div class="metric-top"><div class="metric-label">Due to Calve</div><div class="metric-icon">🍼</div></div>
+              <div class="metric-val">3</div>
+              <div class="metric-trend trend-warn">⚠ 1 within 7 days</div>
+            </div>
+            <div class="metric-card" onclick="showScreen('cows')">
+              <div class="metric-top"><div class="metric-label">Pregnant</div><div class="metric-icon">❤️</div></div>
+              <div class="metric-val">9</div>
+              <div class="metric-trend trend-up">37.5% conception</div>
+            </div>
+          </div>
+
+          <div class="section-hd"><div class="section-hd-title">📊 Milk this week</div><div class="see-all" onclick="showScreen('reports')">See report</div></div>
+          <div class="mini-chart-wrap">
+            <div class="chart-header"><div class="chart-title">Daily production (litres)</div><div class="chart-period">14–20 Mar</div></div>
+            <div class="bar-chart">
+              <div class="bar-col"><div class="bar" style="height:50px"></div><div class="bar-lbl">Mon</div></div>
+              <div class="bar-col"><div class="bar" style="height:56px"></div><div class="bar-lbl">Tue</div></div>
+              <div class="bar-col"><div class="bar" style="height:58px"></div><div class="bar-lbl">Wed</div></div>
+              <div class="bar-col"><div class="bar" style="height:55px"></div><div class="bar-lbl">Thu</div></div>
+              <div class="bar-col"><div class="bar" style="height:60px"></div><div class="bar-lbl">Fri</div></div>
+              <div class="bar-col"><div class="bar" style="height:54px"></div><div class="bar-lbl">Sat</div></div>
+              <div class="bar-col active"><div class="bar active" style="height:47px"></div><div class="bar-lbl" style="color:var(--green-700)">Sun</div></div>
+            </div>
+            <div class="chart-total">
+              <div class="chart-total-lbl">Weekly total</div>
+              <div class="chart-total-val">997L ↑ 6% vs last week</div>
+            </div>
+          </div>
+
+          <div class="section-hd"><div class="section-hd-title">⚠️ Active alerts</div><div class="see-all" onclick="showScreen('alerts')">All alerts</div></div>
+          <div class="alert-card red" onclick="showScreen('calving')">
+            <div class="alert-icon">🍼</div>
+            <div><div class="alert-title">Rosa #011 is in labour!</div><div class="alert-body">Labour timer running · 2h 14m ago · Tap to monitor live</div><div class="alert-time">NOW</div></div>
+          </div>
+          <div class="alert-card amber" onclick="showScreen('alerts')">
+            <div class="alert-icon">💉</div>
+            <div><div class="alert-title">Vaccination due tomorrow</div><div class="alert-body">Daisy #007 — FMD booster · Sat 21 Mar</div><div class="alert-time">1 day</div></div>
+          </div>
+
+          <div class="section-hd"><div class="section-hd-title">🐄 Recent cows</div><div class="see-all" onclick="showScreen('cows')">View all</div></div>
+          <div class="cow-card" onclick="showScreen('profile')">
+            <div class="cow-avatar-big" style="background:var(--red-100)">🐄</div>
+            <div class="cow-info">
+              <div class="cow-name-big">Rosa #011</div>
+              <div class="cow-meta">Ayrshire · 5 yrs · Last: 14.2L/day</div>
+            </div>
+            <div class="status-pill pill-red">In labour</div>
+          </div>
+          <div class="cow-card" onclick="showScreen('profile')">
+            <div class="cow-avatar-big" style="background:var(--amber-100)">🐄</div>
+            <div class="cow-info">
+              <div class="cow-name-big">Daisy #007</div>
+              <div class="cow-meta">Sahiwal · 6 yrs · Last: 18.5L/day</div>
+            </div>
+            <div class="status-pill pill-amber">Due in 6d</div>
+          </div>
+        </div>
+        <div class="fab" onclick="showScreen('addcow')">+</div>
+        <div class="bottom-nav">
+          <div class="nav-btn" onclick="showScreen('dashboard')"><div class="nav-icon-wrap active">🏠</div><div class="nav-label active">Home</div></div>
+          <div class="nav-btn" onclick="showScreen('cows')"><div class="nav-icon-wrap">🐄</div><div class="nav-label">Cows</div></div>
+          <div class="nav-btn" onclick="showScreen('alerts')"><div class="nav-icon-wrap">🔔</div><div class="nav-label">Alerts</div></div>
+          <div class="nav-btn" onclick="showScreen('reports')"><div class="nav-icon-wrap">📊</div><div class="nav-label">Reports</div></div>
+          <div class="nav-btn" onclick="showScreen('ai')"><div class="nav-icon-wrap">🤖</div><div class="nav-label">AI</div></div>
+        </div>
+      </div>
+
+      <!-- ======================== COWS LIST ======================== -->
+      <div class="screen" id="screen-cows">
+        <div class="status-bar"><span>9:41</span><div class="status-icons">📶 🔋</div></div>
+        <div class="top-header">
+          <div class="header-title">My Cows</div>
+          <div class="notif-btn" onclick="showScreen('addcow')" style="background:var(--green-600);color:white;font-size:22px">+</div>
+        </div>
+        <div style="padding: 0 20px 8px;">
+          <div class="search-bar"><div class="search-icon">🔍</div><input class="search-input" placeholder="Search by name, ID, breed…"></div>
+          <div class="filter-row">
+            <div class="chip active">All (24)</div>
+            <div class="chip">Milking (14)</div>
+            <div class="chip">Pregnant (9)</div>
+            <div class="chip">Dry (1)</div>
+          </div>
+        </div>
+        <div class="scroll-area" style="padding-top: 0;">
+          <div class="cow-card" onclick="showScreen('profile')">
+            <div class="cow-avatar-big" style="background:var(--red-100)">🐄</div>
+            <div class="cow-info"><div class="cow-name-big">Rosa #011</div><div class="cow-meta">Ayrshire · 5 yrs · Insem: 16 Mar 2025</div></div>
+            <div class="status-pill pill-red">In labour</div>
+          </div>
+          <div class="cow-card" onclick="showScreen('profile')">
+            <div class="cow-avatar-big" style="background:var(--amber-100)">🐄</div>
+            <div class="cow-info"><div class="cow-name-big">Daisy #007</div><div class="cow-meta">Sahiwal · 6 yrs · Due: 26 Mar</div></div>
+            <div class="status-pill pill-amber">Due 6d</div>
+          </div>
+          <div class="cow-card" onclick="showScreen('profile')">
+            <div class="cow-avatar-big" style="background:var(--green-100)">🐄</div>
+            <div class="cow-info"><div class="cow-name-big">Bella #004</div><div class="cow-meta">Friesian · 4 yrs · 19.2L avg/day</div></div>
+            <div class="status-pill pill-green">Milking</div>
+          </div>
+          <div class="cow-card" onclick="showScreen('profile')">
+            <div class="cow-avatar-big" style="background:var(--blue-100)">🐄</div>
+            <div class="cow-info"><div class="cow-name-big">Luna #018</div><div class="cow-meta">Friesian · 3 yrs · Pregnant 9 wks</div></div>
+            <div class="status-pill pill-blue">Pregnant</div>
+          </div>
+          <div class="cow-card" onclick="showScreen('profile')">
+            <div class="cow-avatar-big" style="background:var(--green-100)">🐄</div>
+            <div class="cow-info"><div class="cow-name-big">Mable #022</div><div class="cow-meta">Jersey · 2 yrs · 12.8L avg/day</div></div>
+            <div class="status-pill pill-green">Milking</div>
+          </div>
+          <div class="cow-card" onclick="showScreen('profile')">
+            <div class="cow-avatar-big" style="background:var(--green-100)">🐄</div>
+            <div class="cow-info"><div class="cow-name-big">Cleo #003</div><div class="cow-meta">Ayrshire · 4 yrs · 16.0L avg/day</div></div>
+            <div class="status-pill pill-green">Milking</div>
+          </div>
+          <div class="cow-card" onclick="showScreen('profile')">
+            <div class="cow-avatar-big" style="background:var(--earth-100)">🐄</div>
+            <div class="cow-info"><div class="cow-name-big">Star #009</div><div class="cow-meta">Zebu · 7 yrs · Dry period</div></div>
+            <div class="status-pill pill-gray">Dry</div>
+          </div>
+        </div>
+        <div class="bottom-nav">
+          <div class="nav-btn" onclick="showScreen('dashboard')"><div class="nav-icon-wrap">🏠</div><div class="nav-label">Home</div></div>
+          <div class="nav-btn" onclick="showScreen('cows')"><div class="nav-icon-wrap active">🐄</div><div class="nav-label active">Cows</div></div>
+          <div class="nav-btn" onclick="showScreen('alerts')"><div class="nav-icon-wrap">🔔</div><div class="nav-label">Alerts</div></div>
+          <div class="nav-btn" onclick="showScreen('reports')"><div class="nav-icon-wrap">📊</div><div class="nav-label">Reports</div></div>
+          <div class="nav-btn" onclick="showScreen('ai')"><div class="nav-icon-wrap">🤖</div><div class="nav-label">AI</div></div>
+        </div>
+      </div>
+
+      <!-- ======================== COW PROFILE ======================== -->
+      <div class="screen" id="screen-profile">
+        <div class="status-bar dark" style="background:var(--green-800)"><span style="color:white">9:41</span><div class="status-icons" style="color:rgba(255,255,255,.7)">📶 🔋</div></div>
+        <div class="profile-hero">
+          <div class="profile-hero-top">
+            <div class="back-btn" onclick="showScreen('cows')">‹</div>
+            <div style="flex:1">
+              <div class="profile-name">Bella #004</div>
+              <div class="profile-breed">Friesian · Born Mar 2021 · 4 yrs</div>
+            </div>
+            <div class="profile-avatar">🐄</div>
+          </div>
+          <div class="profile-pills" style="margin-bottom:12px">
+            <div class="profile-pill highlight">Milking</div>
+            <div class="profile-pill">19.2L avg/day</div>
+            <div class="profile-pill">Parity 2</div>
+          </div>
+          <div class="profile-stats">
+            <div class="pstat"><div class="pstat-val">19.2L</div><div class="pstat-lbl">Avg daily</div></div>
+            <div class="pstat"><div class="pstat-val">2</div><div class="pstat-lbl">Calvings</div></div>
+            <div class="pstat"><div class="pstat-val">92%</div><div class="pstat-lbl">Health score</div></div>
+          </div>
+        </div>
+        <div class="tab-bar" id="profileTabBar">
+          <div class="tab active" onclick="setProfileTab(0)">Overview</div>
+          <div class="tab" onclick="setProfileTab(1)">Milk 🥛</div>
+          <div class="tab" onclick="setProfileTab(2)">Breeding</div>
+          <div class="tab" onclick="setProfileTab(3)">Health</div>
+        </div>
+
+        <!-- Tab 0: Overview / Timeline -->
+        <div class="scroll-area" id="ptab-0">
+          <div style="height:10px"></div>
+          <div class="section-hd" style="margin-top:0"><div class="section-hd-title">📅 Lifecycle timeline</div></div>
+          <div class="timeline">
+            <div class="tl-item">
+              <div class="tl-left"><div class="tl-dot done">🐄</div><div class="tl-line done"></div></div>
+              <div class="tl-content">
+                <div class="tl-date">15 MAR 2021</div>
+                <div class="tl-title">Born at Moi Farm</div>
+                <div class="tl-body">Female calf · Dam: Nuru #001 · Weight: 38kg</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-left"><div class="tl-dot done">💉</div><div class="tl-line done"></div></div>
+              <div class="tl-content">
+                <div class="tl-date">12 MAR 2022</div>
+                <div class="tl-title">First insemination (AI)</div>
+                <div class="tl-body">Bull: Ndege Friesian GN2 · Heat confirmed</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-left"><div class="tl-dot done">🍼</div><div class="tl-line done"></div></div>
+              <div class="tl-content">
+                <div class="tl-date">22 DEC 2022</div>
+                <div class="tl-title">First calving</div>
+                <div class="tl-body">Female calf · 285 days gestation · Normal birth</div>
+                <div class="tl-badge"><div class="status-pill pill-green" style="font-size:9px">Successful</div></div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-left"><div class="tl-dot done">🥛</div><div class="tl-line done"></div></div>
+              <div class="tl-content">
+                <div class="tl-date">22 DEC 2022 – 10 OCT 2023</div>
+                <div class="tl-title">Lactation 1</div>
+                <div class="tl-body">305-day avg: 17.4L/day · Total: 5,307L</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-left"><div class="tl-dot active">💉</div><div class="tl-line done"></div></div>
+              <div class="tl-content">
+                <div class="tl-date">04 FEB 2024</div>
+                <div class="tl-title">Second insemination (AI)</div>
+                <div class="tl-body">Bull: Meru Elite M7 · Pregnancy confirmed 28 Mar</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-left"><div class="tl-dot done">🍼</div><div class="tl-line done"></div></div>
+              <div class="tl-content">
+                <div class="tl-date">15 NOV 2024</div>
+                <div class="tl-title">Second calving</div>
+                <div class="tl-body">Male calf · Normal · 283 days gestation</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-left"><div class="tl-dot active">🥛</div><div class="tl-line"></div></div>
+              <div class="tl-content">
+                <div class="tl-date">15 NOV 2024 – PRESENT</div>
+                <div class="tl-title">Lactation 2 (active)</div>
+                <div class="tl-body">Current avg: 19.2L/day — performing above average</div>
+                <div class="tl-badge"><div class="status-pill pill-green" style="font-size:9px">🏆 Top performer</div></div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-left"><div class="tl-dot future">💉</div></div>
+              <div class="tl-content">
+                <div class="tl-date">EST. MAY 2025</div>
+                <div class="tl-title">Next insemination due</div>
+                <div class="tl-body">Schedule AI appointment at 70 days post-calving</div>
+                <div class="tl-badge"><div class="status-pill pill-gray" style="font-size:9px">Upcoming</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 1: Milk -->
+        <div class="scroll-area" id="ptab-1" style="display:none">
+          <div style="height:4px"></div>
+          <div class="mini-chart-wrap">
+            <div class="chart-header"><div class="chart-title">Daily milk — this week</div><div class="chart-period">L per day</div></div>
+            <div class="bar-chart">
+              <div class="bar-col"><div class="bar" style="height:46px"></div><div class="bar-lbl">Mon</div></div>
+              <div class="bar-col"><div class="bar" style="height:52px"></div><div class="bar-lbl">Tue</div></div>
+              <div class="bar-col"><div class="bar" style="height:55px"></div><div class="bar-lbl">Wed</div></div>
+              <div class="bar-col"><div class="bar" style="height:50px"></div><div class="bar-lbl">Thu</div></div>
+              <div class="bar-col"><div class="bar active" style="height:58px"></div><div class="bar-lbl">Fri</div></div>
+              <div class="bar-col"><div class="bar" style="height:52px"></div><div class="bar-lbl">Sat</div></div>
+              <div class="bar-col"><div class="bar" style="height:49px"></div><div class="bar-lbl">Sun</div></div>
+            </div>
+            <div class="chart-total"><div class="chart-total-lbl">7-day total</div><div class="chart-total-val">134.4L</div></div>
+          </div>
+          <div class="mini-chart-wrap">
+            <div class="section-hd-title" style="font-size:12px;font-weight:600;color:var(--earth-900);margin-bottom:10px">Today's milking sessions</div>
+            <div class="milk-row">
+              <div class="milk-session"><strong>Morning session</strong>5:30 AM · Logged by John</div>
+              <div><div class="milk-amount">11.2<span class="milk-unit">L</span></div></div>
+            </div>
+            <div class="milk-row">
+              <div class="milk-session"><strong>Evening session</strong>5:00 PM · Logged by John</div>
+              <div><div class="milk-amount">8.0<span class="milk-unit">L</span></div></div>
+            </div>
+            <div class="milk-row" style="border-bottom:none;padding-top:8px">
+              <div class="milk-session"><strong style="color:var(--green-700)">Total today</strong></div>
+              <div><div class="milk-amount" style="font-size:22px">19.2<span class="milk-unit">L</span></div></div>
+            </div>
+          </div>
+          <button class="primary-btn" style="margin-top:0">+ Log milking session</button>
+        </div>
+
+        <!-- Tab 2: Breeding -->
+        <div class="scroll-area" id="ptab-2" style="display:none">
+          <div style="height:4px"></div>
+          <div class="mini-chart-wrap">
+            <div class="insem-calc-title">📅 Next insemination calculator</div>
+            <div class="insem-calc">
+              <div class="insem-date-row">
+                <div class="insem-date-item">
+                  <div class="insem-date-label">Last calving</div>
+                  <div class="insem-date-value">15 Nov 24</div>
+                </div>
+                <div class="insem-arrow">→</div>
+                <div class="insem-date-item">
+                  <div class="insem-date-label">AI window</div>
+                  <div class="insem-date-value">24 Jan 25</div>
+                </div>
+                <div class="insem-arrow">→</div>
+                <div class="insem-date-item">
+                  <div class="insem-date-label">Exp. calving</div>
+                  <div class="insem-date-value">01 Nov 25</div>
+                </div>
+              </div>
+              <div class="progress-track"><div class="progress-fill" style="width:32%"></div></div>
+              <div class="progress-label">32 of 283 days of gestation · 251 days remaining</div>
+            </div>
+          </div>
+          <div class="mini-chart-wrap">
+            <div class="section-hd-title" style="font-size:12px;font-weight:600;margin-bottom:10px">Breeding history</div>
+            <div class="health-row">
+              <div class="health-icon" style="background:var(--green-50)">💉</div>
+              <div class="health-info"><div class="health-name">AI — Meru Elite M7</div><div class="health-date">04 FEB 2024 · Confirmed pregnant</div></div>
+              <div class="health-status" style="color:var(--green-600)">✓ Success</div>
+            </div>
+            <div class="health-row">
+              <div class="health-icon" style="background:var(--green-50)">💉</div>
+              <div class="health-info"><div class="health-name">AI — Ndege Friesian GN2</div><div class="health-date">12 MAR 2022 · Confirmed pregnant</div></div>
+              <div class="health-status" style="color:var(--green-600)">✓ Success</div>
+            </div>
+          </div>
+          <button class="primary-btn" style="margin-top:0">+ Log insemination</button>
+        </div>
+
+        <!-- Tab 3: Health -->
+        <div class="scroll-area" id="ptab-3" style="display:none">
+          <div style="height:4px"></div>
+          <div class="mini-chart-wrap" style="margin-bottom:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+              <div class="section-hd-title" style="font-size:12px;font-weight:600">Health score</div>
+              <div style="font-size:22px;font-weight:700;color:var(--green-700);font-family:'DM Mono',monospace">92/100</div>
+            </div>
+            <div class="progress-track" style="height:8px"><div class="progress-fill" style="width:92%;background:var(--green-500)"></div></div>
+          </div>
+          <div class="mini-chart-wrap">
+            <div class="section-hd-title" style="font-size:12px;font-weight:600;margin-bottom:8px">Vaccination log</div>
+            <div class="health-row">
+              <div class="health-icon" style="background:var(--green-50)">💉</div>
+              <div class="health-info"><div class="health-name">FMD Booster</div><div class="health-date">14 SEP 2024</div></div>
+              <div class="health-status" style="color:var(--green-600)">Done ✓</div>
+            </div>
+            <div class="health-row">
+              <div class="health-icon" style="background:var(--green-50)">💉</div>
+              <div class="health-info"><div class="health-name">Brucellosis</div><div class="health-date">02 JUN 2024</div></div>
+              <div class="health-status" style="color:var(--green-600)">Done ✓</div>
+            </div>
+            <div class="health-row">
+              <div class="health-icon" style="background:var(--amber-100)">⏰</div>
+              <div class="health-info"><div class="health-name">Annual deworming</div><div class="health-date">Due 25 MAR 2025</div></div>
+              <div class="health-status" style="color:var(--amber-500)">Due soon</div>
+            </div>
+          </div>
+          <button class="primary-btn" style="margin-top:0">+ Add health record</button>
+        </div>
+      </div>
+
+      <!-- ======================== CALVING LIVE ======================== -->
+      <div class="screen" id="screen-calving">
+        <div class="status-bar dark" style="background:var(--red-500)"><span style="color:white">9:41</span><div class="status-icons" style="color:rgba(255,255,255,.7)">📶 🔋</div></div>
+        <div class="calving-live">
+          <div class="calving-live-top">
+            <div class="back-btn" onclick="showScreen('dashboard')">‹</div>
+            <div class="live-badge"><div class="live-dot"></div><div class="live-text">LIVE</div></div>
+          </div>
+          <div style="margin-bottom:6px"><div class="live-cow-name">Rosa #011 — In Labour</div><div style="font-size:11px;color:rgba(255,255,255,.65)">Ayrshire · 5 yrs · Insem: 16 Mar 2025</div></div>
+          <div class="live-timer" id="liveTimer">02:18:44</div>
+          <div class="live-timer-label">LABOUR DURATION</div>
+          <div class="live-stage">
+            <div class="stage-dot done"></div>
+            <div class="stage-dot done"></div>
+            <div class="stage-dot active"></div>
+            <div class="stage-dot"></div>
+          </div>
+          <div style="font-size:10px;color:rgba(255,255,255,.55);margin-top:4px;display:flex;justify-content:space-between;padding:0 2px">
+            <span>Signs</span><span>Early labour</span><span style="color:white;font-weight:600">Active</span><span>Delivery</span>
+          </div>
+        </div>
+        <div class="scroll-area" style="background:var(--earth-50)">
+          <div style="height:10px"></div>
+          <div class="alert-card red" style="border-radius:12px">
+            <div class="alert-icon">⚠️</div>
+            <div><div class="alert-title">Monitor closely — Active stage</div><div class="alert-body">Normal active labour lasts 1–4 hours. If no progress after 4 hours, call a vet immediately.</div></div>
+          </div>
+          <div class="section-hd"><div class="section-hd-title">📋 Log progress</div></div>
+          <div class="mini-chart-wrap">
+            <div class="health-row" style="padding:8px 0">
+              <div class="health-icon" style="background:var(--green-50)">✅</div>
+              <div class="health-info"><div class="health-name">Calf position checked</div><div class="health-date">08:12 AM — Normal presentation</div></div>
+            </div>
+            <div class="health-row" style="padding:8px 0">
+              <div class="health-icon" style="background:var(--green-50)">✅</div>
+              <div class="health-info"><div class="health-name">Water bag visible</div><div class="health-date">08:44 AM</div></div>
+            </div>
+            <div class="health-row" style="padding:8px 0;border-bottom:none">
+              <div class="health-icon" style="background:var(--earth-100)">⏳</div>
+              <div class="health-info"><div class="health-name">Calf legs visible</div><div class="health-date">Waiting…</div></div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+            <button class="primary-btn" style="margin-top:0;font-size:12px;padding:12px">✅ Log milestone</button>
+            <button class="primary-btn" style="margin-top:0;font-size:12px;padding:12px;background:white;color:var(--red-500);border:1.5px solid var(--red-500)">📞 Call vet</button>
+          </div>
+          <div style="height:12px"></div>
+          <button class="primary-btn" style="margin-top:0;background:var(--green-600)">🍼 Register birth — Calf born!</button>
+        </div>
+      </div>
+
+      <!-- ======================== ALERTS ======================== -->
+      <div class="screen" id="screen-alerts">
+        <div class="status-bar"><span>9:41</span><div class="status-icons">📶 🔋</div></div>
+        <div class="top-header"><div class="header-title">Alerts <span style="font-size:12px;font-weight:500;color:var(--red-500);background:var(--red-100);padding:2px 8px;border-radius:20px;margin-left:4px">5 active</span></div></div>
+        <div class="filter-row" style="padding: 0 20px">
+          <div class="chip active">All</div>
+          <div class="chip">Calving 🍼</div>
+          <div class="chip">Health 💉</div>
+          <div class="chip">Breeding ❤️</div>
+        </div>
+        <div class="scroll-area" style="padding-top:0">
+          <div class="big-alert urgent" onclick="showScreen('calving')">
+            <div class="big-alert-top">
+              <div class="big-alert-icon red">🍼</div>
+              <div><div class="big-alert-title">Rosa #011 — IN LABOUR NOW</div><div class="big-alert-sub">Started 2h 18m ago · Active stage</div></div>
+            </div>
+            <div class="big-alert-body">Labour timer is running. Tap to open the live calving monitor and log progress milestones.</div>
+            <div class="action-btn">Open live monitor →</div>
+          </div>
+          <div class="big-alert warning">
+            <div class="big-alert-top">
+              <div class="big-alert-icon amber">💉</div>
+              <div><div class="big-alert-title">Vaccination due tomorrow</div><div class="big-alert-sub">Daisy #007 · Sat 21 Mar 2025</div></div>
+            </div>
+            <div class="big-alert-body">FMD booster vaccination is overdue. Schedule with Dr. Kamau or log as done.</div>
+            <div class="action-btn">View cow profile →</div>
+          </div>
+          <div class="big-alert">
+            <div class="big-alert-top">
+              <div class="big-alert-icon amber">❤️</div>
+              <div><div class="big-alert-title">Breeding check — Star #009</div><div class="big-alert-sub">21-day heat check due today</div></div>
+            </div>
+            <div class="big-alert-body">Check if Star returned to heat. If no heat signs, she is likely confirmed pregnant — schedule a vet check.</div>
+            <div class="action-btn">Log result →</div>
+          </div>
+          <div class="big-alert">
+            <div class="big-alert-top">
+              <div class="big-alert-icon green">📅</div>
+              <div><div class="big-alert-title">Daisy #007 due in 6 days</div><div class="big-alert-sub">Expected calving: 26 Mar 2025</div></div>
+            </div>
+            <div class="big-alert-body">Prepare calving area. Monitor for restlessness, udder swelling, and vulval discharge.</div>
+            <div class="action-btn">View cow →</div>
+          </div>
+          <div class="big-alert">
+            <div class="big-alert-top">
+              <div class="big-alert-icon green">📉</div>
+              <div><div class="big-alert-title">Milk drop — Bella #004</div><div class="big-alert-sub">Down 20% over 3 days</div></div>
+            </div>
+            <div class="big-alert-body">Bella's production dropped from 21L to 17L. Possible mastitis, stress, or feed issue. Check udder health.</div>
+            <div class="action-btn">Ask AI assistant →</div>
+          </div>
+        </div>
+        <div class="bottom-nav">
+          <div class="nav-btn" onclick="showScreen('dashboard')"><div class="nav-icon-wrap">🏠</div><div class="nav-label">Home</div></div>
+          <div class="nav-btn" onclick="showScreen('cows')"><div class="nav-icon-wrap">🐄</div><div class="nav-label">Cows</div></div>
+          <div class="nav-btn" onclick="showScreen('alerts')"><div class="nav-icon-wrap active">🔔</div><div class="nav-label active">Alerts</div></div>
+          <div class="nav-btn" onclick="showScreen('reports')"><div class="nav-icon-wrap">📊</div><div class="nav-label">Reports</div></div>
+          <div class="nav-btn" onclick="showScreen('ai')"><div class="nav-icon-wrap">🤖</div><div class="nav-label">AI</div></div>
+        </div>
+      </div>
+
+      <!-- ======================== ADD COW ======================== -->
+      <div class="screen" id="screen-addcow">
+        <div class="status-bar"><span>9:41</span><div class="status-icons">📶 🔋</div></div>
+        <div class="top-header">
+          <div class="back-btn dark-bg" onclick="showScreen('cows')">‹</div>
+          <div class="header-title">Add new cow</div>
+          <div style="width:32px"></div>
+        </div>
+        <div class="step-indicator">
+          <div class="step-dot active"></div>
+          <div class="step-dot"></div>
+          <div class="step-dot"></div>
+        </div>
+        <div class="scroll-area">
+          <div class="form-section">
+            <div class="photo-upload">
+              <div class="upload-icon">📸</div>
+              <div class="upload-text">Tap to add cow photo<br><span style="font-size:10px">or use camera</span></div>
+            </div>
+          </div>
+          <div class="form-section">
+            <label class="form-label">Identity</label>
+            <input class="form-field filled" placeholder="Cow name (e.g. Bella)" value="Nuru">
+            <input class="form-field filled" placeholder="Tag / ID number" value="#025">
+            <div class="form-row">
+              <select class="form-field" style="color:var(--earth-900)">
+                <option>Breed…</option>
+                <option selected>Friesian</option>
+                <option>Ayrshire</option>
+                <option>Sahiwal</option>
+                <option>Zebu</option>
+                <option>Jersey</option>
+              </select>
+              <input class="form-field" placeholder="Date of birth" type="date">
+            </div>
+          </div>
+          <div class="form-section">
+            <label class="form-label">Status</label>
+            <div class="filter-row" style="margin-bottom:0">
+              <div class="chip active">Milking</div>
+              <div class="chip">Pregnant</div>
+              <div class="chip">Dry</div>
+              <div class="chip">Calf</div>
+            </div>
+          </div>
+          <div class="form-section">
+            <label class="form-label">Insemination (optional)</label>
+            <input class="form-field" placeholder="Last insemination date" type="date">
+            <div class="insem-calc" style="margin-top:0">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div style="font-size:11px;color:var(--green-800)">🤖 Auto-calculated calving date</div>
+                <div style="font-size:13px;font-weight:700;color:var(--green-700);font-family:'DM Mono',monospace">— Nov 2025</div>
+              </div>
+              <div style="font-size:10px;color:var(--earth-400);margin-top:3px">Based on 283-day gestation · Set reminder?</div>
+            </div>
+          </div>
+          <button class="primary-btn">Continue → Step 2 of 3</button>
+          <div style="height:12px"></div>
+        </div>
+      </div>
+
+      <!-- ======================== REPORTS ======================== -->
+      <div class="screen" id="screen-reports">
+        <div class="status-bar"><span>9:41</span><div class="status-icons">📶 🔋</div></div>
+        <div class="top-header">
+          <div class="header-title">Reports</div>
+          <div class="filter-row" style="margin-bottom:0">
+            <div class="chip active" style="font-size:10px;padding:4px 10px">This month</div>
+            <div class="chip" style="font-size:10px;padding:4px 10px">3 months</div>
+          </div>
+        </div>
+        <div class="scroll-area">
+          <div class="conception-card">
+            <div>
+              <div class="conception-num">37<span style="font-size:20px">%</span></div>
+            </div>
+            <div>
+              <div class="conception-label">Conception rate<br>9 of 24 cows pregnant</div>
+              <div class="conception-badge">↑ +4% vs last month</div>
+            </div>
+          </div>
+          <div class="metrics-row">
+            <div class="metric-card">
+              <div class="metric-top"><div class="metric-label">Herd score</div><div class="metric-icon">⭐</div></div>
+              <div class="metric-val">81<span style="font-size:13px;color:var(--earth-400)">/100</span></div>
+              <div class="metric-trend trend-up">↑ Good</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-top"><div class="metric-label">Avg daily milk</div><div class="metric-icon">🥛</div></div>
+              <div class="metric-val">16.2<span style="font-size:13px;color:var(--earth-400)">L</span></div>
+              <div class="metric-trend trend-up">↑ +0.8L</div>
+            </div>
+          </div>
+
+          <div class="section-hd"><div class="section-hd-title">🏆 Top performers this month</div></div>
+          <div class="rank-row">
+            <div class="rank-num">1</div>
+            <div><div class="rank-name">Bella #004</div><div style="font-size:9px;color:var(--earth-400)">Friesian · Milking</div></div>
+            <div class="rank-bar-wrap"><div class="rank-bar" style="width:100%"></div></div>
+            <div class="rank-val">19.2L</div>
+          </div>
+          <div class="rank-row">
+            <div class="rank-num">2</div>
+            <div><div class="rank-name">Daisy #007</div><div style="font-size:9px;color:var(--earth-400)">Sahiwal · Due 26 Mar</div></div>
+            <div class="rank-bar-wrap"><div class="rank-bar" style="width:96%"></div></div>
+            <div class="rank-val">18.5L</div>
+          </div>
+          <div class="rank-row">
+            <div class="rank-num">3</div>
+            <div><div class="rank-name">Cleo #003</div><div style="font-size:9px;color:var(--earth-400)">Ayrshire · Milking</div></div>
+            <div class="rank-bar-wrap"><div class="rank-bar" style="width:83%"></div></div>
+            <div class="rank-val">16.0L</div>
+          </div>
+          <div class="rank-row">
+            <div class="rank-num">4</div>
+            <div><div class="rank-name">Mable #022</div><div style="font-size:9px;color:var(--earth-400)">Jersey · Milking</div></div>
+            <div class="rank-bar-wrap"><div class="rank-bar" style="width:67%"></div></div>
+            <div class="rank-val">12.8L</div>
+          </div>
+
+          <div class="section-hd"><div class="section-hd-title">📊 Monthly milk trend</div></div>
+          <div class="mini-chart-wrap">
+            <div class="bar-chart" style="height:70px">
+              <div class="bar-col"><div class="bar" style="height:42px"></div><div class="bar-lbl">Oct</div></div>
+              <div class="bar-col"><div class="bar" style="height:48px"></div><div class="bar-lbl">Nov</div></div>
+              <div class="bar-col"><div class="bar" style="height:44px"></div><div class="bar-lbl">Dec</div></div>
+              <div class="bar-col"><div class="bar" style="height:52px"></div><div class="bar-lbl">Jan</div></div>
+              <div class="bar-col"><div class="bar" style="height:56px"></div><div class="bar-lbl">Feb</div></div>
+              <div class="bar-col"><div class="bar active" style="height:60px"></div><div class="bar-lbl" style="color:var(--green-700)">Mar</div></div>
+            </div>
+            <div class="chart-total"><div class="chart-total-lbl">March total (to date)</div><div class="chart-total-val">2,842L</div></div>
+          </div>
+        </div>
+        <div class="bottom-nav">
+          <div class="nav-btn" onclick="showScreen('dashboard')"><div class="nav-icon-wrap">🏠</div><div class="nav-label">Home</div></div>
+          <div class="nav-btn" onclick="showScreen('cows')"><div class="nav-icon-wrap">🐄</div><div class="nav-label">Cows</div></div>
+          <div class="nav-btn" onclick="showScreen('alerts')"><div class="nav-icon-wrap">🔔</div><div class="nav-label">Alerts</div></div>
+          <div class="nav-btn" onclick="showScreen('reports')"><div class="nav-icon-wrap active">📊</div><div class="nav-label active">Reports</div></div>
+          <div class="nav-btn" onclick="showScreen('ai')"><div class="nav-icon-wrap">🤖</div><div class="nav-label">AI</div></div>
+        </div>
+      </div>
+
+      <!-- ======================== AI ASSISTANT ======================== -->
+      <div class="screen" id="screen-ai">
+        <div class="status-bar dark" style="background:var(--green-800)"><span style="color:white">9:41</span><div class="status-icons" style="color:rgba(255,255,255,.7)">📶 🔋</div></div>
+        <div class="ai-header">
+          <div class="ai-name">🤖 Farm AI Assistant</div>
+          <div class="ai-status"><div class="ai-online-dot"></div> Connected · Powered by Claude AI</div>
+        </div>
+        <div class="chat-area">
+          <div style="height:6px"></div>
+          <div class="bubble bot">Habari, John! 👋 I can see your farm data. Here's a quick summary:<br><br><strong>⚠ Rosa #011</strong> is in labour — check the live monitor.<br><strong>📉 Bella #004</strong> milk dropped 20% — possible mastitis.<br><strong>💉 Daisy #007</strong> vaccination due tomorrow.<br><br>How can I help you today?</div>
+          <div class="bubble user">Which cow is underperforming this month?</div>
+          <div class="bubble bot">Based on your records, <strong>Mable #022</strong> is producing 12.8L/day — about 21% below the herd average of 16.2L.<br><br>She's a 2-year-old Jersey (first lactation), so some lower output is expected. But her trend is flat — no improvement over 6 weeks. I'd recommend:<br>1. Check feed quality and quantity<br>2. Rule out subclinical mastitis<br>3. Consider a body condition score check</div>
+          <div class="chat-suggestions">
+            <div class="suggest-chip">📊 Show milk trends</div>
+            <div class="suggest-chip">💉 Vaccination schedule</div>
+            <div class="suggest-chip">🍼 Calving prep tips</div>
+            <div class="suggest-chip">🐄 Best breeding time?</div>
+          </div>
+        </div>
+        <div class="chat-input-row">
+          <input class="chat-input" placeholder="Ask about your herd…">
+          <button class="send-btn">➤</button>
+        </div>
+        <div class="bottom-nav">
+          <div class="nav-btn" onclick="showScreen('dashboard')"><div class="nav-icon-wrap">🏠</div><div class="nav-label">Home</div></div>
+          <div class="nav-btn" onclick="showScreen('cows')"><div class="nav-icon-wrap">🐄</div><div class="nav-label">Cows</div></div>
+          <div class="nav-btn" onclick="showScreen('alerts')"><div class="nav-icon-wrap">🔔</div><div class="nav-label">Alerts</div></div>
+          <div class="nav-btn" onclick="showScreen('reports')"><div class="nav-icon-wrap">📊</div><div class="nav-label">Reports</div></div>
+          <div class="nav-btn" onclick="showScreen('ai')"><div class="nav-icon-wrap active">🤖</div><div class="nav-label active">AI</div></div>
+        </div>
+      </div>
+
+      <!-- ======================== ONBOARDING ======================== -->
+      <div class="screen" id="screen-onboard">
+        <div class="status-bar dark" style="background:var(--green-800)"><span style="color:white">9:41</span><div class="status-icons" style="color:rgba(255,255,255,.7)">📶 🔋</div></div>
+        <div class="onboard-hero">
+          <div class="onboard-emoji">🐄</div>
+          <div class="onboard-title">Welcome to HerdIQ</div>
+          <div class="onboard-sub">Your smart assistant for every cow on your farm. Track milk, calving, health, and breeding — all in one place.</div>
+          <div style="display:flex;gap:24px;margin-top:28px;font-size:13px;color:rgba(255,255,255,.7)">
+            <div style="text-align:center"><div style="font-size:24px;margin-bottom:4px">📵</div>Works offline</div>
+            <div style="text-align:center"><div style="font-size:24px;margin-bottom:4px">📱</div>Mobile first</div>
+            <div style="text-align:center"><div style="font-size:24px;margin-bottom:4px">🔔</div>Smart alerts</div>
+          </div>
+        </div>
+        <div class="onboard-bottom">
+          <div style="font-size:12px;font-weight:600;color:var(--earth-700);margin-bottom:8px">Choose your language · Chagua lugha</div>
+          <div class="lang-row">
+            <div class="lang-chip active">🇬🇧 English</div>
+            <div class="lang-chip">🇰🇪 Kiswahili</div>
+          </div>
+          <button class="primary-btn" onclick="showScreen('dashboard')">Get started — Anza sasa</button>
+          <div style="font-size:11px;color:var(--earth-400);text-align:center;margin-top:10px;line-height:1.5">Works without internet · Inafanya kazi bila intaneti</div>
+        </div>
+      </div>
+
+    </div><!-- /device-screen -->
+  </div><!-- /device-frame -->
+
+  <div class="annotation-panel">
+    <div class="anno-title" id="annoTitle">Dashboard</div>
+    <div id="annoContent">
+      <div class="anno-card">
+        <div class="anno-tag must">Must have</div>
+        <div class="anno-text"><b>4 metric cards</b> at the top give the farmer an instant farm health snapshot — total cows, daily milk, cows near calving, and pregnant count.</div>
+      </div>
+      <div class="anno-card">
+        <div class="anno-tag must">Must have</div>
+        <div class="anno-text"><b>Daily bar chart</b> shows 7-day milk trend. Immediate visual — no reading required. Color-coded today vs past days.</div>
+      </div>
+      <div class="anno-card">
+        <div class="anno-tag win">Win feature</div>
+        <div class="anno-text"><b>Swahili banner</b> at the top shows today's production in Kiswahili. Farmers feel seen. Simple localization = huge UX win.</div>
+      </div>
+      <div class="anno-card">
+        <div class="anno-tag ux">UX note</div>
+        <div class="anno-text"><b>Red alert pill</b> in the header is the single most urgent thing — a farmer can tap it to go straight to the calving live screen.</div>
+      </div>
+      <div class="anno-card">
+        <div class="anno-tag ux">UX note</div>
+        <div class="anno-text"><b>FAB (+) button</b> for quick cow addition. Bottom nav is the only persistent control — 5 items max, icon + label.</div>
+      </div>
+    </div>
+  </div>
+</div><!-- /device-wrap -->
+
+<script>
+const annotations = {
+  dashboard: {
+    title: 'Dashboard',
+    items: [
+      { tag: 'must', text: '<b>4 metric cards</b> give instant farm health — total cows, daily milk, cows near calving, and pregnant count.' },
+      { tag: 'must', text: '<b>Bar chart</b> shows 7-day milk trend visually. No reading required — farmers understand colour.' },
+      { tag: 'win', text: '<b>Swahili banner</b> shows daily production in Kiswahili. Judges love localisation — huge differentiator.' },
+      { tag: 'ux', text: '<b>Red alert pill</b> in header is the most urgent thing a farmer sees. One tap → calving live screen.' },
+      { tag: 'ux', text: '<b>FAB (+)</b> for fast cow addition. Bottom nav: 5 items max, always visible.' },
+    ]
+  },
+  cows: {
+    title: 'My Cows',
+    items: [
+      { tag: 'must', text: '<b>Search + filter chips</b> let a farmer find a cow in 2 seconds. Filter by status: Milking, Pregnant, Dry.' },
+      { tag: 'must', text: '<b>Status pills</b> use colour: red = urgent, amber = warning, green = healthy, blue = pregnant.' },
+      { tag: 'ux', text: 'Each cow row shows <b>name, breed, age, and last relevant data</b> (yield or due date) — no extra taps needed.' },
+      { tag: 'win', text: '<b>Tap any row</b> to open the full cow profile. Tap (+) to add a new cow.' },
+    ]
+  },
+  profile: {
+    title: 'Cow Profile',
+    items: [
+      { tag: 'must', text: '<b>Green hero header</b> shows the cow\'s ID, breed, status pill, and 3 key stats at a glance.' },
+      { tag: 'win', text: '<b>Lifecycle timeline</b> (Overview tab) is your killer feature. Shows Insemination → Pregnancy → Calving → Lactation visually.' },
+      { tag: 'must', text: '<b>4 tabs:</b> Overview (timeline), Milk (sessions + chart), Breeding (AI dates + calc), Health (vaccinations).' },
+      { tag: 'win', text: '<b>Auto-calculated calving date</b> on Breeding tab. Farmer enters insemination date — app shows expected birth date and gestation progress bar.' },
+      { tag: 'ux', text: 'Each tab has a <b>primary action button</b> at the bottom — "Log milking", "Log insemination", "Add health record".' },
+    ]
+  },
+  calving: {
+    title: 'Calving Live Monitor',
+    items: [
+      { tag: 'win', text: '<b>Red full-bleed header</b> with LIVE dot and pulsing animation — tells the farmer at a glance this is urgent.' },
+      { tag: 'win', text: '<b>Labour duration timer</b> counting up in real time. Stage progress bar (Signs → Early → Active → Delivery).' },
+      { tag: 'must', text: '<b>Milestone checklist</b> — farmer logs calf position, water bag, legs visible. Creates an auditable birth record.' },
+      { tag: 'ux', text: '<b>"Call vet" button</b> is prominent and red. If labour exceeds safe time, the app alerts automatically.' },
+      { tag: 'win', text: '<b>"Calf born!" button</b> registers the birth, creates the calf\'s new profile, and links to the mother automatically.' },
+    ]
+  },
+  alerts: {
+    title: 'Alerts Screen',
+    items: [
+      { tag: 'must', text: '<b>Big alert cards</b> with clear urgency hierarchy: red border = critical, amber = warning, no border = info.' },
+      { tag: 'must', text: '<b>Filter chips</b>: All, Calving, Health, Breeding — farmer can focus on what matters right now.' },
+      { tag: 'win', text: '<b>Milk drop alert</b> with "Ask AI assistant" CTA. Connects the alert to the AI feature — great demo moment.' },
+      { tag: 'ux', text: 'Each alert has a clear <b>action button</b>: "Open live monitor", "View cow", "Log result" — never a dead end.' },
+    ]
+  },
+  addcow: {
+    title: 'Add Cow Form',
+    items: [
+      { tag: 'must', text: '<b>Step indicator</b> (3 steps) sets expectations. Step 1: Identity. Step 2: Milk. Step 3: Health baseline.' },
+      { tag: 'ux', text: '<b>Photo upload</b> at the top — visual, inviting. Camera integration makes profiles feel alive.' },
+      { tag: 'win', text: '<b>Auto-calculated calving date</b> appears live as the farmer types the insemination date. No maths needed.' },
+      { tag: 'ux', text: '<b>Status chips</b> instead of dropdowns — big tap targets, easy for farmers in the field.' },
+      { tag: 'ux', text: 'Form fields use <b>green background when filled</b> — subtle but reassuring progress feedback.' },
+    ]
+  },
+  reports: {
+    title: 'Reports & Analytics',
+    items: [
+      { tag: 'must', text: '<b>Conception rate card</b> (green full-width) is the headline metric — immediately communicates herd fertility.' },
+      { tag: 'win', text: '<b>Herd Score (81/100)</b> — a single number summarising overall farm health. Judges and farmers love a KPI.' },
+      { tag: 'must', text: '<b>Top performers leaderboard</b> with bar chart per cow. Farmer immediately knows which cows earn the most.' },
+      { tag: 'must', text: '<b>Monthly milk trend</b> bar chart — 6-month view showing trajectory. Decision-driving, not just tracking.' },
+    ]
+  },
+  ai: {
+    title: 'AI Farm Assistant',
+    items: [
+      { tag: 'win', text: '<b>Context-aware welcome message</b> — the AI already knows Rosa is in labour and Bella\'s milk dropped. Feels magical.' },
+      { tag: 'win', text: '<b>Suggested questions</b> as tappable chips — lowers barrier for non-tech farmers to engage with AI.' },
+      { tag: 'win', text: 'AI gives <b>numbered, actionable recommendations</b>, not just observations. "Do this next" is what farmers need.' },
+      { tag: 'ux', text: 'Powered by <b>Claude API</b>. In demo, AI reads your farm\'s actual database. Hackathon judges will be amazed.' },
+    ]
+  },
+  onboard: {
+    title: 'Onboarding Screen',
+    items: [
+      { tag: 'ux', text: '<b>Green full-bleed hero</b> with large emoji and clear tagline — sets the product\'s warm, practical tone immediately.' },
+      { tag: 'win', text: '<b>Language toggle (English / Kiswahili)</b> on the first screen. Judges see you thought about the real user.' },
+      { tag: 'must', text: '<b>3 pillars</b> shown: Works offline, Mobile first, Smart alerts — the 3 promises of the app in one glance.' },
+      { tag: 'ux', text: '"Get started — Anza sasa" bilingual CTA. The farmer feels welcomed in their own language from the first tap.' },
+    ]
+  },
+};
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  document.querySelectorAll('.screen-tab').forEach((t,i) => t.classList.remove('active'));
+  const tabs = ['dashboard','cows','profile','calving','alerts','addcow','reports','ai','onboard'];
+  const idx = tabs.indexOf(name);
+  if (idx >= 0) document.querySelectorAll('.screen-tab')[idx].classList.add('active');
+
+  const a = annotations[name];
+  if (a) {
+    document.getElementById('annoTitle').textContent = a.title;
+    document.getElementById('annoContent').innerHTML = a.items.map(item =>
+      `<div class="anno-card"><div class="anno-tag ${item.tag}">${item.tag === 'must' ? 'Must have' : item.tag === 'win' ? 'Win feature' : 'UX note'}</div><div class="anno-text">${item.text}</div></div>`
+    ).join('');
+  }
+}
+
+function setProfileTab(idx) {
+  document.querySelectorAll('#screen-profile .tab').forEach((t,i) => {
+    t.classList.toggle('active', i === idx);
+  });
+  document.querySelectorAll('[id^="ptab-"]').forEach((p,i) => {
+    p.style.display = i === idx ? 'block' : 'none';
+  });
+}
+
+// Live calving timer
+let sec = 8324;
+function tickTimer() {
+  sec++;
+  const h = String(Math.floor(sec/3600)).padStart(2,'0');
+  const m = String(Math.floor((sec%3600)/60)).padStart(2,'0');
+  const s = String(sec%60).padStart(2,'0');
+  const el = document.getElementById('liveTimer');
+  if (el) el.textContent = `${h}:${m}:${s}`;
+}
+setInterval(tickTimer, 1000);
+</script>
+</body>
+</html>

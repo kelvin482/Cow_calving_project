@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HerdIQ Vet Portal — Wireframe Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy-950: #050d1a;
+    --navy-900: #0a1628;
+    --navy-800: #0f2040;
+    --navy-700: #163058;
+    --navy-600: #1d4070;
+    --navy-400: #3a6fa8;
+    --navy-200: #8eb8e0;
+    --navy-100: #c4dbf0;
+    --navy-50:  #eaf3fb;
+    --teal-600: #0b7a6e;
+    --teal-500: #0d9488;
+    --teal-400: #22c5b7;
+    --teal-100: #ccf3f0;
+    --teal-50:  #edfaf9;
+    --red-600:  #c0392b;
+    --red-500:  #e74c3c;
+    --red-100:  #fde8e6;
+    --amber-600:#b45309;
+    --amber-500:#f59e0b;
+    --amber-100:#fef3c7;
+    --green-600:#16a34a;
+    --green-500:#22c55e;
+    --green-100:#dcfce7;
+    --slate-900:#1e293b;
+    --slate-700:#334155;
+    --slate-500:#64748b;
+    --slate-300:#cbd5e1;
+    --slate-200:#e2e8f0;
+    --slate-100:#f1f5f9;
+    --slate-50: #f8fafc;
+    --white:    #ffffff;
+    --shadow-xs: 0 1px 3px rgba(5,13,26,.08);
+    --shadow-sm: 0 2px 8px rgba(5,13,26,.10);
+    --shadow-md: 0 6px 24px rgba(5,13,26,.14);
+    --r-sm: 10px;
+    --r-md: 14px;
+    --r-lg: 20px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: #0d1117;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 48px;
+  }
+
+  /* ── HEADER ── */
+  .proto-header {
+    width: 100%; max-width: 1140px;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 28px; flex-wrap: wrap; gap: 12px;
+  }
+  .brand { color: #fff; font-size: 15px; font-weight: 700; letter-spacing: -.02em; }
+  .brand-badge {
+    display: inline-block; background: var(--teal-500); color: #fff;
+    font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 4px;
+    letter-spacing: .08em; text-transform: uppercase; margin-left: 6px;
+  }
+  .screen-tabs { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; }
+  .screen-tab {
+    padding: 5px 12px; border-radius: 18px; font-size: 11px; font-weight: 600;
+    cursor: pointer; border: 1.5px solid rgba(255,255,255,.12);
+    color: rgba(255,255,255,.45); background: transparent; transition: all .18s; white-space: nowrap;
+  }
+  .screen-tab:hover { border-color: var(--teal-400); color: var(--teal-400); }
+  .screen-tab.active { background: var(--teal-600); border-color: var(--teal-600); color: #fff; }
+  .proto-meta { color: rgba(255,255,255,.3); font-size: 11px; font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
+
+  /* ── DEVICE ── */
+  .device-wrap { display: flex; gap: 30px; align-items: flex-start; justify-content: center; width: 100%; max-width: 1140px; }
+  .device-frame {
+    width: 375px; min-width: 375px;
+    background: #0d0d0e; border-radius: 50px; padding: 14px;
+    box-shadow: 0 32px 90px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.07);
+    position: relative; flex-shrink: 0;
+  }
+  .device-notch { width: 110px; height: 30px; background: #0d0d0e; border-radius: 0 0 18px 18px; margin: 0 auto 8px; }
+  .device-screen { background: var(--slate-50); border-radius: 38px; overflow: hidden; height: 740px; position: relative; }
+
+  /* ── ANNOTATION ── */
+  .annotation-panel { flex: 1; max-width: 310px; display: flex; flex-direction: column; gap: 10px; }
+  .anno-heading { color: rgba(255,255,255,.85); font-size: 14px; font-weight: 700; margin-bottom: 2px; letter-spacing: -.02em; }
+  .anno-card { background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.09); border-radius: 12px; padding: 12px 14px; }
+  .anno-tag {
+    display: inline-block; font-size: 9px; font-weight: 700;
+    letter-spacing: .07em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 20px; margin-bottom: 6px;
+  }
+  .anno-tag.core  { background: rgba(13,148,136,.2); color: var(--teal-400); }
+  .anno-tag.win   { background: rgba(245,158,11,.2); color: #fcd368; }
+  .anno-tag.ux    { background: rgba(59,111,168,.2); color: var(--navy-200); }
+  .anno-tag.new   { background: rgba(34,197,94,.2);  color: #6ee7a2; }
+  .anno-text { font-size: 11.5px; color: rgba(255,255,255,.5); line-height: 1.6; }
+  .anno-text b { color: rgba(255,255,255,.82); font-weight: 600; }
+
+  /* ── SCREENS ── */
+  .screen { position: absolute; inset: 0; display: none; flex-direction: column; overflow: hidden; animation: fadeIn .2s ease; }
+  .screen.active { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; } }
+
+  /* ── COMMON COMPONENTS ── */
+  .status-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 22px 6px; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+  .status-bar.dark { background: var(--navy-900); color: rgba(255,255,255,.85); }
+  .status-bar.light { color: var(--slate-700); }
+  .status-bar.teal { background: var(--teal-600); color: rgba(255,255,255,.85); }
+  .status-icons { display: flex; gap: 4px; align-items: center; font-size: 10px; }
+
+  .scroll-area { flex: 1; overflow-y: auto; padding: 0 18px 14px; }
+  .scroll-area::-webkit-scrollbar { display: none; }
+
+  .bottom-nav { display: flex; padding: 10px 0 18px; background: var(--white); border-top: 1px solid var(--slate-200); flex-shrink: 0; }
+  .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
+  .nav-icon-w { width: 30px; height: 30px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .nav-icon-w.on { background: var(--teal-100); }
+  .nav-lbl { font-size: 9px; font-weight: 600; color: var(--slate-500); }
+  .nav-lbl.on { color: var(--teal-600); }
+
+  /* Top headers */
+  .top-hd { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px 10px; flex-shrink: 0; }
+  .top-hd.dark { background: var(--navy-900); }
+  .top-hd.teal { background: var(--teal-600); }
+  .hd-title { font-size: 17px; font-weight: 800; color: var(--slate-900); letter-spacing: -.04em; }
+  .hd-title.w { color: #fff; }
+  .hd-sub { font-size: 11px; color: var(--slate-500); font-weight: 400; }
+  .hd-sub.w { color: rgba(255,255,255,.6); }
+  .hd-action { width: 36px; height: 36px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 17px; cursor: pointer; }
+  .hd-action.light { background: var(--slate-100); }
+  .hd-action.notif { background: var(--slate-100); position: relative; }
+  .hd-action.teal { background: rgba(255,255,255,.18); color: white; font-size: 16px; }
+  .notif-dot { position: absolute; top: 7px; right: 7px; width: 8px; height: 8px; border-radius: 50%; background: var(--red-500); border: 2px solid var(--slate-50); }
+  .back-btn { width: 32px; height: 32px; border-radius: 10px; background: rgba(255,255,255,.16); display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; color: white; flex-shrink: 0; }
+  .back-btn.dk { background: var(--slate-100); color: var(--slate-700); }
+
+  /* Section heads */
+  .sec-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; margin-top: 16px; }
+  .sec-hd-title { font-size: 13px; font-weight: 700; color: var(--slate-900); }
+  .see-all { font-size: 11px; font-weight: 600; color: var(--teal-600); cursor: pointer; }
+
+  /* Cards */
+  .card { background: var(--white); border-radius: var(--r-md); border: 1px solid var(--slate-200); padding: 12px 14px; box-shadow: var(--shadow-xs); }
+
+  /* ── STATUS PILLS ── */
+  .pill { padding: 3px 9px; border-radius: 20px; font-size: 10px; font-weight: 700; white-space: nowrap; }
+  .pill-teal   { background: var(--teal-100);   color: var(--teal-600); }
+  .pill-red    { background: var(--red-100);     color: var(--red-600); }
+  .pill-amber  { background: var(--amber-100);   color: var(--amber-600); }
+  .pill-green  { background: var(--green-100);   color: var(--green-600); }
+  .pill-navy   { background: var(--navy-50);     color: var(--navy-700); }
+  .pill-slate  { background: var(--slate-100);   color: var(--slate-700); }
+
+  /* ── METRIC CARDS ── */
+  .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 16px; }
+  .m-card { background: var(--white); border-radius: var(--r-md); border: 1px solid var(--slate-200); padding: 12px; box-shadow: var(--shadow-xs); cursor: pointer; transition: transform .15s; }
+  .m-card:active { transform: scale(.97); }
+  .m-label { font-size: 10px; font-weight: 600; color: var(--slate-500); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+  .m-val { font-size: 26px; font-weight: 800; color: var(--slate-900); letter-spacing: -.05em; line-height: 1; }
+  .m-trend { font-size: 10px; font-weight: 600; margin-top: 4px; }
+  .tr-up   { color: var(--green-600); }
+  .tr-down { color: var(--red-600); }
+  .tr-warn { color: var(--amber-600); }
+  .tr-info { color: var(--navy-600); }
+
+  /* ── VISIT CARDS ── */
+  .visit-card {
+    background: var(--white); border-radius: var(--r-md); border: 1px solid var(--slate-200);
+    padding: 12px 14px; margin-bottom: 9px; box-shadow: var(--shadow-xs);
+    cursor: pointer; transition: transform .15s; display: flex; gap: 12px; align-items: flex-start;
+  }
+  .visit-card:active { transform: scale(.98); }
+  .visit-card.urgent { border-left: 3px solid var(--red-500); }
+  .visit-card.scheduled { border-left: 3px solid var(--teal-500); }
+  .visit-card.pending { border-left: 3px solid var(--amber-500); }
+  .visit-time-col { min-width: 48px; text-align: center; }
+  .visit-time { font-size: 13px; font-weight: 700; color: var(--slate-900); font-family: 'JetBrains Mono', monospace; line-height: 1.2; }
+  .visit-ampm { font-size: 9px; color: var(--slate-500); font-weight: 600; }
+  .vline { width: 1px; background: var(--slate-200); flex-shrink: 0; align-self: stretch; }
+  .visit-info { flex: 1; }
+  .visit-farm { font-size: 13px; font-weight: 700; color: var(--slate-900); }
+  .visit-detail { font-size: 10.5px; color: var(--slate-500); margin-top: 2px; line-height: 1.4; }
+  .visit-tags { display: flex; gap: 5px; margin-top: 6px; flex-wrap: wrap; }
+
+  /* ── FARM LIST CARDS ── */
+  .farm-card {
+    background: var(--white); border-radius: var(--r-md); border: 1px solid var(--slate-200);
+    padding: 12px 14px; margin-bottom: 8px; box-shadow: var(--shadow-xs);
+    display: flex; align-items: center; gap: 12px; cursor: pointer; transition: transform .15s;
+  }
+  .farm-card:active { transform: scale(.98); }
+  .farm-avatar { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .farm-name { font-size: 13px; font-weight: 700; color: var(--slate-900); }
+  .farm-meta { font-size: 10.5px; color: var(--slate-500); margin-top: 2px; }
+  .farm-right { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .alert-count { background: var(--red-100); color: var(--red-600); font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; }
+
+  /* ── COW PATIENT ROW ── */
+  .patient-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0; border-bottom: 1px solid var(--slate-100);
+    cursor: pointer;
+  }
+  .patient-row:last-child { border-bottom: none; }
+  .p-avatar { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .p-name { font-size: 12px; font-weight: 700; color: var(--slate-900); }
+  .p-meta { font-size: 10px; color: var(--slate-500); margin-top: 2px; }
+  .p-right { margin-left: auto; }
+
+  /* ── DIAGNOSIS FORM ── */
+  .form-label { font-size: 10px; font-weight: 700; color: var(--slate-600); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; display: block; }
+  .form-field {
+    width: 100%; padding: 10px 12px; border-radius: 10px;
+    border: 1.5px solid var(--slate-200); background: var(--white);
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; color: var(--slate-900);
+    margin-bottom: 10px; outline: none; transition: border-color .15s;
+  }
+  .form-field:focus { border-color: var(--teal-500); }
+  .form-field.filled { border-color: var(--teal-200); background: var(--teal-50); }
+  .form-section { margin-bottom: 14px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .severity-row { display: flex; gap: 6px; margin-bottom: 10px; }
+  .severity-chip { flex: 1; padding: 8px 4px; border-radius: 9px; text-align: center; font-size: 11px; font-weight: 700; cursor: pointer; border: 1.5px solid var(--slate-200); color: var(--slate-600); background: var(--white); transition: all .15s; }
+  .severity-chip.low  { border-color: var(--green-500); background: var(--green-100); color: var(--green-600); }
+  .severity-chip.med  { border-color: var(--amber-500); background: var(--amber-100); color: var(--amber-600); }
+  .severity-chip.high { border-color: var(--red-500);   background: var(--red-100);   color: var(--red-600); }
+  .drug-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--navy-50); border-radius: 9px; margin-bottom: 6px; }
+  .drug-icon { font-size: 16px; }
+  .drug-name { font-size: 12px; font-weight: 600; color: var(--slate-900); }
+  .drug-dose { font-size: 10px; color: var(--slate-500); }
+  .drug-remove { margin-left: auto; font-size: 16px; cursor: pointer; color: var(--slate-400); }
+
+  /* ── PRESCRIPTION ── */
+  .rx-header { background: var(--navy-900); padding: 16px 18px; flex-shrink: 0; }
+  .rx-logo { font-size: 20px; font-weight: 800; color: white; letter-spacing: -.04em; margin-bottom: 2px; }
+  .rx-vet { font-size: 10px; color: rgba(255,255,255,.5); }
+  .rx-patient-bar { background: var(--navy-800); padding: 10px 18px; display: flex; justify-content: space-between; flex-shrink: 0; }
+  .rx-p-label { font-size: 9px; color: rgba(255,255,255,.4); text-transform: uppercase; letter-spacing: .05em; }
+  .rx-p-val { font-size: 12px; font-weight: 700; color: white; margin-top: 1px; }
+  .rx-drug-card { background: var(--white); border-radius: var(--r-md); border: 1px solid var(--slate-200); padding: 12px 14px; margin-bottom: 9px; box-shadow: var(--shadow-xs); }
+  .rx-num { width: 24px; height: 24px; border-radius: 7px; background: var(--navy-900); display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .rx-drug-top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .rx-drug-name { font-size: 13px; font-weight: 700; color: var(--slate-900); }
+  .rx-drug-class { font-size: 10px; color: var(--slate-500); }
+  .rx-detail-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+  .rx-detail { background: var(--slate-50); border-radius: 7px; padding: 6px 8px; }
+  .rx-d-label { font-size: 9px; color: var(--slate-500); text-transform: uppercase; letter-spacing: .04em; }
+  .rx-d-val { font-size: 11px; font-weight: 700; color: var(--slate-900); margin-top: 1px; font-family: 'JetBrains Mono', monospace; }
+  .rx-warning { background: var(--amber-100); border-radius: 9px; padding: 8px 10px; margin-bottom: 9px; display: flex; gap: 8px; align-items: flex-start; }
+  .rx-w-text { font-size: 11px; color: var(--amber-600); line-height: 1.5; font-weight: 500; }
+  .sign-block { background: var(--slate-50); border-radius: var(--r-md); padding: 12px 14px; border: 1px dashed var(--slate-300); text-align: center; margin-top: 4px; }
+  .sign-line { width: 100%; height: 40px; }
+
+  /* ── LAB RESULTS ── */
+  .lab-card { background: var(--white); border-radius: var(--r-md); border: 1px solid var(--slate-200); margin-bottom: 9px; overflow: hidden; box-shadow: var(--shadow-xs); }
+  .lab-card-hd { padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--slate-100); }
+  .lab-card-title { font-size: 12px; font-weight: 700; color: var(--slate-900); }
+  .lab-card-date { font-size: 10px; color: var(--slate-500); font-family: 'JetBrains Mono', monospace; }
+  .lab-row { display: flex; align-items: center; padding: 8px 14px; border-bottom: 1px solid var(--slate-50); }
+  .lab-row:last-child { border-bottom: none; }
+  .lab-test { font-size: 11px; font-weight: 600; color: var(--slate-700); flex: 1; }
+  .lab-val { font-size: 12px; font-weight: 700; font-family: 'JetBrains Mono', monospace; margin-right: 8px; }
+  .lab-range { font-size: 10px; color: var(--slate-400); font-family: 'JetBrains Mono', monospace; }
+  .lab-val.normal { color: var(--green-600); }
+  .lab-val.high { color: var(--red-600); }
+  .lab-val.low { color: var(--amber-600); }
+  .result-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-right: 6px; }
+  .dot-ok  { background: var(--green-500); }
+  .dot-hi  { background: var(--red-500); }
+  .dot-lo  { background: var(--amber-500); }
+
+  /* ── CASE HISTORY ── */
+  .case-item { display: flex; gap: 10px; padding-bottom: 18px; }
+  .case-left { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+  .case-dot { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid var(--slate-200); background: var(--white); }
+  .case-dot.resolved { background: var(--teal-100); border-color: var(--teal-400); }
+  .case-dot.active   { background: var(--red-100);  border-color: var(--red-500); }
+  .case-dot.routine  { background: var(--navy-50);  border-color: var(--navy-200); }
+  .case-line { width: 2px; flex: 1; background: var(--slate-200); margin-top: 4px; }
+  .case-content { flex: 1; padding-top: 4px; }
+  .case-date { font-size: 9px; font-family: 'JetBrains Mono', monospace; color: var(--slate-500); margin-bottom: 3px; }
+  .case-title { font-size: 12px; font-weight: 700; color: var(--slate-900); }
+  .case-body { font-size: 10.5px; color: var(--slate-600); margin-top: 3px; line-height: 1.45; }
+  .case-vet { font-size: 9px; color: var(--slate-400); margin-top: 4px; font-style: italic; }
+
+  /* ── TELEHEALTH / CHAT ── */
+  .tele-header { background: var(--navy-900); padding: 14px 18px; flex-shrink: 0; }
+  .tele-farmer-info { display: flex; align-items: center; gap: 10px; }
+  .farmer-avatar { width: 40px; height: 40px; border-radius: 12px; background: var(--teal-600); display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; font-weight: 700; flex-shrink: 0; }
+  .farmer-name { font-size: 14px; font-weight: 700; color: white; }
+  .farmer-farm { font-size: 10px; color: rgba(255,255,255,.5); margin-top: 2px; }
+  .online-badge { margin-left: auto; font-size: 10px; font-weight: 600; color: var(--teal-400); display: flex; align-items: center; gap: 4px; }
+  .online-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal-400); animation: pulse 1.4s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+  .tele-actions { display: flex; gap: 8px; margin-top: 10px; }
+  .tele-action-btn { flex: 1; padding: 8px; border-radius: 10px; background: rgba(255,255,255,.1); display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; transition: background .15s; }
+  .tele-action-btn:hover { background: rgba(255,255,255,.18); }
+  .tele-action-btn span { font-size: 16px; }
+  .tele-action-btn p { font-size: 9px; color: rgba(255,255,255,.6); font-weight: 600; }
+  .chat-messages { flex: 1; overflow-y: auto; padding: 12px 16px; }
+  .chat-messages::-webkit-scrollbar { display: none; }
+  .msg { max-width: 80%; border-radius: 14px; padding: 9px 12px; font-size: 12px; line-height: 1.5; margin-bottom: 8px; }
+  .msg.farmer { background: var(--white); color: var(--slate-900); border-bottom-left-radius: 4px; border: 1px solid var(--slate-200); }
+  .msg.vet { background: var(--teal-600); color: white; margin-left: auto; border-bottom-right-radius: 4px; }
+  .msg-photo { width: 100%; border-radius: 10px; margin-top: 6px; background: var(--slate-200); height: 80px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .msg-time { font-size: 9px; color: var(--slate-400); text-align: right; margin-top: 3px; font-family: 'JetBrains Mono', monospace; }
+  .msg-time.w { color: rgba(255,255,255,.45); }
+  .msg-label { font-size: 9px; font-weight: 700; color: var(--slate-500); text-align: center; margin: 8px 0 6px; }
+  .quick-reply-row { display: flex; gap: 6px; flex-wrap: wrap; padding: 6px 16px 0; }
+  .qr-chip { font-size: 10px; font-weight: 600; padding: 6px 11px; border-radius: 20px; background: var(--teal-50); color: var(--teal-700); border: 1px solid var(--teal-200); cursor: pointer; white-space: nowrap; }
+  .chat-input-row { display: flex; gap: 8px; padding: 10px 14px; background: var(--white); border-top: 1px solid var(--slate-200); flex-shrink: 0; }
+  .chat-in { flex: 1; padding: 9px 12px; border-radius: 11px; border: 1.5px solid var(--slate-200); background: var(--slate-50); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; outline: none; }
+  .chat-send { width: 36px; height: 36px; border-radius: 10px; background: var(--teal-600); display: flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer; border: none; color: white; flex-shrink: 0; }
+
+  /* ── HERD ANALYTICS ── */
+  .analytics-hero { background: var(--navy-900); padding: 16px 18px 18px; flex-shrink: 0; }
+  .insight-row { display: flex; gap: 8px; margin-top: 10px; }
+  .insight-chip { flex: 1; background: rgba(255,255,255,.1); border-radius: 10px; padding: 8px; text-align: center; }
+  .insight-val { font-size: 18px; font-weight: 800; color: white; letter-spacing: -.04em; font-family: 'JetBrains Mono', monospace; }
+  .insight-lbl { font-size: 9px; color: rgba(255,255,255,.45); margin-top: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+  .risk-row { background: var(--white); border-radius: var(--r-md); border: 1px solid var(--slate-200); padding: 11px 12px; margin-bottom: 8px; display: flex; gap: 10px; align-items: flex-start; box-shadow: var(--shadow-xs); cursor: pointer; }
+  .risk-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+  .risk-farm { font-size: 12px; font-weight: 700; color: var(--slate-900); }
+  .risk-desc { font-size: 10.5px; color: var(--slate-600); margin-top: 2px; line-height: 1.4; }
+  .risk-right { margin-left: auto; }
+  .bar-mini-wrap { height: 5px; background: var(--slate-100); border-radius: 3px; overflow: hidden; margin-top: 4px; width: 60px; }
+  .bar-mini { height: 100%; border-radius: 3px; }
+
+  /* ── CALENDAR ── */
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 12px; text-align: center; }
+  .cal-day-hd { font-size: 9px; font-weight: 700; color: var(--slate-400); text-transform: uppercase; padding: 4px 0; }
+  .cal-cell { width: 100%; aspect-ratio: 1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: var(--slate-600); cursor: pointer; position: relative; transition: background .15s; }
+  .cal-cell:hover { background: var(--slate-100); }
+  .cal-cell.today { background: var(--teal-600); color: white; }
+  .cal-cell.has-visit::after { content: ''; position: absolute; bottom: 3px; width: 4px; height: 4px; border-radius: 50%; background: var(--amber-500); }
+  .cal-cell.today.has-visit::after { background: white; }
+  .cal-cell.past { color: var(--slate-300); }
+  .cal-cell.urgent-visit { background: var(--red-100); color: var(--red-600); }
+
+  /* ── PROFILE ── */
+  .vet-profile-hero { background: linear-gradient(160deg, var(--navy-900), var(--navy-700)); padding: 20px 18px 24px; flex-shrink: 0; text-align: center; }
+  .vet-avatar-big { width: 72px; height: 72px; border-radius: 22px; background: var(--teal-600); display: flex; align-items: center; justify-content: center; color: white; font-size: 28px; font-weight: 800; margin: 0 auto 10px; border: 3px solid rgba(255,255,255,.2); }
+  .vet-name-big { font-size: 18px; font-weight: 800; color: white; letter-spacing: -.04em; }
+  .vet-title { font-size: 11px; color: rgba(255,255,255,.55); margin-top: 3px; }
+  .vet-badge-row { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
+  .vet-badge { padding: 4px 12px; border-radius: 20px; background: rgba(255,255,255,.12); font-size: 10px; font-weight: 600; color: rgba(255,255,255,.8); }
+  .stat-strip { display: flex; margin-top: 14px; }
+  .stat-strip-item { flex: 1; text-align: center; }
+  .strip-val { font-size: 20px; font-weight: 800; color: white; font-family: 'JetBrains Mono', monospace; }
+  .strip-lbl { font-size: 9px; color: rgba(255,255,255,.4); text-transform: uppercase; letter-spacing: .05em; }
+  .strip-div { width: 1px; background: rgba(255,255,255,.12); margin: 4px 0; }
+  .profile-item { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--slate-100); }
+  .profile-item:last-child { border-bottom: none; }
+  .p-icon-w { width: 34px; height: 34px; border-radius: 9px; background: var(--slate-100); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .p-item-label { font-size: 12px; font-weight: 600; color: var(--slate-900); }
+  .p-item-val { font-size: 10.5px; color: var(--slate-500); margin-top: 1px; }
+  .p-item-right { margin-left: auto; font-size: 15px; color: var(--slate-300); cursor: pointer; }
+
+  /* ── PRIMARY BUTTON ── */
+  .primary-btn { width: 100%; padding: 13px; border-radius: 12px; background: var(--teal-600); color: white; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 700; border: none; cursor: pointer; transition: transform .15s, background .15s; margin-top: 6px; }
+  .primary-btn:active { transform: scale(.98); background: var(--teal-700); }
+  .secondary-btn { width: 100%; padding: 12px; border-radius: 12px; background: transparent; color: var(--teal-600); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 700; border: 1.5px solid var(--teal-500); cursor: pointer; transition: all .15s; margin-top: 6px; }
+
+  /* ── FAB ── */
+  .fab { position: absolute; bottom: 84px; right: 18px; width: 50px; height: 50px; border-radius: 15px; background: var(--teal-600); display: flex; align-items: center; justify-content: center; font-size: 22px; color: white; box-shadow: 0 6px 20px rgba(11,122,110,.45); cursor: pointer; z-index: 20; transition: transform .15s; }
+  .fab:active { transform: scale(.93); }
+
+  /* ── SEARCH ── */
+  .search-wrap { display: flex; align-items: center; gap: 8px; background: var(--white); border-radius: 12px; padding: 9px 13px; margin-bottom: 12px; box-shadow: var(--shadow-xs); border: 1.5px solid var(--slate-200); }
+  .search-icon { font-size: 13px; color: var(--slate-400); }
+  .search-in { background: none; border: none; outline: none; font-size: 12px; font-family: 'Plus Jakarta Sans', sans-serif; color: var(--slate-900); flex: 1; }
+
+  /* ── FILTER CHIPS ── */
+  .filter-row { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; }
+  .filter-row::-webkit-scrollbar { display: none; }
+  .chip { padding: 5px 12px; border-radius: 18px; white-space: nowrap; font-size: 11px; font-weight: 600; cursor: pointer; border: 1.5px solid var(--slate-200); color: var(--slate-600); background: var(--white); transition: all .15s; }
+  .chip.on { background: var(--teal-600); border-color: var(--teal-600); color: white; }
+
+  /* ── URGENT BANNER ── */
+  .urgent-banner { background: var(--red-500); border-radius: var(--r-md); padding: 11px 14px; display: flex; align-items: center; gap: 9px; margin-bottom: 12px; cursor: pointer; transition: transform .15s; }
+  .urgent-banner:active { transform: scale(.98); }
+  .urgent-text { font-size: 12px; font-weight: 700; color: white; }
+  .urgent-sub { font-size: 10px; color: rgba(255,255,255,.75); margin-top: 2px; }
+  .urgent-arrow { margin-left: auto; color: rgba(255,255,255,.7); font-size: 18px; }
+
+  /* ── VITALS ── */
+  .vitals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .vital-card { background: var(--white); border-radius: var(--r-md); border: 1px solid var(--slate-200); padding: 10px 12px; }
+  .vital-label { font-size: 9px; font-weight: 700; color: var(--slate-500); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 3px; }
+  .vital-val { font-size: 20px; font-weight: 800; color: var(--slate-900); font-family: 'JetBrains Mono', monospace; line-height: 1; }
+  .vital-unit { font-size: 10px; font-weight: 400; color: var(--slate-500); }
+  .vital-status { font-size: 10px; font-weight: 600; margin-top: 3px; }
+  .vs-ok   { color: var(--green-600); }
+  .vs-hi   { color: var(--red-600); }
+  .vs-lo   { color: var(--amber-600); }
+</style>
+</head>
+<body>
+
+<!-- ── TOP BAR ── -->
+<div class="proto-header">
+  <div class="brand">HerdIQ <span class="brand-badge">VET</span></div>
+  <div class="screen-tabs" id="screenTabs">
+    <div class="screen-tab active"  onclick="showScreen('dashboard')">Dashboard</div>
+    <div class="screen-tab" onclick="showScreen('schedule')">Schedule</div>
+    <div class="screen-tab" onclick="showScreen('farms')">Farms</div>
+    <div class="screen-tab" onclick="showScreen('patient')">Patient File</div>
+    <div class="screen-tab" onclick="showScreen('diagnosis')">Diagnosis</div>
+    <div class="screen-tab" onclick="showScreen('prescription')">Rx</div>
+    <div class="screen-tab" onclick="showScreen('lab')">Lab Results</div>
+    <div class="screen-tab" onclick="showScreen('telehealth')">Telehealth</div>
+    <div class="screen-tab" onclick="showScreen('analytics')">Analytics</div>
+    <div class="screen-tab" onclick="showScreen('profile')">My Profile</div>
+  </div>
+  <div class="proto-meta">10 screens · interactive</div>
+</div>
+
+<div class="device-wrap">
+  <div class="device-frame">
+    <div class="device-notch"></div>
+    <div class="device-screen">
+
+      <!-- ══════════════════════════════════
+           SCREEN 1 — DASHBOARD
+      ══════════════════════════════════ -->
+      <div class="screen active" id="screen-dashboard">
+        <div class="status-bar dark"><span>9:41</span><div class="status-icons">📶 🔋</div></div>
+        <div class="top-hd dark">
+          <div>
+            <div class="hd-title w">Dr. Amina Ochieng</div>
+            <div class="hd-sub w">Rift Valley · Fri 20 Mar 2026</div>
+          </div>
+          <div class="hd-action notif" onclick="showScreen('schedule')" style="background:rgba(255,255,255,.12)">🔔<div class="notif-dot"></div></div>
+        </div>
+
+        <div class="scroll-area" style="background:var(--slate-50)">
+          <div class="urgent-banner" style="margin-top:12px" onclick="showScreen('telehealth')">
+            <div style="font-size:22px">🚨</div>
+            <div>
+              <div class="urgent-text">Urgent call — John Otieno</div>
+              <div class="urgent-sub">Moi Farm · Rosa #011 in labour — complications</div>
+            </div>
+            <div class="urgent-arrow">›</div>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="m-card" onclick="showScreen('schedule')">
+              <div class="m-label">Today's visits</div>
+              <div class="m-val">4</div>
+              <div class="m-trend tr-info">2 remaining</div>
+            </div>
+            <div class="m-card" onclick="showScreen('farms')">
+              <div class="m-label">Assigned farms</div>
+              <div class="m-val">12</div>
+              <div class="m-trend tr-up">+2 this month</div>
+            </div>
+            <div class="m-card" onclick="showScreen('patient')">
+              <div class="m-label">Open cases</div>
+              <div class="m-val">7</div>
+              <div class="m-trend tr-warn">2 urgent</div>
+            </div>
+            <div class="m-card" onclick="showScreen('prescription')">
+              <div class="m-label">Rx issued</div>
+              <div class="m-val">23</div>
+              <div class="m-trend tr-up">This month</div>
+            </div>
+          </div>
+
+          <div class="sec-hd" style="margin-top:4px"><div class="sec-hd-title">📅 Today's schedule</div><div class="see-all" onclick="showScreen('schedule')">Full calendar</div></div>
+
+          <div class="visit-card urgent" onclick="showScreen('diagnosis')">
+            <div class="visit-time-col"><div class="visit-time">08<br>00</div><div class="visit-ampm">AM</div></div>
+            <div class="vline"></div>
+            <div class="visit-info">
+              <div class="visit-farm">Moi Farm — John Otieno</div>
+              <div class="visit-detail">Rosa #011 · Labour complications · Kisii</div>
+              <div class="visit-tags"><div class="pill pill-red">Urgent</div><div class="pill pill-navy">Calving</div></div>
+            </div>
+          </div>
+          <div class="visit-card scheduled" onclick="showScreen('patient')">
+            <div class="visit-time-col"><div class="visit-time">10<br>30</div><div class="visit-ampm">AM</div></div>
+            <div class="vline"></div>
+            <div class="visit-info">
+              <div class="visit-farm">Green Acres — Mary Wanjiku</div>
+              <div class="visit-detail">Herd vaccination · FMD booster · 8 cows</div>
+              <div class="visit-tags"><div class="pill pill-teal">Scheduled</div><div class="pill pill-navy">Vaccination</div></div>
+            </div>
+          </div>
+          <div class="visit-card pending" onclick="showScreen('diagnosis')">
+            <div class="visit-time-col"><div class="visit-time">02<br>00</div><div class="visit-ampm">PM</div></div>
+            <div class="vline"></div>
+            <div class="visit-info">
+              <div class="visit-farm">Sunrise Dairy — Peter Kamau</div>
+              <div class="visit-detail">Daisy #003 · Suspected mastitis · Milk drop 30%</div>
+              <div class="visit-tags"><div class="pill pill-amber">Pending dx</div><div class="pill pill-navy">Health check</div></div>
+            </div>
+          </div>
+
+          <div class="sec-hd"><div class="sec-hd-title">⚠️ Pending actions</div><div class="see-all">All tasks</div></div>
+          <div class="card" style="padding:10px 12px">
+            <div class="patient-row" onclick="showScreen('lab')">
+              <div class="p-avatar" style="background:var(--navy-50)">🔬</div>
+              <div><div class="p-name">Lab results ready — Nuru #025</div><div class="p-meta">Moi Farm · Blood CBC + Brucella · Review needed</div></div>
+              <div class="p-right"><div class="pill pill-amber">Review</div></div>
+            </div>
+            <div class="patient-row" onclick="showScreen('prescription')">
+              <div class="p-avatar" style="background:var(--teal-50)">💊</div>
+              <div><div class="p-name">Rx renewal — Bella #004</div><div class="p-meta">Moi Farm · Oxytetracycline course ends 22 Mar</div></div>
+              <div class="p-right"><div class="pill pill-teal">Renew</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="bottom-nav">
+          <div class="nav-btn" onclick="showScreen('dashboard')"><div class="nav-icon-w on">🏥</div><div class="nav-lbl on">Home</div></div>
+          <div class="nav-btn" onclick="showScreen('schedule')"><div class="nav-icon-w">📅</div><div class="nav-lbl">Schedule</div></div>
+          <div class="nav-btn" onclick="showScreen('farms')"><div class="nav-icon-w">🌿</div><div class="nav-lbl">Farms</div></div>
+          <div class="nav-btn" onclick="showScreen('telehealth')"><div class="nav-icon-w">📞</div><div class="nav-lbl">Telehealth</div></div>
+          <div class="nav-btn" onclick="showScreen('profile')"><div class="nav-icon-w">👤</div><div class="nav-lbl">Profile</div></div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════
+           SCREEN 2 — SCHEDULE / CALENDAR
+      ══════════════════════════════════ -->
+      <div class="screen" id="screen-schedule">
+        <div class="status-bar light"><span>9:41</span><div class="status-icons">📶 🔋</div></div>
+        <div class="top-hd">
+          <div class="hd-title">Schedule</div>
+          <div class="hd-action light" onclick="showScreen('dashboard')">+</div>
+        </div>
+        <div class="scroll-area">
+          <div class="card" style="margin-bottom:14px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+              <div style="font-size:13px;font-weight:800;color:var(--slate-900)">March 2026</div>
+              <div style="display:flex;gap:10px;font-size:16px;color:var(--slate-400)"><span>‹</span><span>›</span></div>
+            </div>
+            <div class="cal-grid">
+              <div class="cal-day-hd">M</div><div class="cal-day-hd">T</div><div class="cal-day-hd">W</div><div class="cal-day-hd">T</div><div class="cal-day-hd">F</div><div class="cal-day-hd">S</div><div class="cal-day-hd">S</div>
+              <div class="cal-cell past">3</div><div class="cal-cell past">4</div><div class="cal-cell past">5</div><div class="cal-cell past">6</div><div class="cal-cell past">7</div><div class="cal-cell past">8</div><div class="cal-cell past">9</div>
+              <div class="cal-cell past has-visit">10</div><div class="cal-cell past">11</div><div class="cal-cell past has-visit">12</div><div class="cal-cell past">13</div><div class="cal-cell past has-visit">14</div><div class="cal-cell past">15</div><div class="cal-cell past">16</div>
+              <div class="cal-cell past has-visit">17</div><div class="cal-cell past">18</div><div class="cal-cell past">19</div><div class="cal-cell today has-visit">20</div><div class="cal-cell has-visit">21</div><div class="cal-cell">22</div><div class="cal-cell">23</div>
+              <div class="cal-cell has-visit">24</div><div class="cal-cell">25</div><div class="cal-cell has-visit">26</div><div class="cal-cell">27</div><div class="cal-cell">28</div><div class="cal-cell">29</div><div class="cal-cell">30</div>
+              <div class="cal-cell">31</div>
+            </div>
+          </div>
+          <div class="sec-hd" style="margin-top:0"><div class="sec-hd-title">🗓 Friday, 20 March</div><div style="font-size:10px;color:var(--teal-600);font-weight:700">4 visits</div></div>
+          <div class="visit-card urgent" onclick="showScreen('diagnosis')">
+            <div class="visit-time-col"><div class="visit-time">08<br>00</div><div class="visit-ampm">AM</div></div>
+            <div class="vline"></div>
+            <div class="visit-info"><div class="visit-farm">Moi Farm</div><div class="visit-detail">Rosa #011 · Labour complications</div><div class="visit-tags"><div class="pill pill-red">Urgent</div></div></div>
+          </div>
+          <div class="visit-card scheduled" onclick="showScreen('patient')">
+            <div class="visit-time-col"><div class="visit-time">10<br>30</div><div class="visit-ampm">AM</div></div>
+            <div class="vline"></div>
+            <div class="visit-info"><div class="visit-farm">Green Acres</div><div class="visit-detail">FMD vaccination · 8 cows · Mary Wanjiku</div><div class="visit-tags"><div class="pill pill-teal">Scheduled</div></div></div>
+          </div>
+          <div class="visit-card pending" onclick="showScreen('diagnosis')">
+            <div class="visit-time-col"><div class="visit-time">02<br>00</div><div class="visit-ampm">PM</div></div>
+            <div class="vline"></div>
+            <div class="visit-info"><div class="visit-farm">Sunrise Dairy</div><div class="visit-detail">Daisy #003 · Suspected mastitis</div><div class="visit-tags"><div class="pill pill-amber">Pending</div></div></div>
+          </div>
+          <div class="visit-card scheduled">
+            <div class="visit-time-col"><div class="visit-time">04<br>30</div><div class="visit-ampm">PM</div></div>
+            <div class="vline"></div>
+            <div class="visit-info"><div class="visit-farm">Baraka Ranch</div><div class="visit-detail">Quarterly herd health check · 6 cows</div><div class="visit-tags"><div class="pill pill-teal">Routine</div></div></div>
+          </div>
+          <button class="primary-btn" style="margin-top:8px">+ Book new visit</button>
+        </div>
+        <div class="bottom-nav">
+          <div class="nav-btn" onclick="showScreen('dashboard')"><div class="nav-icon-w">🏥</div><div class="nav-lbl">Home</div></div>
+          <div class="nav-btn" onclick="showScreen('schedule')"><div class="nav-icon-w on">📅</div><div class="nav-lbl on">Schedule</div></div>
+          <div class="nav-btn" onclick="showScreen('farms')"><div class="nav-icon-w">🌿</div><div class="nav-lbl">Farms</div></div>
+          <div class="nav-btn" onclick="showScreen('telehealth')"><div class="nav-icon-w">📞</div><div class="nav-lbl">Telehealth</div></div>
+          <div class="nav-btn" onclick="showScreen('profile')"><div class="nav-icon-w">👤</div><div class="nav-lbl">Profile</div></div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════
+           SCREEN 3 — FARMS / PATIENTS
+      ══════════════════════════════════ -->
+      <div class="screen" id="screen-farms">
+        <div class="status-bar light"><span>9:41</span><div class="status-icons">📶 🔋</div></div>
+        <div class="top-hd">
+          <div class="hd-title">My Farms</div>
+          <div class="hd-action light">🗺</div>
+        </div>
+        <div style="padding:0 18px 8px">
+          <div class="search-wrap"><div class="search-icon">🔍</div><input class="search-in" placeholder="Search farm or farmer name…"></div>
+          <div class="filter-row">
+            <div class="chip on">All (12)</div>
+            <div class="chip">Active alerts</div>
+            <div class="chip">Kisii</div>
+            <div class="chip">Nakuru</div>
+          </div>
+        </div>
+        <div class="scroll-area" style="padding-top:0">
+          <div class="farm-card" onclick="showScreen('patient')">
+            <div class="farm-avatar" style="background:var(--red-100)">🚨</div>
+            <div><div class="farm-name">Moi Farm</div><div class="farm-meta">John Otieno · Kisii · 24 cows</div></div>
+            <div class="farm-right"><div class="alert-count">2 alerts</div><div style="font-size:10px;color:var(--slate-400);margin-top:3px;text-align:right">2km away</div></div>
+          </div>
+          <div class="farm-card" onclick="showScreen('patient')">
+            <div class="farm-avatar" style="background:var(--teal-50)">🌿</div>
+            <div><div class="farm-name">Green Acres</div><div class="farm-meta">Mary Wanjiku · Nakuru · 18 cows</div></div>
+            <div class="farm-right"><div class="pill pill-teal" style="font-size:10px">Healthy</div><div style="font-size:10px;color:var(--slate-400);margin-top:3px;text-align:right">8km</div></div>
+          </div>
+          <div class="farm-card" onclick="showScreen('patient')">
+            <div class="farm-avatar" style="background:var(--amber-100)">🌅</div>
+            <div><div class="farm-name">Sunrise Dairy</div><div class="farm-meta">Peter Kamau · Kericho · 31 cows</div></div>
+            <div class="farm-right"><div class="alert-count">1 alert</div><div style="font-size:10px;color:var(--slate-400);margin-top:3px;text-align:right">14km</div></div>
+          </div>
+          <div class="farm-card" onclick="showScreen('patient')">
+            <div class="farm-avatar" style="background:var(--navy-50)">🏡</div>
+            <div><div class="farm-name">Baraka Ranch</div><div class="farm-meta">Samuel Kipchoge · Eldoret · 45 cows</div></div>
+            <div class="farm-right"><div class="pill pill-teal" style="font-size:10px">Healthy</div><div style="font-size:10px;color:var(--slate-400);margin-top:3px;text-align:right">22km</div></div>
+          </div>
+          <div class="farm-card">
+            <div class="farm-avatar" style="background:var(--green-100)">🌾</div>
+            <div><div class="farm-name">Ngugi Family Farm</div><div class="farm-meta">Grace Ngugi · Nyeri · 12 cows</div></div>
+            <div class="farm-right"><div class="pill pill-slate" style="font-size:10px">Due check</div><div style="font-size:10px;color:var(--slate-400);margin-top:3px;text-align:right">31km</div></div>
+          </div>
+          <div class="farm-card">
+            <div class="farm-avatar" style="background:var(--teal-50)">🐄</div>
+            <div><div class="farm-name">Savanna Dairy</div><div class="farm-meta">David Mwangi · Kajiado · 28 cows</div></div>
+            <div class="farm-right"><div class="pill pill-teal" style="font-size:10px">Healthy</div><div style="font-size:10px;color:var(--slate-400);margin-top:3px;text-align:right">45km</div></div>
+          </div>
+        </div>
+        <div class="bottom-nav">
+          <div class="nav-btn" onclick="showScreen('dashboard')"><div class="nav-icon-w">🏥</div><div class="nav-lbl">Home</div></div>
+          <div class="nav-btn" onclick="showScreen('schedule')"><div class="nav-icon-w">📅</div><div class="nav-lbl">Schedule</div></div>
+          <div class="nav-btn" onclick="showScreen('farms')"><div class="nav-icon-w on">🌿</div><div class="nav-lbl on">Farms</div></div>
+          <div class="nav-btn" onclick="showScreen('telehealth')"><div class="nav-icon-w">📞</div><div class="nav-lbl">Telehealth</div></div>
+          <div class="nav-btn" onclick="showScreen('profile')"><div class="nav-icon-w">👤</div><div class="nav-lbl">Profile</div></div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════
+           SCREEN 4 — PATIENT FILE (Cow)
+      ══════════════════════════════════ -->
+      <div class="screen" id="screen-patient">
+        <div class="status-bar dark"><span>9:41</span><div class="status-icons">📶 🔋</div></div>
+        <div style="background:var(--navy-900);padding:12px 18px 16px;flex-shrink:0">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <div class="back-btn" onclick="showScreen('farms')">‹</div>
+            <div style="flex:1">
+              <div style="font-size:17px;font-weight:800;color:white;letter-spacing:-.04em">Rosa #011</div>
+              <div style="font-size:10px;color:rgba(255,255,255,.5)">Moi Farm · John Otieno · Ayrshire</div>
+            </div>
+            <div class="pill pill-red" style="font-size:10px">In labour</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+            <div style="background:rgba(255,255,255,.1);border-radius:9px;padding:7px;text-align:center"><div style="font-size:14px;font-weight:800;color:white;font-family:'JetBrains Mono',monospace">5yr</div><div style="font-size:9px;color:rgba(255,255,255,.45);margin-top:1px">AGE</div></div>
+            <div style="background:rgba(255,255,255,.1);border-radius:9px;padding:7px;text-align:center"><div style="font-size:14px;font-weight:800;color:white;font-family:'JetBrains Mono',monospace">390</div><div style="font-size:9px;color:rgba(255,255,255,.45);margin-top:1px">KG</div></div>
+            <div style="background:rgba(255,255,255,.1);border-radius:9px;padding:7px;text-align:center"><div style="font-size:14px;font-weight:800;color:white;font-family:'JetBrains Mono',monospace">P3</div><div style="font-size:9px;color:rgba(255,255,255,.45);margin-top:1px">PARITY</div></div>
+            <div style="background:rgba(255,255,255,.1);border-radius:9px;padding:7px;text-align:center"><div style="font-size:14px;font-weight:800;color:white;font-family:'JetBrains Mono',monospace">14L</div><div style="font-size:9px;color:rgba(255,255,255,.45);margin-top:1px">AVG/DAY</div></div>
+          </div>
+        </div>
+        <div style="display:flex;background:var(--white);border-bottom:1px solid var(--slate-200);flex-shrink:0" id="patTabBar">
+          <div class="tab-i active" onclick="setPatTab(0)" style="flex:1;padding:10px 4px;text-align:center;font-size:10px;font-weight:700;color:var(--teal-600);border-bottom:2.5px solid var(--teal-600);cursor:pointer">Case History</div>
+          <div class="tab-i" onclick="setPatTab(1)" style="flex:1;padding:10px 4px;text-align:center;font-size:10px;font-weight:700;color:var(--slate-400);border-bottom:2.5px solid transparent;cursor:pointer">Vitals</div>
+          <div class="tab-i" onclick="setPatTab(2)" style="flex:1;padding:10px 4px;text-align:center;font-size:10px;font-weight:700;color:var(--slate-400);border-bottom:2.5px solid transparent;cursor:pointer">Medications</div>
+          <div class="tab-i" onclick="setPatTab(3)" style="flex:1;padding:10px 4px;text-align:center;font-size:10px;font-weight:700;color:var(--slate-400);border-bottom:2.5px solid transparent;cursor:pointer">Vaccinations</div>
+        </div>
+        <!-- Tab 0: Case history -->
+        <div class="scroll-area" id="patab-0">
+          <div style="height:10px"></div>
+          <div class="case-item">
+            <div class="case-left"><div class="case-dot active">🚨</div><div class="case-line"></div></div>
+            <div class="case-content"><div class="case-date">20 MAR 2026 · CURRENT</div><div class="case-title">Labour complications — Stage 3</div><div class="case-body">Active labour 2h 18m. Calf presentation normal. Farmer monitoring. Vet called.</div><div style="margin-top:5px"><div class="pill pill-red">Open case</div></div></div>
+          </div>
+          <div class="case-item">
+            <div class="case-left"><div class="case-dot resolved">💊</div><div class="case-line"></div></div>
+            <div class="case-content"><div class="case-date">02 DEC 2025</div><div class="case-title">Mastitis — Left rear quarter</div><div class="case-body">Subclinical mastitis detected. California Mastitis Test (+). Treated with Oxytetracycline 22mg/kg for 5 days.</div><div class="case-vet">Dr. Amina Ochieng</div><div style="margin-top:5px"><div class="pill pill-teal">Resolved</div></div></div>
+          </div>
+          <div class="case-item">
+            <div class="case-left"><div class="case-dot routine">💉</div><div class="case-line"></div></div>
+            <div class="case-content"><div class="case-date">14 SEP 2025</div><div class="case-title">FMD Booster Vaccination</div><div class="case-body">Annual FMD booster administered. KEVEVAPI batch KE-FMD-2025-0914. No adverse reaction.</div><div class="case-vet">Dr. Amina Ochieng</div></div>
+          </div>
+          <div class="case-item">
+            <div class="case-left"><div class="case-dot resolved">🍼</div><div class="case-line"></div></div>
+            <div class="case-content"><div class="case-date">15 NOV 2024</div><div class="case-title">Calving — Female calf born</div><div class="case-body">Normal birth. Calf weight 36kg. Dam and calf healthy. Colostrum feeding confirmed.</div><div class="case-vet">Dr. Amina Ochieng</div></div>
+          </div>
+          <button class="primary-btn" onclick="showScreen('diagnosis')">+ Add clinical note</button>
+          <div style="height:8px"></div>
+        </div>
+        <!-- Tab 1: Vitals -->
+        <div class="scroll-area" id="patab-1" style="display:none">
+          <div style="height:10px"></div>
+          <div class="sec-hd" style="margin-top:0"><div class="sec-hd-title">Latest vitals — 20 Mar, 8:05 AM</div></div>
+          <div class="vitals-grid">
+            <div class="vital-card"><div class="vital-label">Temperature</div><div class="vital-val">39.2<span class="vital-unit">°C</span></div><div class="vital-status vs-hi">↑ Slightly high</div></div>
+            <div class="vital-card"><div class="vital-label">Heart rate</div><div class="vital-val">72<span class="vital-unit">bpm</span></div><div class="vital-status vs-ok">✓ Normal</div></div>
+            <div class="vital-card"><div class="vital-label">Resp. rate</div><div class="vital-val">28<span class="vital-unit">/min</span></div><div class="vital-status vs-ok">✓ Normal</div></div>
+            <div class="vital-card"><div class="vital-label">Body score</div><div class="vital-val">3.0<span class="vital-unit">/5</span></div><div class="vital-status vs-ok">✓ Adequate</div></div>
+          </div>
+          <button class="primary-btn" style="margin-top:0">+ Record vitals now</button>
+        </div>
+        <!-- Tab 2: Medications -->
+        <div class="scroll-area" id="patab-2" style="display:none">
+          <div style="height:10px"></div>
+          <div class="drug-row" style="margin-bottom:8px"><div class="drug-icon">💊</div><div><div class="drug-name">Oxytetracycline LA</div><div class="drug-dose">22mg/kg · 1×/day · Completed 07 Dec 2025</div></div><div class="pill pill-teal" style="margin-left:auto;font-size:9px">Done</div></div>
+          <div class="drug-row" style="margin-bottom:8px"><div class="drug-icon">🌡</div><div><div class="drug-name">Flunixin Meglumine</div><div class="drug-dose">2.2mg/kg IV · Given 20 Mar 2026</div></div><div class="pill pill-amber" style="margin-left:auto;font-size:9px">Given today</div></div>
+          <div class="drug-row"><div class="drug-icon">💉</div><div><div class="drug-name">Oxytocin (if needed)</div><div class="drug-dose">20 IU IV slow · Labour only</div></div><div class="pill pill-slate" style="margin-left:auto;font-size:9px">Standby</div></div>
+          <button class="primary-btn" style="margin-top:10px" onclick="showScreen('prescription')">Issue new prescription</button>
+        </div>
+        <!-- Tab 3: Vaccinations -->
+        <div class="scroll-area" id="patab-3" style="display:none">
+          <div style="height:10px"></div>
+          <div class="drug-row" style="margin-bottom:8px"><div class="drug-icon">💉</div><div><div class="drug-name">FMD Booster</div><div class="drug-dose">14 Sep 2025 · Due: Sep 2026</div></div><div class="pill pill-green" style="margin-left:auto;font-size:9px">Current</div></div>
+          <div class="drug-row" style="margin-bottom:8px"><div class="drug-icon">💉</div><div><div class="drug-name">Brucellosis (S19)</div><div class="drug-dose">Jun 2024 · One-time dose</div></div><div class="pill pill-teal" style="margin-left:auto;font-size:9px">Done</div></div>
+          <div class="drug-row"><div class="drug-icon">💉</div><div><div class="drug-name">LSD Vaccine</div><div class="drug-dose">Due: Apr 2026</div></div><div class="pill pill-amber" style="margin-left:auto;font-size:9px">Due soon</div></div>
+          <button class="primary-btn" style="margin-top:10px">+ Log vaccination</button>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════
+           SCREEN 5 — DIAGNOSIS / CLINICAL NOTE
+      ══════════════════════════════════ -->
+      <div class="screen" id="screen-diagnosis">
+        <div class="status-bar light"><span>9:41</span><div class="status-icons">📶 🔋</div></div>
+        <div class="top-hd">
+          <div class="back-btn dk" onclick="showScreen('patient')">‹</div>
+          <div style="text-align:center;flex:1"><div class="hd-title" style="font-size:15px">Clinical Note</div><div class="hd-sub">Rosa #011 · Moi Farm</div></div>
+          <div style="width:32px"></div>
+        </div>
+        <div class="scroll-area">
+          <div class="form-section">
+            <label class="form-label">Chief complaint</label>
+            <input class="form-field filled" value="Labour — Stage 3, possible dystocia" placeholder="Chief complaint">
+          </div>
+          <div class="form-section">
+            <label class="form-label">Severity level</label>
+            <div class="severity-row">
+              <div class="severity-chip">Mild</div>
+              <div class="severity-chip med">Moderate</div>
+              <div class="severity-chip">Severe</div>
+              <div class="severity-chip high">Critical</div>
+            </div>
+          </div>
+          <div class="form-section">
+            <label class="form-label">Clinical findings</label>
+            <textarea class="form-field filled" rows="3" style="resize:none">Cow in active labour 2h 18m. Calf in anterior presentation, both front legs visible. Temperature 39.2°C. Heart rate 72 bpm. No signs of uterine torsion.</textarea>
+          </div>
+          <div class="form-section">
+            <label class="form-label">Diagnosis</label>
+            <input class="form-field filled" value="Normal labour — prolonged stage 2" placeholder="Enter diagnosis">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:-4px;margin-bottom:8px">
+              <div class="pill pill-teal" style="cursor:pointer;font-size:10px">Dystocia</div>
+              <div class="pill pill-navy" style="cursor:pointer;font-size:10px">Uterine inertia</div>
+              <div class="pill pill-slate" style="cursor:pointer;font-size:10px">Normal labour</div>
+              <div class="pill pill-amber" style="cursor:pointer;font-size:10px">+ Add</div>
+            </div>
+          </div>
+          <div class="form-section">
+            <label class="form-label">Treatment given</label>
+            <textarea class="form-field" rows="2" placeholder="Describe treatment administered…" style="resize:none"></textarea>
+          </div>
+          <div class="form-section">
+            <label class="form-label">Vitals recorded</label>
+            <div class="form-row">
+              <input class="form-field filled" value="39.2°C" placeholder="Temperature">
+              <input class="form-field filled" value="72 bpm" placeholder="Heart rate">
+            </div>
+            <div class="form-row">
+              <input class="form-field" placeholder="Resp. rate" value="28/min">
+              <input class="form-field" placeholder="Body score (1–5)" value="3.0">
+            </div>
+          </div>
+          <div class="form-section">
+            <label class="form-label">Next action</label>
+            <div class="filter-row" style="margin-bottom:8px">
+              <div class="chip on">Monitor</div>
+              <div class="chip">Prescribe Rx</div>
+              <div class="chip">Lab test</div>
+              <div class="chip">Follow-up</div>
+            </div>
+          </div>
+          <button class="primary-btn" onclick="showScreen('prescription')">Save & issue prescription →</button>
+          <button class="secondary-btn">Save note only</button>
+          <div style="height:12px"></div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════
+           SCREEN 6 — PRESCRIPTION (Rx)
+      ══════════════════════════════════ -->
+      <div class="screen" id="screen-prescription">
+        <div class="status-bar dark"><span>9:41</span><div class="status-icons">📶 🔋</div></div>
+        <div class="rx-header">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="back-btn" onclick="showScreen('diagnosis')">‹</div>
+            <div>
+              <div class="rx-logo">Rx Prescription</div>
+              <div class="rx-vet">Dr. Amina Ochieng · KVB Reg. KE-VET-4921</div>
+            </div>
+          </div>
+        </div>
+        <div class="rx-patient-bar">
+          <div><div class="rx-p-label">Patient</div><div class="rx-p-val">Rosa #011 · Ayrshire</div></div>
+          <div><div class="rx-p-label">Farm</div><div class="rx-p-val">Moi Farm — John Otieno</div></div>
+          <div><div class="rx-p-label">Date</div><div class="rx-p-val">20 Mar 2026</div></div>
+        </div>
+        <div class="scroll-area" style="background:var(--slate-50)">
+          <div style="height:10px"></div>
+          <div class="rx-warning">
+            <div style="font-size:18px;flex-shrink:0">⚠️</div>
+            <div class="rx-w-text"><b>Milk withholding period applies.</b> Milk from this cow must not be sold for 4 days after last dose.</div>
+          </div>
+          <div class="sec-hd" style="margin-top:0"><div class="sec-hd-title">💊 Prescribed drugs</div><div class="see-all" onclick="showScreen('prescription')">+ Add drug</div></div>
+          <div class="rx-drug-card">
+            <div class="rx-drug-top">
+              <div class="rx-num">1</div>
+              <div><div class="rx-drug-name">Oxytocin Injection</div><div class="rx-drug-class">Hormone · Uterotonic</div></div>
+            </div>
+            <div class="rx-detail-grid">
+              <div class="rx-detail"><div class="rx-d-label">Dose</div><div class="rx-d-val">20 IU</div></div>
+              <div class="rx-detail"><div class="rx-d-label">Route</div><div class="rx-d-val">IV slow</div></div>
+              <div class="rx-detail"><div class="rx-d-label">Freq</div><div class="rx-d-val">Once</div></div>
+              <div class="rx-detail"><div class="rx-d-label">Duration</div><div class="rx-d-val">1 dose</div></div>
+              <div class="rx-detail"><div class="rx-d-label">Withhold</div><div class="rx-d-val">Nil</div></div>
+              <div class="rx-detail"><div class="rx-d-label">Wt.</div><div class="rx-d-val">390 kg</div></div>
+            </div>
+          </div>
+          <div class="rx-drug-card">
+            <div class="rx-drug-top">
+              <div class="rx-num">2</div>
+              <div><div class="rx-drug-name">Flunixin Meglumine</div><div class="rx-drug-class">NSAID · Anti-inflammatory</div></div>
+            </div>
+            <div class="rx-detail-grid">
+              <div class="rx-detail"><div class="rx-d-label">Dose</div><div class="rx-d-val">2.2mg/kg</div></div>
+              <div class="rx-detail"><div class="rx-d-label">Route</div><div class="rx-d-val">IV</div></div>
+              <div class="rx-detail"><div class="rx-d-label">Freq</div><div class="rx-d-val">1×/day</div></div>
+              <div class="rx-detail"><div class="rx-d-label">Duration</div><div class="rx-d-val">3 days</div></div>
+              <div class="rx-detail"><div class="rx-d-label">Withhold</div><div class="rx-d-val">4 days</div></div>
+              <div class="rx-detail"><div class="rx-d-label">Total</div><div class="rx-d-val">858mg</div></div>
+            </div>
+          </div>
+          <div class="sign-block">
+            <div style="font-size:24px;font-weight:800;color:var(--slate-300);font-style:italic;font-family:serif;letter-spacing:-.02em">Dr. A. Ochieng</div>
+            <div style="font-size:10px;color:var(--slate-400);margin-top:4px">Digital signature · KVB Reg. KE-VET-4921</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+            <button class="primary-btn" style="margin-top:0">📤 Send to farmer</button>
+            <button class="secondary-btn" style="margin-top:0">📄 Save PDF</button>
+          </div>
+          <div style="height:10px"></div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════
+           SCREEN 7 — LAB RESULTS
+      ══════════════════════════════════ -->
+      <div class="screen" id="screen-lab">
+        <div class="status-bar light"><span>9:41</span><div class="status-icons">📶 🔋</div></div>
+        <div class="top-hd">
+          <div class="back-btn dk" onclick="showScreen('patient')">‹</div>
+          <div style="text-align:center;flex:1"><div class="hd-title" style="font-size:15px">Lab Results</div><div class="hd-sub">Nuru #025 · Moi Farm</div></div>
+          <div style="width:32px"></div>
+        </div>
+        <div class="filter-row" style="padding:8px 18px 0">
+          <div class="chip on">All</div>
+          <div class="chip">Blood panel</div>
+          <div class="chip">Serology</div>
+          <div class="chip">Milk quality</div>
+        </div>
+        <div class="scroll-area" style="padding-top:8px">
+          <div class="urgent-banner" style="margin-bottom:12px;margin-top:0">
+            <div style="font-size:16px">🔬</div>
+            <div><div class="urgent-text">3 results out of range</div><div class="urgent-sub">Requires veterinary review before sharing with farmer</div></div>
+          </div>
+          <div class="lab-card">
+            <div class="lab-card-hd">
+              <div class="lab-card-title">🩸 Complete Blood Count (CBC)</div>
+              <div class="lab-card-date">18 MAR 2026</div>
+            </div>
+            <div class="lab-row"><div class="result-dot dot-ok"></div><div class="lab-test">Haemoglobin</div><div class="lab-val normal">11.2</div><div class="lab-range">g/dL · ref 8–14</div></div>
+            <div class="lab-row"><div class="result-dot dot-hi"></div><div class="lab-test">WBC Count</div><div class="lab-val high">14.8</div><div class="lab-range">×10⁹/L · ref 4–12</div></div>
+            <div class="lab-row"><div class="result-dot dot-ok"></div><div class="lab-test">Platelets</div><div class="lab-val normal">320</div><div class="lab-range">×10⁹/L · ref 200–700</div></div>
+            <div class="lab-row"><div class="result-dot dot-lo"></div><div class="lab-test">Haematocrit</div><div class="lab-val low">22%</div><div class="lab-range">ref 24–46%</div></div>
+          </div>
+          <div class="lab-card">
+            <div class="lab-card-hd">
+              <div class="lab-card-title">🧫 Brucella Serology (RBPT)</div>
+              <div class="lab-card-date">18 MAR 2026</div>
+            </div>
+            <div class="lab-row"><div class="result-dot dot-ok"></div><div class="lab-test">Rose Bengal Plate Test</div><div class="lab-val normal">Negative</div><div class="lab-range">Expected: Neg</div></div>
+            <div class="lab-row"><div class="result-dot dot-ok"></div><div class="lab-test">SAT Titre</div><div class="lab-val normal">&lt;1:20</div><div class="lab-range">ref &lt;1:20</div></div>
+          </div>
+          <div class="lab-card">
+            <div class="lab-card-hd">
+              <div class="lab-card-title">🥛 Milk Quality — CMT</div>
+              <div class="lab-card-date">19 MAR 2026</div>
+            </div>
+            <div class="lab-row"><div class="result-dot dot-ok"></div><div class="lab-test">Front left quarter</div><div class="lab-val normal">Negative</div><div class="lab-range">CMT score 0</div></div>
+            <div class="lab-row"><div class="result-dot dot-hi"></div><div class="lab-test">Rear left quarter</div><div class="lab-val high">Positive (2+)</div><div class="lab-range">CMT score 2</div></div>
+            <div class="lab-row"><div class="result-dot dot-ok"></div><div class="lab-test">SCC estimate</div><div class="lab-val high">450k</div><div class="lab-range">cells/mL · ref &lt;200k</div></div>
+          </div>
+          <button class="primary-btn" style="margin-top:4px">📤 Share report with farmer</button>
+          <div style="height:10px"></div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════
+           SCREEN 8 — TELEHEALTH / MESSAGING
+      ══════════════════════════════════ -->
+      <div class="screen" id="screen-telehealth">
+        <div class="status-bar dark"><span>9:41</span><div class="status-icons">📶 🔋</div></div>
+        <div class="tele-header">
+          <div class="tele-farmer-info">
+            <div class="back-btn" onclick="showScreen('dashboard')" style="flex-shrink:0">‹</div>
+            <div class="farmer-avatar" style="margin-left:6px">JO</div>
+            <div style="flex:1">
+              <div class="farmer-name">John Otieno</div>
+              <div class="farmer-farm">Moi Farm · 24 cows · Kisii</div>
+            </div>
+            <div class="online-badge"><div class="online-dot"></div>Online</div>
+          </div>
+          <div class="tele-actions">
+            <div class="tele-action-btn"><span>📞</span><p>Call</p></div>
+            <div class="tele-action-btn"><span>📹</span><p>Video</p></div>
+            <div class="tele-action-btn" onclick="showScreen('patient')"><span>🐄</span><p>Patient file</p></div>
+            <div class="tele-action-btn" onclick="showScreen('prescription')"><span>💊</span><p>Send Rx</p></div>
+          </div>
+        </div>
+        <div class="chat-messages">
+          <div class="msg-label">Today, 7:42 AM</div>
+          <div class="msg farmer">
+            Daktari, Rosa #011 labours kuanza. Niko wasiwasi — ni zaidi ya saa mbili sasa. Tuma picha.
+            <div class="msg-photo">📷 Photo attached</div>
+            <div class="msg-time">7:42 AM</div>
+          </div>
+          <div class="msg vet">
+            Asante John. Nimeona picha. Calf position looks normal — anterior presentation with both front legs visible. Monitor closely. How long exactly?
+            <div class="msg-time w">7:45 AM</div>
+          </div>
+          <div class="msg farmer">
+            2 hours 18 minutes now. She's pushing but calf not coming out fully.
+            <div class="msg-time">7:58 AM</div>
+          </div>
+          <div class="msg vet">
+            OK. I'm on my way — ETA 20 minutes. Meanwhile: <b>do not pull</b>. Keep cow calm. Make sure calving area is clean. I'll administer oxytocin when I arrive.
+            <div class="msg-time w">8:01 AM</div>
+          </div>
+          <div class="msg farmer">
+            Sawa daktari. Waiting for you. Sent current photo of cow 🙏
+            <div class="msg-time">8:04 AM</div>
+          </div>
+        </div>
+        <div class="quick-reply-row">
+          <div class="qr-chip">I'm on my way</div>
+          <div class="qr-chip">Send photo</div>
+          <div class="qr-chip">Sending Rx now</div>
+          <div class="qr-chip">Call vet →</div>
+        </div>
+        <div class="chat-input-row">
+          <input class="chat-in" placeholder="Type a message…">
+          <button class="chat-send">📎</button>
+          <button class="chat-send" style="margin-left:4px">➤</button>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════
+           SCREEN 9 — HERD ANALYTICS
+      ══════════════════════════════════ -->
+      <div class="screen" id="screen-analytics">
+        <div class="status-bar dark"><span>9:41</span><div class="status-icons">📶 🔋</div></div>
+        <div class="analytics-hero">
+          <div style="font-size:15px;font-weight:800;color:white;letter-spacing:-.03em;margin-bottom:2px">Herd analytics</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.5)">12 farms · 287 cows · March 2026</div>
+          <div class="insight-row">
+            <div class="insight-chip"><div class="insight-val">34%</div><div class="insight-lbl">Conception</div></div>
+            <div class="insight-chip"><div class="insight-val">8</div><div class="insight-lbl">Open cases</div></div>
+            <div class="insight-chip"><div class="insight-val">91%</div><div class="insight-lbl">Vacc. cover</div></div>
+            <div class="insight-chip"><div class="insight-val">16.1L</div><div class="insight-lbl">Avg yield</div></div>
+          </div>
+        </div>
+        <div class="scroll-area" style="background:var(--slate-50)">
+          <div class="sec-hd" style="margin-top:12px"><div class="sec-hd-title">⚠️ At-risk farms</div><div class="see-all" onclick="showScreen('farms')">All farms</div></div>
+          <div class="risk-row" onclick="showScreen('patient')">
+            <div class="risk-icon" style="background:var(--red-100)">🔴</div>
+            <div style="flex:1"><div class="risk-farm">Moi Farm</div><div class="risk-desc">2 active cases · Rosa in labour · Milk drop detected</div></div>
+            <div class="risk-right"><div class="bar-mini-wrap"><div class="bar-mini" style="width:85%;background:var(--red-500)"></div></div><div style="font-size:9px;color:var(--red-600);font-weight:700;text-align:right;margin-top:2px">High risk</div></div>
+          </div>
+          <div class="risk-row" onclick="showScreen('farms')">
+            <div class="risk-icon" style="background:var(--amber-100)">🟡</div>
+            <div style="flex:1"><div class="risk-farm">Sunrise Dairy</div><div class="risk-desc">Mastitis suspected · 1 cow pending diagnosis</div></div>
+            <div class="risk-right"><div class="bar-mini-wrap"><div class="bar-mini" style="width:52%;background:var(--amber-500)"></div></div><div style="font-size:9px;color:var(--amber-600);font-weight:700;text-align:right;margin-top:2px">Med risk</div></div>
+          </div>
+          <div class="risk-row">
+            <div class="risk-icon" style="background:var(--amber-100)">🟡</div>
+            <div style="flex:1"><div class="risk-farm">Ngugi Family Farm</div><div class="risk-desc">Vaccination overdue for 3 cows</div></div>
+            <div class="risk-right"><div class="bar-mini-wrap"><div class="bar-mini" style="width:35%;background:var(--amber-500)"></div></div><div style="font-size:9px;color:var(--amber-600);font-weight:700;text-align:right;margin-top:2px">Med risk</div></div>
+          </div>
+          <div class="risk-row">
+            <div class="risk-icon" style="background:var(--green-100)">🟢</div>
+            <div style="flex:1"><div class="risk-farm">Green Acres</div><div class="risk-desc">All vaccinations current · No open cases</div></div>
+            <div class="risk-right"><div class="bar-mini-wrap"><div class="bar-mini" style="width:10%;background:var(--green-500)"></div></div><div style="font-size:9px;color:var(--green-600);font-weight:700;text-align:right;margin-top:2px">Low risk</div></div>
+          </div>
+
+          <div class="sec-hd"><div class="sec-hd-title">🦠 Disease pattern (30 days)</div></div>
+          <div class="card" style="padding:12px">
+            <div style="display:grid;grid-template-columns:1fr auto;gap:4px;margin-bottom:6px;align-items:center">
+              <div style="font-size:11px;font-weight:600;color:var(--slate-700)">Mastitis</div>
+              <div style="font-size:11px;font-weight:700;color:var(--slate-900);font-family:'JetBrains Mono',monospace">4 cases</div>
+              <div style="height:6px;background:var(--slate-100);border-radius:3px;overflow:hidden;grid-column:1/-1"><div style="height:100%;width:80%;background:var(--red-500);border-radius:3px"></div></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr auto;gap:4px;margin-bottom:6px;align-items:center">
+              <div style="font-size:11px;font-weight:600;color:var(--slate-700)">Difficult calving</div>
+              <div style="font-size:11px;font-weight:700;color:var(--slate-900);font-family:'JetBrains Mono',monospace">2 cases</div>
+              <div style="height:6px;background:var(--slate-100);border-radius:3px;overflow:hidden;grid-column:1/-1"><div style="height:100%;width:40%;background:var(--amber-500);border-radius:3px"></div></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr auto;gap:4px;margin-bottom:0;align-items:center">
+              <div style="font-size:11px;font-weight:600;color:var(--slate-700)">Tick-borne fever</div>
+              <div style="font-size:11px;font-weight:700;color:var(--slate-900);font-family:'JetBrains Mono',monospace">1 case</div>
+              <div style="height:6px;background:var(--slate-100);border-radius:3px;overflow:hidden;grid-column:1/-1"><div style="height:100%;width:20%;background:var(--navy-400);border-radius:3px"></div></div>
+            </div>
+          </div>
+
+          <div class="sec-hd"><div class="sec-hd-title">📋 Vaccination coverage</div></div>
+          <div class="card" style="padding:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+              <div style="font-size:11px;font-weight:600;color:var(--slate-700)">FMD</div>
+              <div style="font-size:11px;font-weight:700;color:var(--green-600);font-family:'JetBrains Mono',monospace">96%</div>
+            </div>
+            <div style="height:6px;background:var(--slate-100);border-radius:3px;overflow:hidden;margin-bottom:10px"><div style="height:100%;width:96%;background:var(--green-500);border-radius:3px"></div></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+              <div style="font-size:11px;font-weight:600;color:var(--slate-700)">Brucellosis</div>
+              <div style="font-size:11px;font-weight:700;color:var(--amber-600);font-family:'JetBrains Mono',monospace">79%</div>
+            </div>
+            <div style="height:6px;background:var(--slate-100);border-radius:3px;overflow:hidden;margin-bottom:10px"><div style="height:100%;width:79%;background:var(--amber-500);border-radius:3px"></div></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+              <div style="font-size:11px;font-weight:600;color:var(--slate-700)">LSD</div>
+              <div style="font-size:11px;font-weight:700;color:var(--red-600);font-family:'JetBrains Mono',monospace">62%</div>
+            </div>
+            <div style="height:6px;background:var(--slate-100);border-radius:3px;overflow:hidden"><div style="height:100%;width:62%;background:var(--red-500);border-radius:3px"></div></div>
+          </div>
+          <div style="height:12px"></div>
+        </div>
+        <div class="bottom-nav">
+          <div class="nav-btn" onclick="showScreen('dashboard')"><div class="nav-icon-w">🏥</div><div class="nav-lbl">Home</div></div>
+          <div class="nav-btn" onclick="showScreen('schedule')"><div class="nav-icon-w">📅</div><div class="nav-lbl">Schedule</div></div>
+          <div class="nav-btn" onclick="showScreen('farms')"><div class="nav-icon-w">🌿</div><div class="nav-lbl">Farms</div></div>
+          <div class="nav-btn" onclick="showScreen('telehealth')"><div class="nav-icon-w">📞</div><div class="nav-lbl">Telehealth</div></div>
+          <div class="nav-btn" onclick="showScreen('analytics')"><div class="nav-icon-w on">📊</div><div class="nav-lbl on">Analytics</div></div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════
+           SCREEN 10 — VET PROFILE
+      ══════════════════════════════════ -->
+      <div class="screen" id="screen-profile">
+        <div class="status-bar dark"><span>9:41</span><div class="status-icons">📶 🔋</div></div>
+        <div class="vet-profile-hero">
+          <div class="vet-avatar-big">AO</div>
+          <div class="vet-name-big">Dr. Amina Ochieng</div>
+          <div class="vet-title">Registered Veterinarian · Kenya Veterinary Board</div>
+          <div class="vet-badge-row">
+            <div class="vet-badge">🏥 Large Animal</div>
+            <div class="vet-badge">🐄 Bovine</div>
+            <div class="vet-badge">🔬 Theriogenology</div>
+          </div>
+          <div class="stat-strip">
+            <div class="stat-strip-item"><div class="strip-val">12</div><div class="strip-lbl">Farms</div></div>
+            <div class="strip-div"></div>
+            <div class="stat-strip-item"><div class="strip-val">287</div><div class="strip-lbl">Patients</div></div>
+            <div class="strip-div"></div>
+            <div class="stat-strip-item"><div class="strip-val">4.9</div><div class="strip-lbl">Rating</div></div>
+            <div class="strip-div"></div>
+            <div class="stat-strip-item"><div class="strip-val">6yr</div><div class="strip-lbl">Experience</div></div>
+          </div>
+        </div>
+        <div class="scroll-area" style="background:var(--slate-50)">
+          <div style="height:8px"></div>
+          <div class="card">
+            <div class="profile-item">
+              <div class="p-icon-w">📋</div>
+              <div><div class="p-item-label">KVB Registration</div><div class="p-item-val">KE-VET-4921 · Valid until Dec 2026</div></div>
+              <div class="p-item-right">›</div>
+            </div>
+            <div class="profile-item">
+              <div class="p-icon-w">📍</div>
+              <div><div class="p-item-label">Service area</div><div class="p-item-val">Rift Valley · Central Kenya</div></div>
+              <div class="p-item-right">›</div>
+            </div>
+            <div class="profile-item">
+              <div class="p-icon-w">📞</div>
+              <div><div class="p-item-label">Phone</div><div class="p-item-val">+254 712 445 891</div></div>
+              <div class="p-item-right">›</div>
+            </div>
+            <div class="profile-item">
+              <div class="p-icon-w">💊</div>
+              <div><div class="p-item-label">Drug formulary</div><div class="p-item-val">124 drugs loaded · Updated Jan 2026</div></div>
+              <div class="p-item-right">›</div>
+            </div>
+            <div class="profile-item">
+              <div class="p-icon-w">🌐</div>
+              <div><div class="p-item-label">Language</div><div class="p-item-val">English · Kiswahili</div></div>
+              <div class="p-item-right">›</div>
+            </div>
+          </div>
+          <div class="sec-hd"><div class="sec-hd-title">📊 This month's stats</div></div>
+          <div class="metrics-grid" style="margin-bottom:8px">
+            <div class="m-card"><div class="m-label">Visits completed</div><div class="m-val">18</div><div class="m-trend tr-up">↑ vs last month</div></div>
+            <div class="m-card"><div class="m-label">Rx issued</div><div class="m-val">23</div><div class="m-trend tr-info">Across 8 farms</div></div>
+          </div>
+          <button class="primary-btn" style="margin-top:0">Edit profile</button>
+          <button class="secondary-btn" style="margin-top:6px">Download activity report</button>
+          <div style="height:12px"></div>
+        </div>
+        <div class="bottom-nav">
+          <div class="nav-btn" onclick="showScreen('dashboard')"><div class="nav-icon-w">🏥</div><div class="nav-lbl">Home</div></div>
+          <div class="nav-btn" onclick="showScreen('schedule')"><div class="nav-icon-w">📅</div><div class="nav-lbl">Schedule</div></div>
+          <div class="nav-btn" onclick="showScreen('farms')"><div class="nav-icon-w">🌿</div><div class="nav-lbl">Farms</div></div>
+          <div class="nav-btn" onclick="showScreen('telehealth')"><div class="nav-icon-w">📞</div><div class="nav-lbl">Telehealth</div></div>
+          <div class="nav-btn" onclick="showScreen('profile')"><div class="nav-icon-w on">👤</div><div class="nav-lbl on">Profile</div></div>
+        </div>
+      </div>
+
+    </div><!-- /device-screen -->
+  </div><!-- /device-frame -->
+
+  <!-- ── ANNOTATIONS ── -->
+  <div class="annotation-panel">
+    <div class="anno-heading" id="annoTitle">Dashboard</div>
+    <div id="annoContent"></div>
+  </div>
+</div>
+
+<script>
+const annotations = {
+  dashboard: {
+    title: 'Vet Dashboard',
+    items: [
+      { tag: 'core', text: '<b>Dark navy header</b> establishes a clinical, professional tone — distinct from the farmer\'s green app. Same system, different role.' },
+      { tag: 'win', text: '<b>Urgent call banner</b> at the top with red background — if a farmer calls about a labour emergency, the vet sees it before anything else.' },
+      { tag: 'core', text: '<b>4 KPIs</b>: today\'s visits, assigned farms, open cases, and Rx issued — everything a vet needs to prioritise their day.' },
+      { tag: 'ux', text: '<b>Today\'s visit cards</b> use left-border colour coding: red=urgent, teal=scheduled, amber=pending diagnosis.' },
+      { tag: 'win', text: '<b>Pending actions section</b> surfaces lab results needing review and Rx renewals — no task falls through the cracks.' },
+    ]
+  },
+  schedule: {
+    title: 'Schedule & Calendar',
+    items: [
+      { tag: 'core', text: '<b>Monthly calendar</b> with visit dots — vet sees at a glance which days are busy. Today is highlighted in teal.' },
+      { tag: 'ux', text: '<b>Day view below the calendar</b> shows each visit with time, farm, cow detail, and urgency tag — no extra taps needed.' },
+      { tag: 'win', text: 'Visits are linked — tapping one opens the patient file or diagnosis screen directly. The schedule IS the workflow.' },
+      { tag: 'core', text: '<b>+ Book visit</b> CTA at the bottom. Vet can add emergency callouts or routine checks on the fly.' },
+    ]
+  },
+  farms: {
+    title: 'My Farms',
+    items: [
+      { tag: 'core', text: '<b>Farm cards</b> show name, farmer, location, and cow count — all the context a vet needs before a farm visit.' },
+      { tag: 'win', text: '<b>Alert count badge</b> (red pill) on farms with active issues. Vet prioritises at a glance — no need to check each farm individually.' },
+      { tag: 'ux', text: '<b>Distance shown</b> on each farm card. Helps vet plan routing for multi-visit days — a practical UX touch judges notice.' },
+      { tag: 'core', text: '<b>Health status pill</b>: green=healthy, amber=alert, red=urgent. Filter chips let vet sort by county or alert status.' },
+    ]
+  },
+  patient: {
+    title: 'Cow Patient File',
+    items: [
+      { tag: 'win', text: '<b>Navy patient header</b> with 4 vital stats (age, weight, parity, avg daily yield) — a clinical summary before the vet even scrolls.' },
+      { tag: 'core', text: '<b>4 tabs</b>: Case History (medical timeline), Vitals (temperature, HR, etc.), Medications (current + past Rx), Vaccinations.' },
+      { tag: 'win', text: '<b>Case history timeline</b> is the equivalent of the farmer\'s lifecycle view — but seen through a clinical lens with diagnoses, treatments, and vet signatures.' },
+      { tag: 'ux', text: '<b>Vitals tab</b> shows normal/high/low colour-coding. High temperature displays in red instantly — no manual interpretation needed.' },
+    ]
+  },
+  diagnosis: {
+    title: 'Clinical Note / Diagnosis',
+    items: [
+      { tag: 'core', text: '<b>Severity selector</b> (Mild / Moderate / Severe / Critical) at the top — sets the urgency context for everything that follows.' },
+      { tag: 'win', text: '<b>Quick diagnosis tags</b> (Dystocia, Uterine inertia, etc.) save time. Vet taps a known condition rather than typing from scratch.' },
+      { tag: 'core', text: '<b>Vitals fields inline</b> in the clinical note — temperature and heart rate captured in context of the diagnosis, not as a separate step.' },
+      { tag: 'ux', text: '"Save & issue prescription" CTA flows directly to the Rx screen. The diagnosis-to-prescription workflow is one seamless path.' },
+    ]
+  },
+  prescription: {
+    title: 'Prescription (Rx)',
+    items: [
+      { tag: 'win', text: '<b>Milk withholding warning</b> banner at the top. This is legally required and practically important — milk from treated cows cannot be sold. Huge credibility point.' },
+      { tag: 'core', text: '<b>Drug detail grid</b> shows dose, route, frequency, duration, withholding period, and weight-based calculation — a proper clinical record.' },
+      { tag: 'win', text: '<b>Digital signature block</b> with KVB registration number. Makes the Rx legally valid and professional — differentiates from informal notes.' },
+      { tag: 'ux', text: '"Send to farmer" sends the Rx via SMS/WhatsApp using Africa\'s Talking. "Save PDF" creates a downloadable record. Both with one tap.' },
+    ]
+  },
+  lab: {
+    title: 'Lab Results',
+    items: [
+      { tag: 'core', text: '<b>Colour-coded result dots</b>: green=normal, red=high, amber=low. Vet reads the panel in seconds — no reference range memorisation.' },
+      { tag: 'win', text: '<b>Reference ranges shown inline</b> next to each result. Scientific credibility — shows the app was designed with real veterinary workflows in mind.' },
+      { tag: 'win', text: '<b>"Requires review" banner</b> — lab results go to vet first before being shared with the farmer. Protects against misinterpretation.' },
+      { tag: 'core', text: '"Share report with farmer" CTA at the bottom — vet reviews, then pushes results to the farmer\'s HerdIQ app with one tap.' },
+    ]
+  },
+  telehealth: {
+    title: 'Telehealth Messaging',
+    items: [
+      { tag: 'win', text: '<b>Bilingual conversation</b> — farmer writes in Kiswahili, vet replies in English. App doesn\'t force one language. Natural and inclusive.' },
+      { tag: 'win', text: '<b>4 quick actions</b> in the header: voice call, video call, open patient file, send Rx. The entire clinical workflow accessible from the chat.' },
+      { tag: 'core', text: '<b>Photo sharing in chat</b> — farmer sends a photo of the cow in distress, vet assesses remotely. Rural emergency support without travel time.' },
+      { tag: 'ux', text: '<b>Quick reply chips</b> ("I\'m on my way", "Sending Rx now") save typing time when a vet is driving or gloved during an examination.' },
+    ]
+  },
+  analytics: {
+    title: 'Herd Analytics',
+    items: [
+      { tag: 'win', text: '<b>Population-level view</b> — unlike the farmer who sees their 24 cows, the vet sees patterns across 287 animals and 12 farms. Epidemiological intelligence.' },
+      { tag: 'win', text: '<b>At-risk farms dashboard</b> with colour-coded risk bars. Vet knows which farms to prioritise on a busy week without reading case notes.' },
+      { tag: 'core', text: '<b>Disease pattern chart</b> (mastitis, difficult calving, tick-borne fever) lets vet spot outbreaks early. A strong public health argument for the judges.' },
+      { tag: 'core', text: '<b>Vaccination coverage bars</b> — vet sees at a glance that LSD coverage is only 62% across the region and can run a targeted campaign.' },
+    ]
+  },
+  profile: {
+    title: 'Vet Profile',
+    items: [
+      { tag: 'core', text: '<b>KVB registration</b> and expiry date front and centre — professional credibility, and a reminder when renewal is due.' },
+      { tag: 'win', text: '<b>Drug formulary</b> shows 124 drugs loaded. Means Rx auto-fills safe doses based on the cow\'s weight. No manual dose calculation errors.' },
+      { tag: 'ux', text: '<b>Language settings</b> (English + Kiswahili) — vet can switch the app language for telehealth sessions with Swahili-speaking farmers.' },
+      { tag: 'core', text: '<b>Monthly stats</b>: visits completed and Rx issued — helps vet track their own productivity and report to their practice or NGO.' },
+    ]
+  }
+};
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  const tabs = ['dashboard','schedule','farms','patient','diagnosis','prescription','lab','telehealth','analytics','profile'];
+  document.querySelectorAll('.screen-tab').forEach((t,i) => t.classList.toggle('active', tabs[i] === name));
+  const a = annotations[name];
+  if (a) {
+    document.getElementById('annoTitle').textContent = a.title;
+    const tagLabel = {core:'Core feature', win:'Win feature', ux:'UX note', new:'New'};
+    document.getElementById('annoContent').innerHTML = a.items.map(item =>
+      `<div class="anno-card"><div class="anno-tag ${item.tag}">${tagLabel[item.tag]}</div><div class="anno-text">${item.text}</div></div>`
+    ).join('');
+  }
+}
+
+function setPatTab(idx) {
+  document.querySelectorAll('#screen-patient .tab-i').forEach((t,i) => {
+    const on = i === idx;
+    t.style.color = on ? 'var(--teal-600)' : 'var(--slate-400)';
+    t.style.borderBottomColor = on ? 'var(--teal-600)' : 'transparent';
+  });
+  [0,1,2,3].forEach(i => {
+    const el = document.getElementById('patab-' + i);
+    if (el) el.style.display = i === idx ? 'block' : 'none';
+  });
+}
+
+// Init annotations
+showScreen('dashboard');
+</script>
+</body>
+</html>
