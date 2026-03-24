@@ -1,5 +1,9 @@
 # CowCalving.farm
 
+[![Python](https://img.shields.io/badge/Python-3.x-blue.svg)](https://www.python.org/)
+[![Django](https://img.shields.io/badge/Django-6.0.3-0C4B33.svg)](https://www.djangoproject.com/)
+[![Status](https://img.shields.io/badge/Status-Active%20Development-2d7a46.svg)](#current-status)
+
 CowCalving.farm is a Django-based livestock support platform focused on cow calving guidance, farmer workflows, and veterinary coordination. The repository combines a public educational website, authentication flows, role-based dashboards, and an AI-assisted workspace in one modular project.
 
 ## Why This Project Exists
@@ -30,6 +34,20 @@ Cow calving is a high-stakes period for farmers. Good outcomes depend on prepara
 - Django Allauth for authentication and social login support
 - OpenAI SDK support inside the AI app service layer
 - HTML, CSS, and JavaScript for frontend pages
+
+## Quick Start
+
+```powershell
+git clone https://github.com/kelvin482/Ai_Testing_intergration.git
+cd Ai_Testing_intergration
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+```
+
+Then open `http://127.0.0.1:8000/`.
 
 ## Repository Structure
 
@@ -153,6 +171,17 @@ AI workspace and AI test endpoint.
 - `/app/`
 - `/app/ai/test/`
 
+## Route Overview
+
+| Area | Base Path | Purpose |
+| --- | --- | --- |
+| Public website | `/` | Product story, guide, checklist, and support pages |
+| Authentication | `/accounts/` | Login, signup, logout, and reset flows |
+| Shared dashboard handoff | `/dashboard/` | Role-aware redirect and profile management |
+| Farmer workspace | `/farmers/` | Farmer overview, herd, alerts, and reports |
+| Veterinary workspace | `/veterinary/` | Clinical and operational dashboard pages |
+| AI workspace | `/app/` | Guided livestock support and AI demo entry point |
+
 ## User Flow
 
 1. A visitor lands on the public website and learns what the platform does.
@@ -251,6 +280,13 @@ The repository already includes:
 - an AI app scaffold and demo endpoint
 
 Some dashboard surfaces currently act as structured demo-ready UI while the data model for full live herd and case records continues to evolve.
+
+## Roadmap
+
+- Expand persistent herd, calving, and case data models
+- Connect dashboard screens to live operational data
+- Strengthen automated test coverage for critical workflows
+- Improve AI-assisted support with safer and richer prompt flows
 
 ## Contributing
 
