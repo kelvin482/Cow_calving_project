@@ -8,9 +8,10 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
+from communications.models import ConversationThread, Notification
 from users.models import Profile, Role
 
-from .models import Cow, InseminationRequest, ReproductiveEvent
+from .models import Cow, InseminationRequest, ReproductiveEvent, ServiceProviderMessage
 
 
 class FarmersDashboardViewTests(TestCase):
@@ -164,6 +165,9 @@ class FarmersDashboardViewTests(TestCase):
         dashboard_response = self.client.get(reverse("farmers_dashboard:dashboard"))
         herd_response = self.client.get(reverse("farmers_dashboard:herd"))
         alerts_response = self.client.get(reverse("farmers_dashboard:alerts"))
+        location_response = self.client.get(reverse("farmers_dashboard:location"))
+        messages_response = self.client.get(reverse("farmers_dashboard:messages"))
+        notifications_response = self.client.get(reverse("farmers_dashboard:notifications"))
         reports_response = self.client.get(reverse("farmers_dashboard:reports"))
         service_response = self.client.get(reverse("farmers_dashboard:service_finder"))
 
@@ -177,11 +181,163 @@ class FarmersDashboardViewTests(TestCase):
         self.assertContains(herd_response, "Track cow")
         self.assertContains(alerts_response, "Cow alerts")
         self.assertContains(alerts_response, cow.name)
+        self.assertContains(location_response, "Set farm location")
+        self.assertContains(location_response, "Use my current location")
+        self.assertContains(location_response, "Hover preview")
+        self.assertContains(location_response, "Pinned point")
+        self.assertContains(messages_response, "Messages")
+        self.assertContains(notifications_response, "Notifications")
         self.assertContains(reports_response, "Follow-up schedule")
         self.assertContains(reports_response, "Next meaningful date per cow")
         self.assertContains(reports_response, "Expected calving")
         self.assertContains(reports_response, cow.name)
-        self.assertContains(service_response, "Find veterinary support by county")
+        self.assertContains(service_response, "Find veterinary and AI support by county")
+        self.assertContains(service_response, "Artificial insemination")
+
+    def test_service_finder_filters_to_artificial_insemination_personnel(self):
+        self._login_farmer()
+
+        response = self.client.get(
+            reverse("farmers_dashboard:service_finder"),
+            {"service_type": "artificial_insemination"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Available personnel")
+        self.assertContains(response, "Artificial insemination")
+        self.assertContains(response, "AI technician")
+        self.assertNotContains(response, "Dr. James Mwangi")
+
+    def test_service_finder_opens_provider_profile_details(self):
+        self._login_farmer()
+
+        response = self.client.get(
+            reverse("farmers_dashboard:service_finder"),
+            {
+                "provider": "veterinary-dr-james-mwangi",
+                "panel": "profile",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Provider profile")
+        self.assertContains(response, "+254712345678")
+        self.assertContains(response, "jmwangi@vetkenya.co.ke")
+        self.assertContains(response, "Nairobi and nearby peri-urban farms")
+
+    def test_service_finder_saves_message_and_shows_feedback(self):
+        self._login_farmer()
+
+        response = self.client.post(
+            reverse("farmers_dashboard:service_finder"),
+            data={
+                "send_message": "1",
+                "provider_key": "artificial_insemination-mary-chebet",
+                "county": "nakuru",
+                "service_type": "artificial_insemination",
+                "message": "My cow showed heat signs this morning and I need service help.",
+                "image": SimpleUploadedFile(
+                    "heat-sign.png",
+                    b"fake-image-content",
+                    content_type="image/png",
+                ),
+            },
+            follow=True,
+        )
+
+        self.assertEqual(ServiceProviderMessage.objects.count(), 1)
+        self.assertEqual(ConversationThread.objects.count(), 1)
+        message = ServiceProviderMessage.objects.get()
+        thread = ConversationThread.objects.get()
+        self.assertEqual(message.farmer, self.user)
+        self.assertEqual(message.provider_name, "Mary Chebet")
+        self.assertEqual(
+            message.provider_service_type,
+            ServiceProviderMessage.SERVICE_TYPE_ARTIFICIAL_INSEMINATION,
+        )
+        self.assertEqual(thread.farmer, self.user)
+        self.assertEqual(thread.provider_name_snapshot, "Mary Chebet")
+        self.assertEqual(thread.messages.count(), 1)
+        self.assertEqual(thread.messages.first().attachments.count(), 1)
+        self.assertContains(response, "Message sent to Mary Chebet")
+        self.assertContains(response, "Mary Chebet")
+        self.assertContains(response, "My cow showed heat signs this morning")
+
+    def test_farmer_message_thread_marks_vet_reply_notification_read_on_open(self):
+        self._login_farmer()
+        thread = ConversationThread.objects.create(
+            farmer=self.user,
+            provider_key="veterinary-dr-james-mwangi",
+            provider_name_snapshot="Dr. James Mwangi",
+            provider_title_snapshot="Large animal veterinarian",
+            provider_service_type="veterinary",
+            subject="Daisy support request",
+        )
+        thread.messages.create(
+            sender=self.user,
+            sender_role_snapshot="farmer",
+            body="I need help with Daisy.",
+        )
+        vet_role, _ = Role.objects.get_or_create(
+            slug="veterinary",
+            defaults={
+                "name": "Veterinary",
+                "dashboard_namespace": "veterinary_dashboard",
+                "default_path": "/veterinary/",
+            },
+        )
+        vet_user = User.objects.create_user(
+            username="vet-helper",
+            email="vet-helper@example.com",
+            password="StrongPass123!",
+        )
+        Profile.objects.create(user=vet_user, role=vet_role)
+        reply = thread.messages.create(
+            sender=vet_user,
+            sender_role_snapshot="veterinary",
+            body="Please keep the cow isolated and send one photo.",
+        )
+        notification = Notification.objects.create(
+            recipient=self.user,
+            actor=vet_user,
+            notification_type=Notification.TYPE_PROVIDER_REPLIED,
+            title="New reply from the veterinary team",
+            body="Please keep the cow isolated and send one photo.",
+            action_url=reverse("farmers_dashboard:messages_thread", args=[thread.pk]),
+            thread=thread,
+        )
+
+        response = self.client.get(
+            reverse("farmers_dashboard:messages_thread", args=[thread.pk])
+        )
+
+        notification.refresh_from_db()
+        reply.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Please keep the cow isolated and send one photo.")
+        self.assertIsNotNone(notification.read_at)
+        self.assertIsNotNone(reply.read_at)
+
+    def test_farmer_can_save_farm_location(self):
+        self._login_farmer()
+
+        response = self.client.post(
+            reverse("farmers_dashboard:location"),
+            data={
+                "latitude": "-0.303100",
+                "longitude": "36.080000",
+                "source": "manual_pin",
+            },
+            follow=True,
+        )
+
+        profile = self.user.profile
+        profile.refresh_from_db()
+        self.assertEqual(f"{profile.farm_latitude:.6f}", "-0.303100")
+        self.assertEqual(f"{profile.farm_longitude:.6f}", "36.080000")
+        self.assertEqual(profile.farm_location_source, "manual_pin")
+        self.assertIsNotNone(profile.farm_location_updated_at)
+        self.assertContains(response, "Farm location saved")
 
     def test_tracking_page_shows_guided_reproductive_dates(self):
         self._login_farmer()

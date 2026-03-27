@@ -187,6 +187,7 @@
     function resetComposer() {
         questionInput.value = "";
         questionInput.style.height = "auto";
+        questionInput.style.overflowY = "hidden";
     }
 
     function setLoading(isLoading) {
@@ -197,7 +198,10 @@
 
     function autoresizeInput() {
         questionInput.style.height = "auto";
-        questionInput.style.height = `${Math.min(questionInput.scrollHeight, 160)}px`;
+        const nextHeight = Math.min(questionInput.scrollHeight, 160);
+        questionInput.style.height = `${nextHeight}px`;
+        questionInput.style.overflowY =
+            questionInput.scrollHeight > 160 ? "auto" : "hidden";
     }
 
     async function fetchAdvice(question, cowId) {

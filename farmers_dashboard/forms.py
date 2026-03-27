@@ -1,4 +1,5 @@
 from django import forms
+from django.core.validators import FileExtensionValidator
 
 from .models import Cow, ReproductiveEvent
 
@@ -218,3 +219,78 @@ class ReproductiveEventForm(forms.Form):
             )
 
         return cleaned_data
+
+
+class ServiceProviderMessageForm(forms.Form):
+    image_validator = FileExtensionValidator(
+        allowed_extensions=["jpg", "jpeg", "png", "webp"]
+    )
+    provider_key = forms.CharField(widget=forms.HiddenInput())
+    county = forms.CharField(required=False, widget=forms.HiddenInput())
+    service_type = forms.CharField(required=False, widget=forms.HiddenInput())
+    message = forms.CharField(
+        label="Message",
+        widget=forms.Textarea(
+            attrs={
+                "rows": 4,
+                "class": "form-input",
+                "placeholder": "Type a short message about the help you need.",
+            }
+        ),
+    )
+    image = forms.FileField(
+        required=False,
+        label="Cow image",
+        widget=forms.ClearableFileInput(
+            attrs={
+                "accept": ".jpg,.jpeg,.png,.webp",
+                "class": "form-input",
+            }
+        ),
+    )
+
+    def clean_message(self):
+        message = (self.cleaned_data.get("message") or "").strip()
+        if len(message) < 8:
+            raise forms.ValidationError(
+                "Write a short message so the provider understands the request."
+            )
+        return message
+
+    def clean_image(self):
+        image = self.cleaned_data.get("image")
+        if image:
+            self.image_validator(image)
+        return image
+
+
+class FarmLocationForm(forms.Form):
+    latitude = forms.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        widget=forms.HiddenInput(),
+    )
+    longitude = forms.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        widget=forms.HiddenInput(),
+    )
+    source = forms.ChoiceField(
+        choices=[
+            ("manual_pin", "Pin on map"),
+            ("current_location", "Current location"),
+        ],
+        widget=forms.HiddenInput(),
+    )
+
+    def clean_latitude(self):
+        latitude = self.cleaned_data["latitude"]
+        if latitude < -90 or latitude > 90:
+            raise forms.ValidationError("Choose a valid farm location on the map.")
+        return latitude
+
+    def clean_longitude(self):
+        longitude = self.cleaned_data["longitude"]
+        if longitude < -180 or longitude > 180:
+            raise forms.ValidationError("Choose a valid farm location on the map.")
+        return longitude

@@ -1,0 +1,79 @@
+{% extends "veterinary_dashboard/base_dashboard.html" %}
+
+{% block veterinary_dashboard_content %}
+    <section class="rounded-[1.8rem] border border-slate-200 bg-white px-5 py-5 shadow-[0_12px_32px_rgba(15,23,42,0.05)] sm:px-6">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Records summary</p>
+                <h2 class="mt-2 text-2xl tracking-tight text-slate-950 font-display">Review what happened before acting</h2>
+                <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600">This page should help the vet reopen recent history fast, not compete with the active case page.</p>
+            </div>
+        </div>
+
+        <div class="mt-5 grid gap-3 md:grid-cols-3">
+            <article class="rounded-[1.2rem] border border-slate-200 bg-slate-50/80 px-4 py-4">
+                <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Recent records</p>
+                <p class="mt-2 text-3xl tracking-tight text-slate-950">{{ record_summary.total }}</p>
+            </article>
+            <article class="rounded-[1.2rem] border border-slate-200 bg-slate-50/80 px-4 py-4">
+                <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Open case links</p>
+                <p class="mt-2 text-3xl tracking-tight text-rose-500">{{ record_summary.open_case }}</p>
+            </article>
+            <article class="rounded-[1.2rem] border border-slate-200 bg-slate-50/80 px-4 py-4">
+                <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Awaiting review</p>
+                <p class="mt-2 text-3xl tracking-tight text-amber-500">{{ record_summary.awaiting_review }}</p>
+            </article>
+        </div>
+    </section>
+
+    <section class="grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
+        <article class="rounded-[1.8rem] border border-slate-200 bg-white p-5 shadow-[0_16px_40px_rgba(15,23,42,0.06)] sm:p-6">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Recent records</p>
+                <h2 class="mt-2 text-2xl tracking-tight text-slate-950 font-display">Cases and summaries worth reopening</h2>
+                <p class="mt-2 text-sm leading-6 text-slate-600">Each row keeps the record type, context, and next likely action in one place.</p>
+            </div>
+
+            <div class="mt-5 space-y-3">
+                {% for item in record_items %}
+                    <article class="rounded-[1.2rem] border border-slate-200 bg-slate-50/70 px-4 py-4">
+                        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                            <div class="min-w-0">
+                                <div class="flex flex-wrap items-center gap-3">
+                                    <p class="text-lg font-semibold text-slate-950">{{ item.title }}</p>
+                                    <span class="inline-flex rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] {% if item.tone == 'rose' %}bg-rose-100 text-rose-700{% elif item.tone == 'amber' %}bg-amber-100 text-amber-700{% elif item.tone == 'navy' %}bg-slate-100 text-slate-700{% else %}bg-emerald-100 text-emerald-700{% endif %}">
+                                        {{ item.status }}
+                                    </span>
+                                </div>
+                                <p class="mt-2 text-sm text-slate-600">{{ item.record_type }} - {{ item.farm }} - {{ item.owner }}</p>
+                                <p class="mt-3 text-sm leading-6 text-slate-700">{{ item.detail }}</p>
+                                <p class="mt-2 text-sm leading-6 text-slate-600">{{ item.next_step }}</p>
+                            </div>
+                            <div class="rounded-[1rem] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
+                                <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Last updated</p>
+                                <p class="mt-2 font-semibold text-slate-950">{{ item.updated_at }}</p>
+                            </div>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        </article>
+
+        <article class="rounded-[1.8rem] border border-slate-200 bg-white p-5 shadow-[0_16px_40px_rgba(15,23,42,0.06)] sm:p-6">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Connected workflows</p>
+                <h2 class="mt-2 text-2xl tracking-tight text-slate-950 font-display">Move out of history cleanly</h2>
+                <p class="mt-2 text-sm leading-6 text-slate-600">Use these actions only when the record review has given enough context.</p>
+            </div>
+
+            <div class="mt-5 space-y-3">
+                {% for item in record_support_actions %}
+                    <a href="{{ item.url }}" class="block rounded-[1.2rem] border border-slate-200 bg-slate-50/70 px-4 py-4 transition hover:border-slate-300 hover:bg-slate-50">
+                        <p class="text-sm font-semibold text-slate-950">{{ item.label }}</p>
+                        <p class="mt-1 text-sm leading-6 text-slate-600">{{ item.description }}</p>
+                    </a>
+                {% endfor %}
+            </div>
+        </article>
+    </section>
+{% endblock %}

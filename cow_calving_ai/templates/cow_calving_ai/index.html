@@ -51,30 +51,15 @@
         {% endif %}
         <section class="chat-shell {% if embedded %}embedded-shell h-full rounded-none border-0 shadow-none{% else %}rounded-[2rem] border border-dusk/10 bg-white/90 shadow-soft{% endif %} overflow-hidden">
             {% if embedded %}
-                <header class="embedded-header border-b border-dusk/10">
-                    <div class="workspace-bar workspace-bar-embedded">
-                        <div class="workspace-brand">
-                            {% include "includes/cow_calving_logo.html" with logo_wrap_class="assistant-brand-mark assistant-brand-mark-compact" logo_icon_wrap_class="flex items-center justify-center" logo_icon_class="h-10 w-10 text-[#1a6a31]" logo_text_wrap_class="sr-only" logo_text_class="sr-only" logo_tagline_class="hidden" %}
-                            <div class="workspace-brand-copy">
-                                <h1 class="assistant-title assistant-title-compact">Cow Calving Assistant</h1>
-                                <p class="workspace-subtitle">Ask, read the reply, then take the next farm step.</p>
-                            </div>
-                        </div>
+                <section class="chat-stage embedded-chat-stage">
+                    <h1 class="sr-only">Cow Calving Assistant</h1>
+                    <div class="embedded-stage-toolbar">
                         <div class="hero-meta hero-meta-compact">
                             <span class="presence-pill">
                                 <span class="presence-dot" aria-hidden="true"></span>
                                 Online
                             </span>
                             <p id="status" class="status-text status-normal embedded-status text-sm">Ready for your question.</p>
-                        </div>
-                    </div>
-                </header>
-
-                <section class="chat-stage embedded-chat-stage">
-                    <div class="prompt-toolbar border-b border-dusk/10">
-                        <div class="prompt-toolbar-copy">
-                            <p class="prompt-toolbar-eyebrow">Quick prompts</p>
-                            <p class="prompt-toggle-note">Starter ideas for common farm questions.</p>
                         </div>
                         <button
                             type="button"
@@ -112,7 +97,7 @@
                         <form id="ai-form" class="composer embedded-composer" data-ai-endpoint="{% url 'cow_calving_ai:ai_test' %}">
                             <label class="sr-only" for="question">Question</label>
                             <div class="composer-shell">
-                                <textarea id="question" name="q" rows="1" placeholder="Ask a farm question, for example: my cow hasn't shown heat in 45 days..." class="composer-input" required></textarea>
+                                <textarea id="question" name="q" rows="1" placeholder="Ask a clear farm question..." class="composer-input" required></textarea>
                                 <button id="submit-btn" type="submit" class="composer-primary">Ask AI</button>
                             </div>
                             <div class="embedded-composer-footer">
@@ -184,7 +169,7 @@
                         <form id="ai-form" class="composer" data-ai-endpoint="{% url 'cow_calving_ai:ai_test' %}">
                             <label class="sr-only" for="question">Question</label>
                             <div class="composer-shell">
-                                <textarea id="question" name="q" rows="1" placeholder="Ask a farm question, for example: my cow hasn't shown heat in 45 days..." class="composer-input" required></textarea>
+                                <textarea id="question" name="q" rows="1" placeholder="Ask a clear farm question..." class="composer-input" required></textarea>
                                 <button id="submit-btn" type="submit" class="composer-primary">Ask AI</button>
                             </div>
                             <div class="embedded-composer-footer">

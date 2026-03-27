@@ -146,7 +146,7 @@ class AccountsViewTests(TestCase):
         )
 
     @override_settings(ACCOUNT_EMAIL_VERIFICATION="none")
-    def test_register_creates_farmer_profile_and_redirects_to_shared_router(self):
+    def test_register_creates_farmer_profile_and_redirects_to_home_page(self):
         response = self.client.post(
             reverse("accounts:signup"),
             {
@@ -161,13 +161,13 @@ class AccountsViewTests(TestCase):
             follow=False,
         )
 
-        self.assertRedirects(response, "/dashboard/", fetch_redirect_response=False)
+        self.assertRedirects(response, "/", fetch_redirect_response=False)
         user = User.objects.get(username="kelvin-profile")
         profile = Profile.objects.get(user=user)
         self.assertEqual(profile.role, self.farmer_role)
         self.assertEqual(profile.farm_name, "Demo Farm")
 
-    def test_farmer_login_redirects_to_shared_router(self):
+    def test_farmer_login_redirects_to_home_page(self):
         user = User.objects.create_user(
             username="login-home-user",
             email="login-home@example.com",
@@ -185,9 +185,9 @@ class AccountsViewTests(TestCase):
             follow=False,
         )
 
-        self.assertRedirects(response, "/dashboard/", fetch_redirect_response=False)
+        self.assertRedirects(response, "/", fetch_redirect_response=False)
 
-    def test_veterinary_login_redirects_to_veterinary_dashboard(self):
+    def test_veterinary_login_redirects_to_home_page(self):
         user = User.objects.create_user(
             username="vet-login-user",
             email="vet-login@example.com",
@@ -209,7 +209,7 @@ class AccountsViewTests(TestCase):
             follow=False,
         )
 
-        self.assertRedirects(response, "/dashboard/", fetch_redirect_response=False)
+        self.assertRedirects(response, "/", fetch_redirect_response=False)
 
     def test_veterinary_account_cannot_sign_in_through_farmer_login_path(self):
         user = User.objects.create_user(

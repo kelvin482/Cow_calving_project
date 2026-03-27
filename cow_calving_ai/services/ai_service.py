@@ -1,11 +1,12 @@
 import os
+import re
 from pathlib import Path
 
 
 _POLICY_CACHE: dict[str, object] = {"path": None, "mtime": None, "text": None}
 
 
-def get_ai_max_tokens(default: int = 900) -> int:
+def get_ai_max_tokens(default: int = 650) -> int:
     raw = (os.getenv("AI_MAX_TOKENS", str(default)) or "").strip()
     try:
         value = int(raw)
@@ -101,6 +102,40 @@ def _build_system_message() -> str:
     return f"{base}\n\nPolicy:\n{policy_text}"
 
 
+def _extract_affordable_token_limit(error: Exception) -> int | None:
+    message = str(error)
+    match = re.search(r"can only afford\s+(\d+)", message, re.IGNORECASE)
+    if not match:
+        return None
+    try:
+        affordable = int(match.group(1))
+    except ValueError:
+        return None
+    if affordable < 200:
+        return 200
+    return min(affordable, 4000)
+
+
+def _create_chat_completion_with_credit_fallback(client, *, messages, model):
+    max_tokens = get_ai_max_tokens()
+    request_kwargs = {
+        "messages": messages,
+        "model": model,
+        "temperature": 1,
+        "max_tokens": max_tokens,
+        "top_p": 1,
+    }
+    try:
+        return client.chat.completions.create(**request_kwargs)
+    except Exception as exc:
+        affordable_limit = _extract_affordable_token_limit(exc)
+        if affordable_limit is None or affordable_limit >= max_tokens:
+            raise
+
+        request_kwargs["max_tokens"] = affordable_limit
+        return client.chat.completions.create(**request_kwargs)
+
+
 def get_ai_provider() -> str:
     return os.getenv("AI_PROVIDER", "stub").strip().lower()
 
@@ -121,7 +156,8 @@ def _github_models_advice(prompt: str) -> str:
         raise RuntimeError("Install the OpenAI SDK: pip install openai") from exc
 
     client = OpenAI(base_url=base_url, api_key=token)
-    response = client.chat.completions.create(
+    response = _create_chat_completion_with_credit_fallback(
+        client,
         messages=[
             {
                 "role": "system",
@@ -130,9 +166,6 @@ def _github_models_advice(prompt: str) -> str:
             {"role": "user", "content": prompt},
         ],
         model=model,
-        temperature=1,
-        max_tokens=get_ai_max_tokens(),
-        top_p=1,
     )
 
     content = (response.choices[0].message.content or "").strip()
@@ -168,7 +201,8 @@ def _openrouter_advice(prompt: str) -> str:
         client_kwargs["default_headers"] = headers
 
     client = OpenAI(**client_kwargs)
-    response = client.chat.completions.create(
+    response = _create_chat_completion_with_credit_fallback(
+        client,
         messages=[
             {
                 "role": "system",
@@ -177,9 +211,6 @@ def _openrouter_advice(prompt: str) -> str:
             {"role": "user", "content": prompt},
         ],
         model=model,
-        temperature=1,
-        max_tokens=get_ai_max_tokens(),
-        top_p=1,
     )
 
     content = (response.choices[0].message.content or "").strip()

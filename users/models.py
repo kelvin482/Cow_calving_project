@@ -20,6 +20,14 @@ class Role(models.Model):
 
 
 class Profile(models.Model):
+    LOCATION_SOURCE_MANUAL_PIN = "manual_pin"
+    LOCATION_SOURCE_CURRENT = "current_location"
+
+    LOCATION_SOURCE_CHOICES = [
+        (LOCATION_SOURCE_MANUAL_PIN, "Pin on map"),
+        (LOCATION_SOURCE_CURRENT, "Current location"),
+    ]
+
     # Keep application-specific details here so the auth app can stay focused
     # on login, registration, reset, and verification flows.
     user = models.OneToOneField(
@@ -36,6 +44,25 @@ class Profile(models.Model):
     )
     farm_name = models.CharField(max_length=200, blank=True)
     phone_number = models.CharField(max_length=30, blank=True)
+    farm_latitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True,
+    )
+    farm_longitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True,
+    )
+    farm_location_source = models.CharField(
+        max_length=32,
+        choices=LOCATION_SOURCE_CHOICES,
+        blank=True,
+        default="",
+    )
+    farm_location_updated_at = models.DateTimeField(null=True, blank=True)
     professional_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
     is_profile_complete = models.BooleanField(default=False)
 
@@ -48,6 +75,18 @@ class Profile(models.Model):
     @property
     def dashboard_slug(self):
         return self.role.slug if self.role else ""
+
+    @property
+    def has_farm_location(self):
+        return self.farm_latitude is not None and self.farm_longitude is not None
+
+    @property
+    def farm_location_label(self):
+        if self.farm_location_source == self.LOCATION_SOURCE_CURRENT:
+            return "Current location"
+        if self.farm_location_source == self.LOCATION_SOURCE_MANUAL_PIN:
+            return "Pinned on map"
+        return "Location source"
 
     def save(self, *args, **kwargs):
         # Admin-provisioned veterinary IDs should stay normalized so sign-in

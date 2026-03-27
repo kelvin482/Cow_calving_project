@@ -5,9 +5,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CowCalving.farm - Complete Calving Guide For Smallholder Dairy Farms</title>
+  <title>CowCalving.farm | Complete Calving Guide For Cow Gestation, Labor And Calf Care</title>
   <meta name="description"
-    content="Read the full CowCalving.farm guide for late pregnancy planning, calving stages, colostrum management, calf care, dry-period planning, and troubleshooting.">
+    content="Read the complete CowCalving.farm guide for cow gestation timing, signs of calving, stages of labor, colostrum management, calf care, dry-period planning, and calving troubleshooting.">
   <link rel="stylesheet" href="{% static 'Core_Web/styles.css' %}{% if dev_static_version %}?v={{ dev_static_version }}{% endif %}">
   <style>
     .auth-context {
@@ -24,7 +24,7 @@
   </style>
 </head>
 
-<body>
+<body class="guide-page">
 
   {% include "Core_Web/includes/public_site_nav.html" %}
 
@@ -65,25 +65,23 @@
     <div class="intro-section">
       <div class="intro-text">
         <div class="section-tag">Why This Matters</div>
-        <h2>Why Calving Management Drives Dairy Productivity</h2>
-        <p>Calving is not only a birth event. It is the bridge between late pregnancy, the next milk cycle, calf
-          survival, and the cow's future reproductive performance. Good management at this stage protects both current
-          income and the next breeding opportunity.</p>
-        <p>For smallholder dairy farms, mistakes around timing, hygiene, colostrum, or delayed escalation can extend
-          calving intervals, weaken calves, and increase avoidable treatment costs. This guide keeps the essential field
-          detail in one place so the next action is easier to judge.</p>
+        <h2>Complete Calving Guide For Dairy Farmers Who Need Clear Next Steps</h2>
+        <p>Calving is not only a birth event. It sits between late pregnancy, the next milk cycle, calf survival, and
+          the cow's future reproductive performance. Good decisions during this window protect both current income and
+          the next breeding opportunity.</p>
+        <p>This guide is built as a practical field reference. It helps farmers understand cow gestation timing, spot
+          the signs of calving, follow the stages of labor, protect colostrum transfer, and respond faster when the case
+          stops looking routine.</p>
 
         <div class="challenges-box">
-          <h3>Where Farmers Commonly Lose Time Or Money</h3>
-          <p>Even experienced farmers run into the same practical pressure points:</p>
+          <h3>Why Farmers Open This Guide</h3>
+          <p>These are the moments when a fast, reliable reference matters most:</p>
           <ul>
-            <li>Recognizing early signs of labor before it progresses</li>
-            <li>Knowing when to intervene versus when to wait quietly</li>
-            <li>Managing the dry period and late-pregnancy transition well</li>
-            <li>Making sure the calf receives colostrum in time</li>
-            <li>Handling retained placenta without causing harm</li>
-            <li>Managing weak or cold calves in the first hours after birth</li>
-            <li>Responding safely to night-time or difficult calvings</li>
+            <li>They need to confirm whether a cow is nearing calving or only showing early change</li>
+            <li>They want a clear timing rule for when to wait, reassess, or call a veterinarian</li>
+            <li>They need a stronger plan for dry period, late-pregnancy, and calving preparation</li>
+            <li>They want to protect calf survival through better colostrum and first-day care</li>
+            <li>They need quick reminders for retained placenta, weak calves, scours, or milk fever</li>
           </ul>
         </div>
       </div>
@@ -92,15 +90,18 @@
         <div class="intro-image">
           <img src="{% static 'Core_Web/images/286aa99925f3186fc15680800fa372e6.jpg' %}" alt="Newborn calf after birth">
         </div>
-        <div class="quote-block">
-          <blockquote>A calf that misses its colostrum window starts life at an avoidable disadvantage. The first hours
-            are where good preparation pays off.</blockquote>
-          <div class="quote-attr">
-            <div class="quote-attr-text">
-              <div class="name">Calving Management Principle</div>
-              <div class="title">Preparation and timing matter more than rushing late</div>
-            </div>
+        <div class="guide-map">
+          <div class="guide-map-tag">Guide Map</div>
+          <h3>Start from the question you have right now</h3>
+          <div class="guide-map-links">
+            <a href="#signs">Signs before calving</a>
+            <a href="#stages">Stages of labor</a>
+            <a href="#colostrum">Colostrum timing</a>
+            <a href="#daily">Transition care</a>
+            <a href="#trouble">Troubleshooting</a>
           </div>
+          <p>The strongest use of this page is simple: open the exact section you need, confirm the next action, then
+            return to the farm workflow with less guesswork.</p>
         </div>
       </div>
     </div>
@@ -108,17 +109,54 @@
 
   <div class="main-wrap">
     <div class="section-work">
-      <div class="section-tag">What This Guide Covers</div>
-      <h2>Your Structured Guide To Calving And Transition Management</h2>
-      <p>This guide walks through the warning signs before calving, the three stages of labor, colostrum management,
-        newborn calf care, daily management, and common problems that require intervention.</p>
-      <p>It also connects late pregnancy, dry-period planning, and early post-calving follow-up so calving is treated
-        as part of the full reproductive cycle rather than a single emergency moment.</p>
+      <div class="section-work-layout">
+        <div class="section-work-main">
+          <div class="section-tag">What This Guide Covers</div>
+          <h2>Your Structured Guide To Calving And Transition Management</h2>
+          <p>This guide walks through cow gestation timing, the warning signs before calving, the three stages of labor,
+            colostrum management, newborn calf care, transition-period planning, and common problems that require
+            intervention.</p>
+          <p>It is structured to support one full reproductive story: late pregnancy preparation, labor observation,
+            delivery decisions, calf protection, and early post-calving follow-up.</p>
 
-      <div class="highlight-stat">
-        <span class="big-num">30 min</span>
-        <span class="caption">If a mature cow shows no progress in Stage 2 after 30 minutes of active straining, stop
-          waiting and reassess immediately. For heifers, the working limit is 1 hour.</span>
+          <div class="highlight-stat">
+            <span class="big-num">30 min</span>
+            <span class="caption">If a mature cow shows no progress in Stage 2 after 30 minutes of active straining,
+              stop waiting and reassess immediately. For heifers, the working limit is 1 hour.</span>
+          </div>
+        </div>
+
+        <div class="section-work-rail" aria-label="Guide structure">
+          <div class="section-work-rail-title">Page Structure</div>
+          <div class="section-work-step">
+            <span class="section-work-step-num">1</span>
+            <div>
+              <strong>Prepare</strong>
+              <p>Use Quick Start and Signs to identify where the cow is before active labor begins.</p>
+            </div>
+          </div>
+          <div class="section-work-step">
+            <span class="section-work-step-num">2</span>
+            <div>
+              <strong>Decide</strong>
+              <p>Use Stages of labor and the timing rules to judge when progress is normal or delayed.</p>
+            </div>
+          </div>
+          <div class="section-work-step">
+            <span class="section-work-step-num">3</span>
+            <div>
+              <strong>Protect</strong>
+              <p>Move into Colostrum and First 24 Hours to protect the calf immediately after birth.</p>
+            </div>
+          </div>
+          <div class="section-work-step">
+            <span class="section-work-step-num">4</span>
+            <div>
+              <strong>Follow Up</strong>
+              <p>Use Transition Management and Troubleshooting for the issues that appear after calving.</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -518,21 +556,23 @@
   <div class="testimonials">
     <div class="main-wrap">
       <div>
+        <div class="section-tag section-tag--inverse">Guide Value</div>
+        <h2 class="guide-dark-heading">What This Guide Helps The Farm Decide</h2>
         <div class="testimonial-card">
-          <blockquote>The first time I lost a calf to scours, I did not understand what I was missing. Once I fixed my
-            colostrum timing and quality checks, the results on the farm changed completely.</blockquote>
+          <blockquote>Use this guide before calving when the farm needs clearer timing, better pen preparation, and a
+            stronger plan for observation instead of rushed last-minute decisions.</blockquote>
           <div class="testimonial-attr">
-            <div class="name">James Mwangi</div>
-            <div class="desc">Dairy farmer using stricter colostrum routines and record keeping</div>
+            <div class="name">Before Calving</div>
+            <div class="desc">Best for gestation timing, close-up observation, dry period planning, and calving readiness</div>
           </div>
         </div>
 
         <div class="testimonial-card">
-          <blockquote>Learning the 30-minute rule for Stage 2 changed how I respond to difficult calvings. Acting early
-            saved a heifer and calf I would have lost if I had kept waiting.</blockquote>
+          <blockquote>Use this guide after calving when the cow or calf needs closer watch, the placenta is delayed, the
+            calf is weak, or the first colostrum routine is at risk of slipping.</blockquote>
           <div class="testimonial-attr">
-            <div class="name">Grace Atieno</div>
-            <div class="desc">Smallholder farmer focused on earlier intervention decisions</div>
+            <div class="name">After Calving</div>
+            <div class="desc">Best for colostrum, calf care, retained placenta, milk fever, scours, and early warning signs</div>
           </div>
         </div>
       </div>
@@ -667,29 +707,29 @@
 
   <div class="main-wrap">
     <div class="features-section" style="background: transparent; border: none; padding-bottom: 40px;">
-      <h2>Why This Guide Matters For Herd Performance</h2>
-      <p class="subtitle">The website is lighter by design, but farmers still need one strong reference page for the
-        field-level decisions that affect fertility, calf survival, and the next lactation.</p>
+      <h2>What This Guide Helps You Decide Faster</h2>
+      <p class="subtitle">The goal is not more reading. The goal is to help the farm make better calving, calf-care,
+        and follow-up decisions with less delay and less confusion.</p>
       <div class="features-grid" style="grid-template-columns: repeat(4, 1fr);">
         <div class="feature-card">
           <div class="feature-icon">&#128046;</div>
           <h3 style="font-size: 18px;">Clearer calving decisions</h3>
-          <p style="font-size: 14px;">Know what is normal, what is not, and when the farm needs to move faster.</p>
+          <p style="font-size: 14px;">Judge whether labor is progressing normally or whether the farm needs to reassess immediately.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">&#128202;</div>
           <h3 style="font-size: 18px;">Stronger calf starts</h3>
-          <p style="font-size: 14px;">Tie timing, colostrum, and early care together instead of treating them separately.</p>
+          <p style="font-size: 14px;">Connect airway care, warmth, colostrum timing, and early feeding into one first-day routine.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">&#127806;</div>
           <h3 style="font-size: 18px;">Better transition management</h3>
-          <p style="font-size: 14px;">Connect dry period planning, pen hygiene, and observation to better outcomes.</p>
+          <p style="font-size: 14px;">Connect dry period planning, pen hygiene, observation, and recovery into one transition plan.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">&#129658;</div>
           <h3 style="font-size: 18px;">Earlier escalation</h3>
-          <p style="font-size: 14px;">Use the guide before delay turns a manageable calving or post-calving problem into a larger loss.</p>
+          <p style="font-size: 14px;">Use warning signs earlier so a manageable calving or post-calving problem does not become a larger loss.</p>
         </div>
       </div>
     </div>

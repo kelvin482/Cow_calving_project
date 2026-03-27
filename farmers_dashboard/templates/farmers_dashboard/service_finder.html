@@ -6,7 +6,7 @@
             <div class="max-w-2xl">
                 <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Provider search</p>
                 <h2 class="mt-2 text-2xl tracking-tight text-slate-950 font-display">Find the right field support</h2>
-                <p class="mt-2 text-sm leading-6 text-slate-600">Filter quickly, scan the best match, then contact the provider directly.</p>
+                <p class="mt-2 text-sm leading-6 text-slate-600">Filter quickly, scan the best match, then contact the right veterinary or artificial insemination personnel directly.</p>
             </div>
 
             <form method="get" class="w-full max-w-3xl rounded-[1.4rem] border border-slate-200 bg-slate-50/80 p-4">
@@ -53,58 +53,173 @@
     <section class="rounded-[2rem] border border-slate-200 bg-white px-5 py-5 shadow-[0_16px_40px_rgba(15,23,42,0.06)] sm:px-7 sm:py-7">
         <div>
             <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Provider list</p>
-            <h2 class="mt-2 text-2xl tracking-tight text-slate-950 font-display">Contact-ready matches</h2>
+            <h2 class="mt-2 text-2xl tracking-tight text-slate-950 font-display">Available personnel</h2>
         </div>
 
         <div class="mt-6 overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white">
             {% for provider in service_providers %}
-                <article class="grid gap-4 px-4 py-5 lg:grid-cols-[minmax(0,1fr)_12rem_minmax(0,1fr)_auto] lg:items-center {% if not forloop.last %}border-b border-slate-200{% endif %}">
-                    <div class="min-w-0">
-                        <div class="flex flex-wrap items-center gap-3">
-                            <h3 class="text-xl tracking-tight text-slate-950 font-display">{{ provider.name }}</h3>
-                            {% if provider.is_verified %}
-                                <span class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
-                                    <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
-                                    Verified
+                <article class="{% if not forloop.last %}border-b border-slate-200{% endif %}">
+                    <div class="grid gap-4 px-4 py-5 lg:grid-cols-[minmax(0,1fr)_12rem_minmax(0,1fr)_auto] lg:items-center">
+                        <div class="min-w-0">
+                            <div class="flex flex-wrap items-center gap-3">
+                                <h3 class="text-xl tracking-tight text-slate-950 font-display">{{ provider.name }}</h3>
+                                {% if provider.is_verified %}
+                                    <span class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
+                                        <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                                        Verified
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <p class="mt-2 text-sm font-medium text-slate-700">{{ provider.provider_title }}</p>
+                            <div class="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-600">
+                                <span>{{ provider.county_label }}</span>
+                                <span class="rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-sky-700">
+                                    {{ provider.service_type_label }}
                                 </span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Availability</p>
+                            <p class="mt-2 text-sm font-medium text-slate-900">{{ provider.availability }}</p>
+                        </div>
+
+                        <div class="min-w-0">
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Best fit</p>
+                            <p class="mt-2 text-sm leading-6 text-slate-700">{{ provider.summary }}</p>
+                        </div>
+
+                        <div class="flex flex-col gap-3 lg:min-w-[12rem]">
+                            <form method="get" class="w-full">
+                                <input type="hidden" name="provider" value="{{ provider.key }}">
+                                <input type="hidden" name="panel" value="profile">
+                                {% if selected_county %}<input type="hidden" name="county" value="{{ selected_county }}">{% endif %}
+                                {% if selected_service_type %}<input type="hidden" name="service_type" value="{{ selected_service_type }}">{% endif %}
+                                <button type="submit" class="inline-flex w-full items-center justify-center gap-2 rounded-[1rem] border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:border-slate-300 hover:bg-slate-50">
+                                    View profile
+                                </button>
+                            </form>
+                            <form method="get" class="w-full">
+                                <input type="hidden" name="provider" value="{{ provider.key }}">
+                                <input type="hidden" name="panel" value="message">
+                                {% if selected_county %}<input type="hidden" name="county" value="{{ selected_county }}">{% endif %}
+                                {% if selected_service_type %}<input type="hidden" name="service_type" value="{{ selected_service_type }}">{% endif %}
+                                <button type="submit" class="inline-flex w-full items-center justify-center gap-2 rounded-[1rem] bg-[#14532d] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#114524]">
+                                    Send message
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    {% if active_provider_key == provider.key %}
+                        <div class="border-t border-slate-200 bg-slate-50/70 px-4 py-5">
+                            <div class="flex flex-wrap items-center justify-between gap-3">
+                                <div>
+                                    <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+                                        {% if active_provider_panel == "message" %}Message provider{% else %}Provider profile{% endif %}
+                                    </p>
+                                    <h4 class="mt-2 text-xl tracking-tight text-slate-950 font-display">{{ provider.name }}</h4>
+                                </div>
+                                <a href="{% url 'farmers_dashboard:service_finder' %}{% if selected_county or selected_service_type %}?{% if selected_county %}county={{ selected_county }}{% endif %}{% if selected_county and selected_service_type %}&{% endif %}{% if selected_service_type %}service_type={{ selected_service_type }}{% endif %}{% endif %}" class="inline-flex items-center justify-center rounded-[1rem] border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
+                                    Hide
+                                </a>
+                            </div>
+
+                            {% if active_provider_panel == "profile" %}
+                                <div class="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                                    <div class="rounded-[1.2rem] border border-slate-200 bg-white px-4 py-4">
+                                        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Phone</p>
+                                        <a href="tel:{{ provider.phone }}" class="mt-2 block text-sm font-semibold text-slate-900 hover:text-emerald-700">{{ provider.phone }}</a>
+                                    </div>
+                                    <div class="rounded-[1.2rem] border border-slate-200 bg-white px-4 py-4">
+                                        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Email</p>
+                                        <a href="mailto:{{ provider.email }}" class="mt-2 block break-all text-sm font-semibold text-slate-900 hover:text-emerald-700">{{ provider.email }}</a>
+                                    </div>
+                                    <div class="rounded-[1.2rem] border border-slate-200 bg-white px-4 py-4">
+                                        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Coverage</p>
+                                        <p class="mt-2 text-sm text-slate-700">{{ provider.coverage }}</p>
+                                    </div>
+                                    <div class="rounded-[1.2rem] border border-slate-200 bg-white px-4 py-4">
+                                        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Availability</p>
+                                        <p class="mt-2 text-sm text-slate-700">{{ provider.availability }}</p>
+                                    </div>
+                                </div>
+                            {% elif active_provider_panel == "message" %}
+                                <div class="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_18rem]">
+                                    <form method="post" enctype="multipart/form-data" class="rounded-[1.3rem] border border-slate-200 bg-white p-4">
+                                        {% csrf_token %}
+                                        {{ message_form.provider_key }}
+                                        {{ message_form.county }}
+                                        {{ message_form.service_type }}
+                                        <div class="flex flex-wrap items-center justify-between gap-3">
+                                            <div>
+                                                <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">New message</p>
+                                                <p class="mt-1 text-sm text-slate-600">Write one short message. You will get a message-sent confirmation after sending.</p>
+                                            </div>
+                                            <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
+                                                Sent to workspace
+                                            </span>
+                                        </div>
+                                        {% if message_form.non_field_errors %}
+                                            <div class="mt-4 rounded-[1rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                                                {% for error in message_form.non_field_errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="mt-4">
+                                            <label for="{{ message_form.message.id_for_label }}" class="mb-2 block text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Message</label>
+                                            {{ message_form.message }}
+                                            {% if message_form.message.errors %}
+                                                <p class="mt-2 text-sm text-rose-600">{{ message_form.message.errors.0 }}</p>
+                                            {% endif %}
+                                        </div>
+                                        <div class="mt-4">
+                                            <label for="{{ message_form.image.id_for_label }}" class="mb-2 block text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Cow image</label>
+                                            {{ message_form.image }}
+                                            <p class="mt-2 text-xs text-slate-500">Optional. Share one clear image if the provider needs visual context.</p>
+                                            {% if message_form.image.errors %}
+                                                <p class="mt-2 text-sm text-rose-600">{{ message_form.image.errors.0 }}</p>
+                                            {% endif %}
+                                        </div>
+                                        <button type="submit" name="send_message" value="1" class="mt-4 inline-flex items-center justify-center rounded-[1rem] bg-[#14532d] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#114524]">
+                                            Send message
+                                        </button>
+                                    </form>
+
+                                    <div class="rounded-[1.3rem] border border-slate-200 bg-white p-4">
+                                        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Contact preview</p>
+                                        <dl class="mt-4 space-y-4 text-sm text-slate-700">
+                                            <div>
+                                                <dt class="font-semibold text-slate-900">Role</dt>
+                                                <dd class="mt-1">{{ provider.provider_title }}</dd>
+                                            </div>
+                                            <div>
+                                                <dt class="font-semibold text-slate-900">County</dt>
+                                                <dd class="mt-1">{{ provider.county_label }}</dd>
+                                            </div>
+                                            <div>
+                                                <dt class="font-semibold text-slate-900">Phone</dt>
+                                                <dd class="mt-1">{{ provider.phone }}</dd>
+                                            </div>
+                                            <div>
+                                                <dt class="font-semibold text-slate-900">Email</dt>
+                                                <dd class="mt-1 break-all">{{ provider.email }}</dd>
+                                            </div>
+                                        </dl>
+                                    </div>
+                                </div>
                             {% endif %}
                         </div>
-                        <div class="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-600">
-                            <span>{{ provider.county_label }}</span>
-                            <span class="rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-sky-700">
-                                {{ provider.service_type_label }}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div>
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Availability</p>
-                        <p class="mt-2 text-sm font-medium text-slate-900">{{ provider.availability }}</p>
-                    </div>
-
-                    <div class="min-w-0">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Best fit</p>
-                        <p class="mt-2 text-sm leading-6 text-slate-700">{{ provider.summary }}</p>
-                    </div>
-
-                    <div class="flex flex-col gap-3 lg:min-w-[11rem]">
-                        <a href="tel:{{ provider.phone }}" class="inline-flex items-center justify-center gap-2 rounded-[1rem] bg-[#14532d] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#114524]">
-                            Call
-                        </a>
-                        <a href="mailto:{{ provider.email }}" class="inline-flex items-center justify-center gap-2 rounded-[1rem] border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:border-slate-300 hover:bg-slate-50">
-                            Email
-                        </a>
-                    </div>
+                    {% endif %}
                 </article>
             {% empty %}
                 <article class="px-6 py-14 text-center">
                     <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">No exact match yet</p>
-                    <h2 class="mt-2 text-2xl tracking-tight text-slate-950 font-display">No providers match the current filters</h2>
+                    <h2 class="mt-2 text-2xl tracking-tight text-slate-950 font-display">No personnel match the current filters</h2>
                     <p class="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-600">
-                        Try a nearby county or clear the filters to see the full veterinary directory.
+                        Try a nearby county or clear the filters to see the full veterinary and artificial insemination directory.
                     </p>
                     <a href="{% url 'farmers_dashboard:service_finder' %}" class="mt-5 inline-flex items-center justify-center rounded-[1rem] bg-[#14532d] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#114524]">
-                        Show all providers
+                        Show all personnel
                     </a>
                 </article>
             {% endfor %}

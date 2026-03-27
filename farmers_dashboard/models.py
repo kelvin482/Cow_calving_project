@@ -127,6 +127,53 @@ class ReproductiveEvent(models.Model):
         return "amber"
 
 
+class ServiceProviderMessage(models.Model):
+    STATUS_SENT = "sent"
+    STATUS_READ = "read"
+
+    STATUS_CHOICES = [
+        (STATUS_SENT, "Sent"),
+        (STATUS_READ, "Read"),
+    ]
+
+    SERVICE_TYPE_VETERINARY = "veterinary"
+    SERVICE_TYPE_ARTIFICIAL_INSEMINATION = "artificial_insemination"
+
+    SERVICE_TYPE_CHOICES = [
+        (SERVICE_TYPE_VETERINARY, "Veterinary"),
+        (SERVICE_TYPE_ARTIFICIAL_INSEMINATION, "Artificial insemination"),
+    ]
+
+    farmer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="service_provider_messages",
+    )
+    provider_key = models.CharField(max_length=64)
+    provider_name = models.CharField(max_length=120)
+    provider_title = models.CharField(max_length=120)
+    provider_service_type = models.CharField(
+        max_length=32,
+        choices=SERVICE_TYPE_CHOICES,
+    )
+    provider_county = models.CharField(max_length=64)
+    provider_phone = models.CharField(max_length=32, blank=True)
+    provider_email = models.EmailField(blank=True)
+    message = models.TextField()
+    status = models.CharField(
+        max_length=16,
+        choices=STATUS_CHOICES,
+        default=STATUS_SENT,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.provider_name} message from {self.farmer}"
+
+
 class Cow(models.Model):
     BREED_FRIESIAN = "friesian"
     BREED_AYRSHIRE = "ayrshire"

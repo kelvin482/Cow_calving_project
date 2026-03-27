@@ -4,30 +4,64 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ page_title }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        green: "#1F5D3B",
+                        "green-dark": "#16422a",
+                        forest: "#1F5D3B",
+                        cream: "#F5F2E8",
+                        muted: "#6B7280",
+                        "vet-navy": "#10345b",
+                    },
+                    fontFamily: {
+                        display: ["Poppins", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
+                    },
+                    boxShadow: {
+                        soft: "0 18px 48px rgba(148,163,184,0.14)",
+                    },
+                }
+            }
+        };
+    </script>
     <style>
         :root {
             color-scheme: light;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
-            font-family: "Instrument Sans", "Segoe UI", sans-serif;
+            font-family: "Inter", "Segoe UI", sans-serif;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
         }
 
         h1,
         h2,
         h3,
         .font-display {
-            font-family: "Fraunces", Georgia, serif;
+            font-family: "Poppins", "Segoe UI", sans-serif;
+        }
+
+        .dashboard-shell {
+            width: min(100%, 1320px);
         }
     </style>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    {% block veterinary_dashboard_head %}{% endblock %}
 </head>
-<body class="min-h-screen bg-[#f5f7fb] text-slate-900">
-    <div class="min-h-screen xl:grid xl:grid-cols-[18rem_minmax(0,1fr)]">
-        <aside class="bg-[linear-gradient(180deg,#0d2f56_0%,#0d355f_52%,#102a47_100%)] text-white shadow-[24px_0_60px_rgba(15,23,42,0.12)]">
+<body class="min-h-screen bg-[#f5f7fb] font-body text-slate-900">
+    <div class="min-h-screen xl:grid xl:grid-cols-[17.5rem_minmax(0,1fr)]">
+        <aside class="bg-[linear-gradient(180deg,#123524_0%,#18452f_48%,#0f2d20_100%)] text-white shadow-[24px_0_60px_rgba(15,23,42,0.12)] xl:sticky xl:top-0 xl:h-screen xl:overflow-y-auto">
             <div class="flex h-full flex-col px-6 py-7">
                 <a href="{{ dashboard_home_url }}" class="inline-flex items-center gap-3 text-white">
                     <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-white">
@@ -35,19 +69,19 @@
                     </span>
                     <span class="min-w-0">
                         <span class="block text-2xl font-semibold tracking-tight font-display">CowCalving</span>
-                        <span class="mt-1 block text-sm text-sky-100/70">Vet portal</span>
+                        <span class="mt-1 block text-sm text-emerald-100/75">Veterinary workspace</span>
                     </span>
                 </a>
 
                 <div class="mt-10 space-y-7">
                     {% for section in navigation_sections %}
                         <div class="{% if not forloop.first %}border-t border-white/10 pt-5{% endif %}">
-                            <p class="px-2 text-xs font-semibold uppercase tracking-[0.28em] text-sky-100/45">{{ section.label }}</p>
+                            <p class="px-2 text-xs font-semibold uppercase tracking-[0.28em] text-emerald-100/45">{{ section.label }}</p>
                             <nav class="mt-3 space-y-1.5">
                                 {% for item in section.items %}
                                     <a
                                         href="{{ item.url }}"
-                                        class="flex items-center gap-3 rounded-r-2xl rounded-l-xl px-4 py-3 text-base transition {% if request.resolver_match.view_name == item.view_name %}bg-white/10 text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]{% else %}text-slate-200/80 hover:bg-white/5 hover:text-white{% endif %}"
+                                        class="flex items-center gap-3 rounded-r-2xl rounded-l-xl px-4 py-3 text-sm transition {% if request.resolver_match.view_name == item.view_name %}bg-white/12 text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]{% else %}text-slate-200/85 hover:bg-white/5 hover:text-white{% endif %}"
                                     >
                                         <span class="flex h-5 w-5 items-center justify-center text-slate-300/85">
                                             {% if item.icon == "overview" %}
@@ -70,6 +104,15 @@
                                                 <svg class="h-5 w-5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                                                     <path d="M3 15.5 6.5 4l3.5 6 3-3 4 8.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
                                                 </svg>
+                                            {% elif item.icon == "messages" %}
+                                                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                                    <path d="M4 5.5h12a1.5 1.5 0 0 1 1.5 1.5v6A1.5 1.5 0 0 1 16 14.5H8l-4.5 2V7A1.5 1.5 0 0 1 5 5.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path>
+                                                </svg>
+                                            {% elif item.icon == "notifications" %}
+                                                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                                    <path d="M10 4.5a3 3 0 0 1 3 3V9c0 .9.3 1.77.86 2.47L15 13H5l1.14-1.53c.56-.7.86-1.57.86-2.47V7.5a3 3 0 0 1 3-3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path>
+                                                    <path d="M8.5 15.5a1.5 1.5 0 0 0 3 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+                                                </svg>
                                             {% else %}
                                                 <svg class="h-5 w-5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                                                     <rect x="4" y="3" width="12" height="14" rx="2" stroke="currentColor" stroke-width="1.6"></rect>
@@ -90,134 +133,166 @@
                     {% endfor %}
                 </div>
 
-                <div class="mt-auto space-y-4">
-                    <div class="rounded-3xl border border-white/10 bg-white/5 p-4">
-                        <p class="text-xs font-semibold uppercase tracking-[0.24em] text-sky-100/50">Session</p>
-                        <div class="mt-3 space-y-2">
-                            <a href="{{ back_to_website_url }}" class="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
-                                <span>Back to website</span>
-                                <span class="text-sky-100/60">&rsaquo;</span>
-                            </a>
-                            <form method="post" action="{% url 'accounts:logout' %}">
-                                {% csrf_token %}
-                                <button type="submit" class="flex w-full items-center justify-between gap-3 rounded-2xl border border-rose-400/20 bg-rose-400/10 px-4 py-3 text-sm font-semibold text-rose-100 transition hover:bg-rose-400/20">
-                                    <span>Logout</span>
-                                    <span class="text-rose-200/70">&rsaquo;</span>
-                                </button>
-                            </form>
+                <div class="mt-auto pt-8">
+                    <div class="border-t border-white/10 pt-5">
+                        <p class="px-2 text-xs font-semibold uppercase tracking-[0.28em] text-emerald-100/45">Workspace</p>
+                        <div class="mt-3 rounded-[1.6rem] bg-white/6 px-4 py-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]">
+                            <div class="flex items-center gap-3">
+                                <span class="flex h-11 w-11 items-center justify-center rounded-full bg-[#10345b] text-sm font-bold text-white shadow-sm">
+                                    {{ vet_initials }}
+                                </span>
+                                <div class="min-w-0">
+                                    <p class="truncate text-sm font-semibold text-white">{{ display_name }}</p>
+                                    <p class="mt-1 text-[11px] uppercase tracking-[0.22em] text-emerald-100/65">Clinical workspace</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="rounded-3xl border border-white/10 bg-white/5 p-4">
-                        <div class="flex items-center gap-3">
-                            <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-100 text-sm font-bold text-[#0d2f56]">
-                                {{ vet_initials }}
-                            </span>
-                            <div class="min-w-0">
-                                <p class="truncate text-sm font-semibold text-white">{{ display_name }}</p>
-                                <p class="mt-1 text-xs uppercase tracking-[0.22em] text-sky-100/60">Clinical workspace</p>
-                            </div>
+                    <div class="border-t border-white/10 pt-5 mt-5">
+                        <p class="px-2 text-xs font-semibold uppercase tracking-[0.28em] text-emerald-100/45">Session</p>
+                        <div class="mt-3 space-y-1.5">
+                            <a href="{{ back_to_website_url }}" class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-emerald-50/82 transition hover:bg-white/6 hover:text-white">
+                                <span class="flex h-5 w-5 items-center justify-center text-emerald-100/75">
+                                    <svg class="h-4.5 w-4.5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                        <path d="M8 5 3.5 10 8 15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+                                        <path d="M4 10h8.5c2.21 0 4 1.79 4 4v.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+                                    </svg>
+                                </span>
+                                <span class="min-w-0 flex-1">Back to website</span>
+                            </a>
+                            <form method="post" action="{% url 'accounts:logout' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-rose-100/90 transition hover:bg-white/6 hover:text-white">
+                                    <span class="flex h-5 w-5 items-center justify-center text-rose-200/80">
+                                        <svg class="h-4.5 w-4.5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                            <path d="M12.5 4.5h2a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+                                            <path d="M8.5 7 5 10l3.5 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+                                            <path d="M5.5 10h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+                                        </svg>
+                                    </span>
+                                    <span class="min-w-0 flex-1">Logout</span>
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
             </div>
         </aside>
 
-        <div class="px-5 py-6 sm:px-7 lg:px-10 lg:py-8">
-            <header class="mb-8 flex flex-col gap-4 border-b border-slate-200/80 pb-6 md:flex-row md:items-start md:justify-between">
-                <div class="max-w-3xl">
-                    <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">{{ page_eyebrow }}</p>
-                    <h1 class="mt-3 text-3xl tracking-tight text-slate-950 sm:text-4xl">
-                        <span class="font-display">{{ display_name }}</span>
-                        <span class="font-normal text-slate-700">, {{ dashboard_greeting }}</span>
-                    </h1>
-                    <p class="mt-2 text-sm font-medium uppercase tracking-[0.2em] text-slate-500">{{ page_heading }}</p>
-                    <p class="mt-3 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">{{ page_intro }}</p>
-                </div>
-
-                <div class="flex flex-wrap items-start gap-3">
-                    <a href="{{ header_primary_action.url }}" class="inline-flex items-center rounded-full bg-[#0d2f56] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#123d6a]">
-                        {{ header_primary_action.label }}
-                    </a>
-
-                    <span class="inline-flex items-center rounded-full bg-sky-100 px-4 py-2 text-sm font-medium text-[#0d4a87]">
-                        Verified vet
-                    </span>
-
-                    <details class="relative">
-                        <summary class="flex cursor-pointer items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-left shadow-sm transition hover:border-slate-300 marker:content-none">
-                            <span class="flex h-10 w-10 items-center justify-center rounded-full bg-[#0d2f56] text-sm font-bold text-white">
-                                {{ vet_initials }}
+        <div class="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 xl:px-10">
+            <div class="dashboard-shell mx-auto">
+                <header class="mb-6 grid gap-5 border-b border-slate-200/80 pb-6 lg:mb-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-8">
+                    <div class="min-w-0">
+                        <div class="flex flex-wrap items-center gap-2.5">
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-500">{{ page_eyebrow }}</p>
+                            <span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-600 shadow-sm">
+                                Clinical workspace
                             </span>
-                            <span class="min-w-0 flex-1">
-                                <span class="block truncate text-sm font-semibold text-slate-950">{{ display_name }}</span>
-                                <span class="mt-0.5 block text-xs uppercase tracking-[0.22em] text-slate-500">Workspace</span>
+                        </div>
+                        <h1 class="mt-3 max-w-3xl text-3xl tracking-tight text-slate-950 sm:text-4xl lg:text-[2.7rem]">
+                            <span class="font-display">{{ page_heading }}</span>
+                        </h1>
+                        <p class="mt-3 max-w-xl text-sm leading-7 text-slate-600 sm:text-base sm:leading-7">{{ page_intro }}</p>
+                    </div>
+
+                    <div class="flex w-full flex-col gap-3 lg:w-[22rem] lg:justify-self-end">
+                        <div class="flex flex-wrap items-center gap-3 lg:justify-end">
+                            <a href="{{ header_primary_action.url }}" class="inline-flex items-center justify-center rounded-full bg-[#14532d] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#114524]">
+                                {{ header_primary_action.label }}
+                            </a>
+
+                            <span class="inline-flex items-center justify-center rounded-full border border-emerald-200 bg-emerald-100 px-4 py-2.5 text-sm font-medium text-emerald-700">
+                                Verified vet
                             </span>
-                            <svg class="h-4 w-4 flex-shrink-0 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.51a.75.75 0 0 1-1.08 0l-4.25-4.51a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd"></path>
-                            </svg>
-                        </summary>
+                        </div>
 
-                        <div class="absolute right-0 top-[calc(100%+0.75rem)] z-30 w-[19.5rem] overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.12)]">
-                            <div class="border-b border-slate-200 px-4 py-4">
-                                <div class="flex items-center gap-3">
-                                    <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0d2f56] text-sm font-bold text-white">
-                                        {{ vet_initials }}
-                                    </span>
-                                    <div class="min-w-0">
-                                        <p class="truncate text-sm font-semibold text-slate-950">{{ display_name }}</p>
-                                        <p class="mt-1 text-[11px] uppercase tracking-[0.22em] text-slate-500">Veterinary workspace</p>
-                                    </div>
-                                </div>
-                                <div class="mt-3 rounded-2xl bg-slate-50 px-3 py-2.5">
-                                    <p class="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">Professional ID</p>
-                                    <p class="mt-1 font-mono text-sm text-slate-800">{{ professional_id_display }}</p>
-                                </div>
-                            </div>
+                        <details class="relative">
+                            <summary class="flex cursor-pointer items-center gap-3 rounded-[1.4rem] border border-slate-200 bg-white px-4 py-3 text-left shadow-sm transition hover:border-slate-300 marker:content-none">
+                                <span class="flex h-11 w-11 items-center justify-center rounded-full bg-[#10345b] text-sm font-bold text-white shadow-sm">
+                                    {{ vet_initials }}
+                                </span>
+                                <span class="min-w-0 flex-1">
+                                    <span class="block truncate text-sm font-semibold text-slate-950">{{ display_name }}</span>
+                                    <span class="mt-0.5 block text-xs uppercase tracking-[0.22em] text-slate-500">Workspace</span>
+                                </span>
+                                <svg class="h-4 w-4 flex-shrink-0 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.51a.75.75 0 0 1-1.08 0l-4.25-4.51a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd"></path>
+                                </svg>
+                            </summary>
 
-                            <div class="p-2">
-                                {% for section in workspace_menu_sections %}
-                                    <div class="{% if not forloop.first %}mt-2 border-t border-slate-100 pt-2{% endif %}">
-                                        <p class="px-2 pb-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">{{ section.label }}</p>
-                                        <div class="space-y-1">
-                                            {% for item in section.items %}
-                                                <a href="{{ item.url }}" class="flex items-start justify-between gap-3 rounded-2xl px-3 py-2.5 transition hover:bg-slate-50">
-                                                    <span class="min-w-0">
-                                                        <span class="block text-sm font-semibold text-slate-900">{{ item.label }}</span>
-                                                        <span class="mt-0.5 block text-xs leading-5 text-slate-500">{{ item.description }}</span>
-                                                    </span>
-                                                    <span class="pt-0.5 text-slate-300">&rsaquo;</span>
-                                                </a>
-                                            {% endfor %}
+                            <div class="absolute right-0 top-[calc(100%+0.75rem)] z-30 w-[19.5rem] max-w-[calc(100vw-2rem)] overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.12)]">
+                                <div class="border-b border-slate-200 px-4 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#10345b] text-sm font-bold text-white">
+                                            {{ vet_initials }}
+                                        </span>
+                                        <div class="min-w-0">
+                                            <p class="truncate text-sm font-semibold text-slate-950">{{ display_name }}</p>
+                                            <p class="mt-1 text-[11px] uppercase tracking-[0.22em] text-slate-500">Veterinary workspace</p>
                                         </div>
                                     </div>
-                                {% endfor %}
-                            </div>
+                                    <div class="mt-3 rounded-2xl bg-slate-50 px-3 py-2.5">
+                                        <p class="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">Professional ID</p>
+                                        <p class="mt-1 font-mono text-sm text-slate-800">{{ professional_id_display }}</p>
+                                    </div>
+                                </div>
 
-                            <div class="border-t border-slate-200 p-2">
-                                <p class="px-2 pb-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">Session</p>
-                                <form method="post" action="{% url 'accounts:logout' %}">
-                                    {% csrf_token %}
-                                    <button type="submit" class="flex w-full items-start justify-between gap-3 rounded-2xl px-3 py-2.5 text-left transition hover:bg-rose-50">
-                                        <span class="min-w-0">
-                                            <span class="block text-sm font-semibold text-rose-700">Sign out</span>
-                                            <span class="mt-0.5 block text-xs leading-5 text-rose-600">End this session safely.</span>
-                                        </span>
-                                        <span class="pt-0.5 text-rose-300">&rsaquo;</span>
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </details>
-                </div>
-            </header>
+                                <div class="p-2">
+                                    {% for section in workspace_menu_sections %}
+                                        <div class="{% if not forloop.first %}mt-2 border-t border-slate-100 pt-2{% endif %}">
+                                            <p class="px-2 pb-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">{{ section.label }}</p>
+                                            <div class="space-y-1">
+                                                {% for item in section.items %}
+                                                    <a href="{{ item.url }}" class="flex items-start justify-between gap-3 rounded-2xl px-3 py-2.5 transition hover:bg-slate-50">
+                                                        <span class="min-w-0">
+                                                            <span class="block text-sm font-semibold text-slate-900">{{ item.label }}</span>
+                                                            <span class="mt-0.5 block text-xs leading-5 text-slate-500">{{ item.description }}</span>
+                                                        </span>
+                                                        <span class="pt-0.5 text-slate-300">&rsaquo;</span>
+                                                    </a>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
 
-            <main class="space-y-8">
-                {% block veterinary_dashboard_content %}{% endblock %}
-            </main>
+                                <div class="border-t border-slate-200 p-2">
+                                    <p class="px-2 pb-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">Session</p>
+                                    <form method="post" action="{% url 'accounts:logout' %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="flex w-full items-start justify-between gap-3 rounded-2xl px-3 py-2.5 text-left transition hover:bg-rose-50">
+                                            <span class="min-w-0">
+                                                <span class="block text-sm font-semibold text-rose-700">Sign out</span>
+                                                <span class="mt-0.5 block text-xs leading-5 text-rose-600">End this session safely.</span>
+                                            </span>
+                                            <span class="pt-0.5 text-rose-300">&rsaquo;</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </details>
+                    </div>
+                </header>
+
+                {% if messages %}
+                    <div class="mb-6 space-y-3">
+                        {% for message in messages %}
+                            <div class="rounded-[1.2rem] border px-4 py-3 text-sm shadow-sm {% if message.tags == 'error' %}border-rose-200 bg-rose-50 text-rose-700{% else %}border-emerald-200 bg-emerald-50 text-emerald-800{% endif %}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <main class="space-y-6 lg:space-y-8">
+                    {% block veterinary_dashboard_content %}{% endblock %}
+                </main>
+            </div>
         </div>
     </div>
 
     {% include "includes/dashboard_ai_workspace.html" %}
+    {% block veterinary_dashboard_scripts %}{% endblock %}
 </body>
 </html>

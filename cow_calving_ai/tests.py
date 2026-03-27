@@ -6,7 +6,12 @@ from unittest.mock import patch
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from .services.ai_service import build_prompt, get_ai_advice, get_ai_max_tokens
+from .services.ai_service import (
+    _extract_affordable_token_limit,
+    build_prompt,
+    get_ai_advice,
+    get_ai_max_tokens,
+)
 
 
 class AIServiceTests(TestCase):
@@ -118,6 +123,13 @@ class AIServiceTests(TestCase):
         with patch.dict(os.environ, {"AI_MAX_TOKENS": "1200"}, clear=False):
             self.assertEqual(get_ai_max_tokens(), 1200)
 
+    def test_extract_affordable_token_limit_reads_openrouter_402_message(self):
+        error = RuntimeError(
+            "This request requires more credits. You requested up to 900 tokens, "
+            "but can only afford 766."
+        )
+        self.assertEqual(_extract_affordable_token_limit(error), 766)
+
 
 class AIViewTests(TestCase):
     def setUp(self):
@@ -147,7 +159,7 @@ class AIViewTests(TestCase):
         response = self.client.get("/app/?embedded=1")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Cow Calving Assistant")
-        self.assertContains(response, "Quick prompts")
+        self.assertContains(response, "Show prompts")
         self.assertContains(response, "Ready for your question.")
         self.assertContains(response, 'data-quick-prompts-toggle', html=False)
         self.assertContains(response, 'class="chat-shell embedded-shell h-full rounded-none border-0 shadow-none overflow-hidden"', html=False)

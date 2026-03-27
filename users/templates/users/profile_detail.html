@@ -53,6 +53,16 @@
                 <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Phone Number</p>
                 <p class="mt-2 text-lg font-semibold text-slate-900">{{ profile.phone_number|default:"Not set" }}</p>
             </div>
+            <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-5">
+                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Farm Location</p>
+                <p class="mt-2 text-lg font-semibold text-slate-900">
+                    {% if profile.has_farm_location %}
+                        {{ profile.farm_location_label }}
+                    {% else %}
+                        Not set
+                    {% endif %}
+                </p>
+            </div>
             {% if profile.professional_id %}
                 <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-5 sm:col-span-2">
                     <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Professional ID</p>
@@ -68,6 +78,11 @@
             <a href="{% url 'cow_calving_ai:index' %}" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
                 Open AI Workspace
             </a>
+            {% if profile.dashboard_slug == "farmer" %}
+                <a href="{% url 'farmers_dashboard:location' %}" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                    Set Farm Location
+                </a>
+            {% endif %}
         </div>
     </section>
 {% endblock %}

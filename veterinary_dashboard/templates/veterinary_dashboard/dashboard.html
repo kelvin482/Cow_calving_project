@@ -1,82 +1,104 @@
 {% extends "veterinary_dashboard/base_dashboard.html" %}
 
 {% block veterinary_dashboard_content %}
-    <section class="grid gap-4 lg:grid-cols-3">
-        {% for card in summary_cards %}
-            <article class="rounded-[1.7rem] border border-slate-200 bg-white px-5 py-5 shadow-[0_10px_30px_rgba(15,23,42,0.04)]">
-                <p class="text-sm text-slate-600">{{ card.label }}</p>
-                <p class="mt-3 text-4xl leading-none tracking-tight {% if card.tone == 'rose' %}text-rose-500{% elif card.tone == 'amber' %}text-amber-500{% elif card.tone == 'emerald' %}text-emerald-600{% else %}text-[#123d6a]{% endif %}">
-                    {{ card.value }}
-                </p>
-                <p class="mt-2 text-sm text-slate-600">{{ card.detail }}</p>
-            </article>
-        {% endfor %}
+    <section class="rounded-[1.8rem] border border-slate-200 bg-white px-5 py-5 shadow-[0_12px_32px_rgba(15,23,42,0.05)] sm:px-6">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Clinical summary</p>
+                <h2 class="mt-2 text-2xl tracking-tight text-slate-950 font-display">What needs action next</h2>
+                <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Keep the veterinary home focused on active work, today&apos;s visits, and the next clear handoff.</p>
+            </div>
+            <a href="{% url 'veterinary_dashboard:patients' %}" class="inline-flex items-center justify-center rounded-[1rem] bg-[#14532d] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#114524]">
+                Open active case
+            </a>
+        </div>
+
+        <div class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {% for card in summary_cards %}
+                <div class="rounded-[1.2rem] border border-slate-200 bg-slate-50/80 px-4 py-4">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">{{ card.label }}</p>
+                    <div class="mt-2 flex items-end justify-between gap-3">
+                        <p class="text-3xl tracking-tight {% if card.tone == 'rose' %}text-rose-500{% elif card.tone == 'amber' %}text-amber-500{% elif card.tone == 'emerald' %}text-emerald-600{% else %}text-[#123d6a]{% endif %}">
+                            {{ card.value }}
+                        </p>
+                    </div>
+                    <p class="mt-1 text-sm leading-6 text-slate-600">{{ card.detail }}</p>
+                </div>
+            {% endfor %}
+        </div>
     </section>
 
-    <section class="grid gap-6 xl:grid-cols-[1.05fr_1fr]">
-        <article class="rounded-[1.9rem] border border-slate-200 bg-white px-6 py-6 shadow-[0_10px_30px_rgba(15,23,42,0.04)]">
-            <div class="flex items-center justify-between gap-3">
-                <h2 class="text-2xl text-slate-950 font-display">Urgent cases</h2>
-                <a href="{% url 'veterinary_dashboard:patients' %}" class="text-sm font-semibold text-[#0d4a87] transition hover:text-[#0b3968]">
+    <section class="grid gap-6 xl:grid-cols-[1.08fr_0.92fr]">
+        <article class="rounded-[2rem] border border-slate-200 bg-white px-5 py-5 shadow-[0_16px_40px_rgba(15,23,42,0.06)] sm:px-7 sm:py-7">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Active case queue</p>
+                    <h2 class="mt-2 text-2xl tracking-tight text-slate-950 font-display">Urgent cases</h2>
+                    <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600">One short list, one clear entry point. Open the case page only when you need the full clinical detail.</p>
+                </div>
+                <a href="{% url 'veterinary_dashboard:patients' %}" class="inline-flex items-center justify-center rounded-[1rem] border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:border-slate-300 hover:bg-slate-50">
                     View all cases
                 </a>
             </div>
 
-            <div class="mt-6 space-y-4">
+            <div class="mt-6 overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white">
                 {% for row in overview_case_rows %}
-                    <div class="grid gap-3 border-b border-slate-100 pb-4 last:border-b-0 last:pb-0 md:grid-cols-[5.2rem_minmax(0,1fr)_auto_auto] md:items-center">
-                        <p class="text-xl tracking-tight text-slate-950 font-display">{{ row.code }}</p>
-                        <p class="text-sm leading-6 text-slate-700">{{ row.detail }}</p>
-                        <span class="inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-semibold {% if row.tone == 'rose' %}bg-rose-100 text-rose-700{% elif row.tone == 'amber' %}bg-amber-100 text-amber-700{% else %}bg-slate-100 text-slate-700{% endif %}">
-                            {{ row.flag }}
-                        </span>
-                        <a href="{% url 'veterinary_dashboard:patients' %}" class="text-sm font-semibold text-[#0d4a87] transition hover:text-[#0b3968]">
+                    <article class="grid gap-4 px-4 py-5 lg:grid-cols-[5rem_minmax(0,1fr)_auto] lg:items-center {% if not forloop.last %}border-b border-slate-200{% endif %}">
+                        <div class="min-w-0">
+                            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">{{ row.code }}</p>
+                            <p class="mt-2 text-base font-semibold text-slate-950">{{ row.flag }}</p>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm leading-6 text-slate-700">{{ row.detail }}</p>
+                        </div>
+                        <a href="{% url 'veterinary_dashboard:patients' %}" class="inline-flex text-sm font-semibold text-[#0d4a87] transition hover:text-[#0b3968]">
                             Open case
                         </a>
-                    </div>
+                    </article>
                 {% endfor %}
             </div>
         </article>
 
-        <article class="rounded-[1.9rem] border border-slate-200 bg-white px-6 py-6 shadow-[0_10px_30px_rgba(15,23,42,0.04)]">
-            <div class="flex items-center justify-between gap-3">
-                <h2 class="text-2xl text-slate-950 font-display">Today's schedule</h2>
+        <article class="rounded-[1.8rem] border border-slate-200 bg-white px-5 py-5 shadow-[0_12px_32px_rgba(15,23,42,0.05)] sm:px-6">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Today&apos;s schedule</p>
+                    <h2 class="mt-2 text-2xl tracking-tight text-slate-950 font-display">Visits in view</h2>
+                </div>
                 <a href="{% url 'veterinary_dashboard:schedule' %}" class="text-sm font-semibold text-[#0d4a87] transition hover:text-[#0b3968]">
                     Open full schedule
                 </a>
             </div>
 
-            <div class="mt-6 space-y-4">
+            <div class="mt-5 overflow-hidden rounded-[1.4rem] border border-slate-200 bg-white">
                 {% for visit in overview_schedule_rows %}
-                    <div class="grid gap-2 border-b border-slate-100 pb-4 last:border-b-0 last:pb-0 md:grid-cols-[4.2rem_minmax(0,1fr)]">
-                        <p class="text-xl tracking-tight text-slate-950 font-display">{{ visit.time }}</p>
+                    <article class="grid gap-3 px-4 py-4 md:grid-cols-[4.3rem_minmax(0,1fr)] {% if not forloop.last %}border-b border-slate-200{% endif %}">
+                        <p class="text-base font-semibold text-slate-950">{{ visit.time }}</p>
                         <div class="min-w-0">
-                            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">{{ visit.farm }}</p>
-                            <p class="mt-1 text-base leading-6 text-slate-900">{{ visit.visit_type }}</p>
-                            <p class="text-sm leading-6 text-slate-600">{{ visit.detail }}</p>
+                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">{{ visit.farm }}</p>
+                            <p class="mt-1 text-sm font-semibold text-slate-900">{{ visit.visit_type }}</p>
+                            <p class="mt-1 text-sm leading-6 text-slate-600">{{ visit.detail }}</p>
                         </div>
-                    </div>
+                    </article>
                 {% endfor %}
             </div>
         </article>
     </section>
 
-    <section class="rounded-[1.9rem] border border-slate-200 bg-white px-6 py-6 shadow-[0_10px_30px_rgba(15,23,42,0.04)]">
-        <div class="flex items-center justify-between gap-3">
-            <h2 class="text-2xl text-slate-950 font-display">More information</h2>
-            <span class="text-sm text-slate-500">Open only when needed</span>
+    <section class="rounded-[1.8rem] border border-slate-200 bg-white px-5 py-5 shadow-[0_12px_32px_rgba(15,23,42,0.05)] sm:px-6">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Next tools</p>
+                <h2 class="mt-2 text-2xl tracking-tight text-slate-950 font-display">Open only when needed</h2>
+                <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600">These are supporting pages, not the main operating surface.</p>
+            </div>
         </div>
 
-        <div class="mt-6 grid gap-4 lg:grid-cols-3">
+        <div class="mt-5 grid gap-3 lg:grid-cols-3">
             {% for item in dashboard_quick_links %}
-                <article class="rounded-[1.5rem] border border-slate-200 bg-[#fbfcff] p-5">
-                    <div class="flex items-start justify-between gap-3">
-                        <div class="min-w-0">
-                            <p class="text-lg text-slate-950 font-display">{{ item.label }}</p>
-                            <p class="mt-2 text-sm leading-6 text-slate-600">{{ item.description }}</p>
-                        </div>
-                        <span class="pt-1 text-slate-300">&rsaquo;</span>
-                    </div>
+                <article class="rounded-[1.2rem] border border-slate-200 bg-slate-50/80 px-4 py-4">
+                    <p class="text-base font-semibold text-slate-950">{{ item.label }}</p>
+                    <p class="mt-2 text-sm leading-6 text-slate-600">{{ item.description }}</p>
                     <a href="{{ item.url }}" class="mt-4 inline-flex text-sm font-semibold text-[#0d4a87] transition hover:text-[#0b3968]">
                         Open page
                     </a>

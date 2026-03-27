@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Cow, InseminationRequest, ReproductiveEvent
+from .models import Cow, InseminationRequest, ReproductiveEvent, ServiceProviderMessage
 
 
 @admin.register(Cow)
@@ -29,3 +29,23 @@ class ReproductiveEventAdmin(admin.ModelAdmin):
     list_display = ("cow", "event_type", "event_date", "recorded_by", "created_at")
     list_filter = ("event_type", "event_date")
     search_fields = ("cow__name", "cow__cow_number", "recorded_by__username", "recorded_by__email")
+
+
+@admin.register(ServiceProviderMessage)
+class ServiceProviderMessageAdmin(admin.ModelAdmin):
+    list_display = (
+        "provider_name",
+        "provider_service_type",
+        "provider_county",
+        "farmer",
+        "status",
+        "created_at",
+    )
+    list_filter = ("provider_service_type", "status", "provider_county")
+    search_fields = (
+        "provider_name",
+        "provider_email",
+        "farmer__username",
+        "farmer__email",
+        "message",
+    )

@@ -5,15 +5,34 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Prefetch
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.text import slugify
 
+from communications.forms import ConversationReplyForm
+from communications.services import (
+    create_or_append_provider_thread,
+    get_notifications_for_user,
+    get_thread_for_user,
+    get_threads_for_user,
+    get_unread_notification_count,
+    get_unread_thread_count,
+    mark_notification_read,
+    mark_thread_messages_read,
+    send_thread_message,
+)
 from users.permissions import role_required
 from users.services import get_or_create_profile
 
-from .forms import CowRegistrationForm, ReproductiveEventForm
-from .models import Cow, InseminationRequest, ReproductiveEvent
+from .forms import (
+    CowRegistrationForm,
+    FarmLocationForm,
+    ReproductiveEventForm,
+    ServiceProviderMessageForm,
+)
+from .models import Cow, InseminationRequest, ReproductiveEvent, ServiceProviderMessage
 
 
 KENYA_COUNTY_OPTIONS = [
@@ -66,18 +85,25 @@ KENYA_COUNTY_OPTIONS = [
     ("west-pokot", "West Pokot County"),
 ]
 
+SERVICE_TYPE_VETERINARY = "veterinary"
+SERVICE_TYPE_ARTIFICIAL_INSEMINATION = "artificial_insemination"
+
 SERVICE_TYPE_OPTIONS = [
-    ("veterinary", "Veterinary"),
+    (SERVICE_TYPE_VETERINARY, "Veterinary"),
+    (SERVICE_TYPE_ARTIFICIAL_INSEMINATION, "Artificial insemination"),
 ]
+
+KENYA_MAP_CENTER = {"lat": -0.023559, "lng": 37.906193}
 
 # Keep the provider directory in code until the self-serve registration flow
 # for professionals is added, so the farmer support page stays demo-ready.
 SERVICE_PROVIDER_DIRECTORY = [
     {
         "name": "Dr. James Mwangi",
+        "provider_title": "Large animal veterinarian",
         "county": "nairobi",
         "county_label": "Nairobi County",
-        "service_type": "veterinary",
+        "service_type": SERVICE_TYPE_VETERINARY,
         "service_type_label": "Veterinary",
         "summary": "Experienced large animal veterinarian supporting dairy herd health, calving readiness, and urgent reproductive follow-up.",
         "phone": "+254712345678",
@@ -88,9 +114,10 @@ SERVICE_PROVIDER_DIRECTORY = [
     },
     {
         "name": "Dr. Grace Wanjiku",
+        "provider_title": "Fertility and herd veterinarian",
         "county": "kiambu",
         "county_label": "Kiambu County",
-        "service_type": "veterinary",
+        "service_type": SERVICE_TYPE_VETERINARY,
         "service_type_label": "Veterinary",
         "summary": "Focuses on fertility checks, pregnancy confirmation, post-calving review, and milk herd health visits.",
         "phone": "+254723456789",
@@ -101,9 +128,10 @@ SERVICE_PROVIDER_DIRECTORY = [
     },
     {
         "name": "Dr. Peter Kiptoo",
+        "provider_title": "Dairy field veterinarian",
         "county": "uasin-gishu",
         "county_label": "Uasin Gishu County",
-        "service_type": "veterinary",
+        "service_type": SERVICE_TYPE_VETERINARY,
         "service_type_label": "Veterinary",
         "summary": "Supports large dairy farms with heat follow-up, calving supervision, calf recovery, and herd vaccination planning.",
         "phone": "+254734567890",
@@ -114,9 +142,10 @@ SERVICE_PROVIDER_DIRECTORY = [
     },
     {
         "name": "Dr. Mercy Atieno",
+        "provider_title": "Reproductive health veterinarian",
         "county": "kisumu",
         "county_label": "Kisumu County",
-        "service_type": "veterinary",
+        "service_type": SERVICE_TYPE_VETERINARY,
         "service_type_label": "Veterinary",
         "summary": "Handles reproductive health reviews, difficult calving follow-up, and newborn calf stabilization for smallholder farms.",
         "phone": "+254745678901",
@@ -127,9 +156,10 @@ SERVICE_PROVIDER_DIRECTORY = [
     },
     {
         "name": "Dr. John Kamau",
+        "provider_title": "Preventive care veterinarian",
         "county": "nakuru",
         "county_label": "Nakuru County",
-        "service_type": "veterinary",
+        "service_type": SERVICE_TYPE_VETERINARY,
         "service_type_label": "Veterinary",
         "summary": "Offers herd fertility planning, retained placenta follow-up, and preventive dairy farm check-ins.",
         "phone": "+254756789012",
@@ -140,9 +170,10 @@ SERVICE_PROVIDER_DIRECTORY = [
     },
     {
         "name": "Dr. Lucy Muthoni",
+        "provider_title": "Mountain dairy veterinarian",
         "county": "nyeri",
         "county_label": "Nyeri County",
-        "service_type": "veterinary",
+        "service_type": SERVICE_TYPE_VETERINARY,
         "service_type_label": "Veterinary",
         "summary": "Supports mountain dairy farms with breeding decisions, post-service review, and postpartum recovery checks.",
         "phone": "+254767890123",
@@ -153,9 +184,10 @@ SERVICE_PROVIDER_DIRECTORY = [
     },
     {
         "name": "Dr. Brian Mutua",
+        "provider_title": "Mixed dairy veterinarian",
         "county": "machakos",
         "county_label": "Machakos County",
-        "service_type": "veterinary",
+        "service_type": SERVICE_TYPE_VETERINARY,
         "service_type_label": "Veterinary",
         "summary": "Works with mixed dairy operations on reproductive case reviews, calf health, and emergency labour escalation.",
         "phone": "+254778901234",
@@ -166,9 +198,10 @@ SERVICE_PROVIDER_DIRECTORY = [
     },
     {
         "name": "Dr. Faith Akinyi",
+        "provider_title": "Dairy reproduction veterinarian",
         "county": "kakamega",
         "county_label": "Kakamega County",
-        "service_type": "veterinary",
+        "service_type": SERVICE_TYPE_VETERINARY,
         "service_type_label": "Veterinary",
         "summary": "Specialises in dairy cow reproductive management, clean calving setup, and first-day calf care.",
         "phone": "+254789012345",
@@ -179,9 +212,10 @@ SERVICE_PROVIDER_DIRECTORY = [
     },
     {
         "name": "Dr. Daniel Kibet",
+        "provider_title": "Breeding and fertility veterinarian",
         "county": "kericho",
         "county_label": "Kericho County",
-        "service_type": "veterinary",
+        "service_type": SERVICE_TYPE_VETERINARY,
         "service_type_label": "Veterinary",
         "summary": "Helps farmers plan insemination timing, confirm pregnancy windows, and reduce repeat breeding losses.",
         "phone": "+254790123456",
@@ -192,9 +226,10 @@ SERVICE_PROVIDER_DIRECTORY = [
     },
     {
         "name": "Dr. Esther Kathure",
+        "provider_title": "Calf survival and fertility veterinarian",
         "county": "meru",
         "county_label": "Meru County",
-        "service_type": "veterinary",
+        "service_type": SERVICE_TYPE_VETERINARY,
         "service_type_label": "Veterinary",
         "summary": "Supports calf survival, difficult deliveries, dairy fertility follow-up, and routine farm visits for growing herds.",
         "phone": "+254701234567",
@@ -203,7 +238,70 @@ SERVICE_PROVIDER_DIRECTORY = [
         "availability": "Responds within 24 hours",
         "is_verified": True,
     },
+    {
+        "name": "Samuel Njoroge",
+        "provider_title": "Artificial insemination technician",
+        "county": "kiambu",
+        "county_label": "Kiambu County",
+        "service_type": SERVICE_TYPE_ARTIFICIAL_INSEMINATION,
+        "service_type_label": "Artificial insemination",
+        "summary": "Supports heat timing, semen handling, and on-farm artificial insemination for smallholder dairy herds.",
+        "phone": "+254711223344",
+        "email": "snjoroge@aibreeding.co.ke",
+        "coverage": "Kiambu, Ruiru, and Juja farms",
+        "availability": "Available this morning",
+        "is_verified": True,
+    },
+    {
+        "name": "Mary Chebet",
+        "provider_title": "AI field officer",
+        "county": "nakuru",
+        "county_label": "Nakuru County",
+        "service_type": SERVICE_TYPE_ARTIFICIAL_INSEMINATION,
+        "service_type_label": "Artificial insemination",
+        "summary": "Provides service timing support, artificial insemination visits, and repeat-breeding follow-up.",
+        "phone": "+254722334455",
+        "email": "mchebet@aibreeding.co.ke",
+        "coverage": "Nakuru, Molo, and Njoro",
+        "availability": "Next slot this afternoon",
+        "is_verified": True,
+    },
+    {
+        "name": "Kevin Oloo",
+        "provider_title": "AI technician",
+        "county": "kisumu",
+        "county_label": "Kisumu County",
+        "service_type": SERVICE_TYPE_ARTIFICIAL_INSEMINATION,
+        "service_type_label": "Artificial insemination",
+        "summary": "Helps farmers act within the breeding window and record artificial insemination dates correctly.",
+        "phone": "+254733445566",
+        "email": "koloo@aibreeding.co.ke",
+        "coverage": "Kisumu, Nyando, and Muhoroni corridor",
+        "availability": "Responds within 2 hours",
+        "is_verified": True,
+    },
+    {
+        "name": "Tabitha Mutheu",
+        "provider_title": "Reproductive service technician",
+        "county": "machakos",
+        "county_label": "Machakos County",
+        "service_type": SERVICE_TYPE_ARTIFICIAL_INSEMINATION,
+        "service_type_label": "Artificial insemination",
+        "summary": "Supports artificial insemination visits, service readiness checks, and breeding follow-up for dairy cows.",
+        "phone": "+254744556677",
+        "email": "tmutheu@aibreeding.co.ke",
+        "coverage": "Machakos, Kangundo, and Athi River",
+        "availability": "Book for same-day visit",
+        "is_verified": True,
+    },
 ]
+
+for provider in SERVICE_PROVIDER_DIRECTORY:
+    provider["key"] = f'{provider["service_type"]}-{slugify(provider["name"])}'
+
+SERVICE_PROVIDER_DIRECTORY_BY_KEY = {
+    provider["key"]: provider for provider in SERVICE_PROVIDER_DIRECTORY
+}
 
 
 TRACKING_STEPS = [
@@ -1000,7 +1098,13 @@ def _get_cows_for_user(user):
     return cows, alerts, follow_up
 
 
-def _build_navigation_sections(total_cows, alert_count):
+def _build_navigation_sections(
+    total_cows,
+    alert_count,
+    unread_message_count,
+    unread_notification_count,
+    has_farm_location,
+):
     return [
         {
             "label": "Main",
@@ -1031,11 +1135,34 @@ def _build_navigation_sections(total_cows, alert_count):
                     "view_name": "farmers_dashboard:service_finder",
                     "icon": "services",
                 },
+                {
+                    "label": "Messages",
+                    "url": reverse("farmers_dashboard:messages"),
+                    "view_name": "farmers_dashboard:messages",
+                    "icon": "messages",
+                    "badge": str(unread_message_count) if unread_message_count else None,
+                },
+                {
+                    "label": "Notifications",
+                    "url": reverse("farmers_dashboard:notifications"),
+                    "view_name": "farmers_dashboard:notifications",
+                    "icon": "notifications",
+                    "badge": str(unread_notification_count)
+                    if unread_notification_count
+                    else None,
+                },
             ],
         },
         {
             "label": "Farm",
             "items": [
+                {
+                    "label": "Farm location",
+                    "url": reverse("farmers_dashboard:location"),
+                    "view_name": "farmers_dashboard:location",
+                    "icon": "location",
+                    "badge": "Saved" if has_farm_location else None,
+                },
                 {
                     "label": "Reports",
                     "url": reverse("farmers_dashboard:reports"),
@@ -1073,9 +1200,14 @@ def _build_farmer_workspace_menu_sections():
                     "url": reverse("cow_calving_ai:index"),
                 },
                 {
-                    "label": "Support hub",
-                    "description": "Open escalation help for urgent issues.",
-                    "url": reverse("Core_Web:support"),
+                    "label": "Find a vet",
+                    "description": "Open nearby veterinary help for urgent issues.",
+                    "url": reverse("farmers_dashboard:service_finder"),
+                },
+                {
+                    "label": "Set farm location",
+                    "description": "Pin your farm so the veterinary team can route there.",
+                    "url": reverse("farmers_dashboard:location"),
                 },
             ],
         },
@@ -1196,25 +1328,46 @@ def _build_quick_links():
             "url": reverse("farmers_dashboard:service_finder"),
         },
         {
-            "label": "Support hub",
-            "description": "Open escalation help for farm cases that cannot wait.",
-            "url": reverse("Core_Web:support"),
+            "label": "Warning signs",
+            "description": "Open the guide troubleshooting section for urgent warning signs.",
+            "url": f"{reverse('Core_Web:guide')}#trouble",
         },
     ]
 
 
-def _build_service_finder_context(request):
+def _extract_service_finder_filters(source):
     valid_counties = {value for value, _label in KENYA_COUNTY_OPTIONS}
     valid_service_types = {value for value, _label in SERVICE_TYPE_OPTIONS}
-    selected_county = request.GET.get("county", "").strip()
-    selected_service_type = request.GET.get("service_type", "").strip()
+    selected_county = source.get("county", "").strip()
+    selected_service_type = source.get("service_type", "").strip()
 
     if selected_county not in valid_counties:
         selected_county = ""
     if selected_service_type not in valid_service_types:
         selected_service_type = ""
 
-    providers = SERVICE_PROVIDER_DIRECTORY
+    return selected_county, selected_service_type
+
+
+def _get_service_provider(provider_key):
+    if not provider_key:
+        return None
+    return SERVICE_PROVIDER_DIRECTORY_BY_KEY.get(provider_key)
+
+
+def _build_service_finder_context(
+    request,
+    *,
+    filter_source=None,
+    active_provider_key="",
+    active_panel="",
+    message_form=None,
+):
+    selected_county, selected_service_type = _extract_service_finder_filters(
+        filter_source or request.GET
+    )
+
+    providers = [provider.copy() for provider in SERVICE_PROVIDER_DIRECTORY]
     if selected_county:
         providers = [
             provider for provider in providers if provider["county"] == selected_county
@@ -1225,6 +1378,28 @@ def _build_service_finder_context(request):
             for provider in providers
             if provider["service_type"] == selected_service_type
         ]
+
+    active_provider = None
+    if active_provider_key:
+        active_provider = next(
+            (provider for provider in providers if provider["key"] == active_provider_key),
+            None,
+        )
+        if not active_provider:
+            active_provider_key = ""
+            active_panel = ""
+
+    if active_panel not in {"profile", "message"}:
+        active_panel = ""
+
+    if active_panel == "message" and active_provider and message_form is None:
+        message_form = ServiceProviderMessageForm(
+            initial={
+                "provider_key": active_provider["key"],
+                "county": selected_county,
+                "service_type": selected_service_type,
+            }
+        )
 
     return {
         "selected_county": selected_county,
@@ -1239,6 +1414,10 @@ def _build_service_finder_context(request):
         "service_providers": providers,
         "service_provider_count": len(providers),
         "service_directory_count": len(SERVICE_PROVIDER_DIRECTORY),
+        "active_provider_key": active_provider_key,
+        "active_provider_panel": active_panel,
+        "active_provider": active_provider,
+        "message_form": message_form,
     }
 
 
@@ -1259,6 +1438,8 @@ def _build_farmer_dashboard_context(
     initials = "".join(part[0].upper() for part in display_name.split()[:2] if part) or "FM"
     cows, alerts, follow_up_items = _get_cows_for_user(request.user)
     readiness_items, readiness_percent = _build_profile_readiness(request.user, profile)
+    unread_message_count = get_unread_thread_count(request.user)
+    unread_notification_count = get_unread_notification_count(request.user)
     context = {
         "dashboard_home_url": reverse("farmers_dashboard:dashboard"),
         "back_to_website_url": reverse("Core_Web:home"),
@@ -1273,7 +1454,13 @@ def _build_farmer_dashboard_context(
         "page_intro": page_intro,
         "page_header_title": page_header_title or page_heading,
         "page_header_context": page_header_context,
-        "navigation_sections": _build_navigation_sections(len(cows), len(alerts)),
+        "navigation_sections": _build_navigation_sections(
+            len(cows),
+            len(alerts),
+            unread_message_count,
+            unread_notification_count,
+            profile.has_farm_location,
+        ),
         "workspace_menu_sections": _build_farmer_workspace_menu_sections(),
         "profile_readiness_items": readiness_items,
         "profile_readiness_percent": readiness_percent,
@@ -1282,6 +1469,8 @@ def _build_farmer_dashboard_context(
         "cow_alerts": alerts,
         "follow_up_items": follow_up_items,
         "dashboard_quick_links": _build_quick_links(),
+        "unread_message_count": unread_message_count,
+        "unread_notification_count": unread_notification_count,
         "header_primary_action": header_primary_action
         or {
             "label": "Register cow",
@@ -1291,6 +1480,22 @@ def _build_farmer_dashboard_context(
     if extra_context:
         context.update(extra_context)
     return context
+
+
+def _build_location_initial_state(profile):
+    if profile.has_farm_location:
+        return {
+            "lat": float(profile.farm_latitude),
+            "lng": float(profile.farm_longitude),
+            "zoom": 13,
+            "source": profile.farm_location_source or "manual_pin",
+        }
+    return {
+        "lat": KENYA_MAP_CENTER["lat"],
+        "lng": KENYA_MAP_CENTER["lng"],
+        "zoom": 6,
+        "source": "manual_pin",
+    }
 
 
 @login_required
@@ -1379,6 +1584,56 @@ def reports_view(request):
 @login_required
 @role_required("farmer")
 def service_finder_view(request):
+    if request.method == "POST" and request.POST.get("send_message"):
+        message_form = ServiceProviderMessageForm(request.POST, request.FILES)
+        active_provider_key = request.POST.get("provider_key", "").strip()
+        if message_form.is_valid():
+            provider = _get_service_provider(message_form.cleaned_data["provider_key"])
+            if provider:
+                # Keep provider contact details on the message record so the vet
+                # workspace can read the exact same item even before providers
+                # become first-class database users.
+                ServiceProviderMessage.objects.create(
+                    farmer=request.user,
+                    provider_key=provider["key"],
+                    provider_name=provider["name"],
+                    provider_title=provider["provider_title"],
+                    provider_service_type=provider["service_type"],
+                    provider_county=provider["county_label"],
+                    provider_phone=provider["phone"],
+                    provider_email=provider["email"],
+                    message=message_form.cleaned_data["message"],
+                )
+                thread = create_or_append_provider_thread(
+                    farmer=request.user,
+                    provider=provider,
+                    body=message_form.cleaned_data["message"],
+                    image=message_form.cleaned_data.get("image"),
+                )
+                messages.success(
+                    request,
+                    f"Message sent to {provider['name']}. The provider will see it in the workspace flow.",
+                )
+                return redirect("farmers_dashboard:messages_thread", thread_id=thread.pk)
+            message_form.add_error(
+                None,
+                "This provider is no longer available in the directory. Choose another provider.",
+            )
+
+        extra_context = _build_service_finder_context(
+            request,
+            filter_source=request.POST,
+            active_provider_key=active_provider_key,
+            active_panel="message",
+            message_form=message_form,
+        )
+    else:
+        extra_context = _build_service_finder_context(
+            request,
+            active_provider_key=request.GET.get("provider", "").strip(),
+            active_panel=request.GET.get("panel", "").strip(),
+        )
+
     return render(
         request,
         "farmers_dashboard/service_finder.html",
@@ -1387,13 +1642,201 @@ def service_finder_view(request):
             page_title="Service Finder | CowCalving",
             page_eyebrow="Farmer support",
             page_heading="Service finder",
-            page_intro="Filter by county and provider type, then contact the provider that best matches the case.",
-            page_header_context="Find veterinary support by county",
+            page_intro="Filter by county and provider type, open the provider profile, then send a short message when you are ready.",
+            page_header_context="Find veterinary and AI support by county",
             header_primary_action={
                 "label": "Reset filters",
                 "url": reverse("farmers_dashboard:service_finder"),
             },
-            extra_context=_build_service_finder_context(request),
+            extra_context=extra_context,
+        ),
+    )
+
+
+def _build_thread_participants_for_farmer(thread):
+    return {
+        "title": thread.provider_name_snapshot,
+        "subtitle": thread.provider_title_snapshot or "Service provider",
+        "meta": thread.cow.name if thread.cow else "General support",
+    }
+
+
+def _load_farmer_message_state(request, thread_id=None):
+    selected_thread = None
+    if thread_id is not None:
+        selected_thread = get_thread_for_user(request.user, thread_id)
+        if selected_thread is None:
+            raise Http404("Conversation not found.")
+
+    if selected_thread is None:
+        thread_list = get_threads_for_user(request.user)
+        if thread_list:
+            selected_thread = thread_list[0]
+
+    if selected_thread is not None:
+        mark_thread_messages_read(selected_thread, request.user)
+
+    thread_list = get_threads_for_user(request.user)
+    if selected_thread is not None:
+        selected_thread = next(
+            (thread for thread in thread_list if thread.pk == selected_thread.pk),
+            selected_thread,
+        )
+    return thread_list, selected_thread
+
+
+@login_required
+@role_required("farmer")
+def messages_view(request, thread_id=None):
+    selected_thread = None
+    if thread_id is not None:
+        selected_thread = get_thread_for_user(request.user, thread_id)
+        if selected_thread is None:
+            raise Http404("Conversation not found.")
+
+    if request.method == "POST":
+        if selected_thread is None:
+            raise Http404("Conversation not found.")
+        reply_form = ConversationReplyForm(request.POST, request.FILES)
+        if reply_form.is_valid():
+            send_thread_message(
+                thread=selected_thread,
+                sender=request.user,
+                body=reply_form.cleaned_data["body"],
+                image=reply_form.cleaned_data.get("image"),
+            )
+            messages.success(request, "Your reply was sent.")
+            return redirect("farmers_dashboard:messages_thread", thread_id=selected_thread.pk)
+    else:
+        reply_form = ConversationReplyForm()
+
+    thread_list, selected_thread = _load_farmer_message_state(request, thread_id=thread_id)
+
+    return render(
+        request,
+        "farmers_dashboard/messages.html",
+        _build_farmer_dashboard_context(
+            request,
+            page_title="Farmer Messages | CowCalving",
+            page_eyebrow="Farmer messages",
+            page_heading="Messages",
+            page_intro="Open one conversation at a time, review cow context, and send a clear next update.",
+            page_header_context="Messages and replies with the service team",
+            header_primary_action={
+                "label": "Find provider",
+                "url": reverse("farmers_dashboard:service_finder"),
+            },
+            extra_context={
+                "conversation_threads": thread_list,
+                "selected_thread": selected_thread,
+                "selected_thread_participants": _build_thread_participants_for_farmer(selected_thread)
+                if selected_thread
+                else None,
+                "reply_form": reply_form,
+            },
+        ),
+    )
+
+
+@login_required
+@role_required("farmer")
+def notifications_view(request):
+    notifications = list(get_notifications_for_user(request.user))
+    if request.method == "POST":
+        notification = get_object_or_404(
+            get_notifications_for_user(request.user),
+            pk=request.POST.get("notification_id"),
+        )
+        mark_notification_read(notification, request.user)
+        if notification.action_url:
+            return redirect(notification.action_url)
+        return redirect("farmers_dashboard:notifications")
+
+    return render(
+        request,
+        "farmers_dashboard/notifications.html",
+        _build_farmer_dashboard_context(
+            request,
+            page_title="Farmer Notifications | CowCalving",
+            page_eyebrow="Farmer alerts",
+            page_heading="Notifications",
+            page_intro="See what changed recently and jump straight to the next step.",
+            page_header_context="Unread replies and workflow updates",
+            header_primary_action={
+                "label": "Open messages",
+                "url": reverse("farmers_dashboard:messages"),
+            },
+            extra_context={
+                "notifications": notifications,
+                "notification_summary": {
+                    "total": len(notifications),
+                    "unread": sum(1 for item in notifications if not item.is_read),
+                    "message_updates": sum(
+                        1
+                        for item in notifications
+                        if item.notification_type == item.TYPE_PROVIDER_REPLIED
+                    ),
+                },
+            },
+        ),
+    )
+
+
+@login_required
+@role_required("farmer")
+def location_view(request):
+    profile = get_or_create_profile(request.user)
+    if request.method == "POST":
+        form = FarmLocationForm(request.POST)
+        if form.is_valid():
+            profile.farm_latitude = form.cleaned_data["latitude"]
+            profile.farm_longitude = form.cleaned_data["longitude"]
+            profile.farm_location_source = form.cleaned_data["source"]
+            profile.farm_location_updated_at = timezone.now()
+            profile.save(
+                update_fields=[
+                    "farm_latitude",
+                    "farm_longitude",
+                    "farm_location_source",
+                    "farm_location_updated_at",
+                ]
+            )
+            messages.success(
+                request,
+                "Farm location saved. The veterinary dashboard can now use it for routing.",
+            )
+            return redirect("farmers_dashboard:location")
+    else:
+        form = FarmLocationForm(
+            initial={
+                "latitude": profile.farm_latitude,
+                "longitude": profile.farm_longitude,
+                "source": profile.farm_location_source or "manual_pin",
+            }
+        )
+
+    location_state = _build_location_initial_state(profile)
+    return render(
+        request,
+        "farmers_dashboard/location.html",
+        _build_farmer_dashboard_context(
+            request,
+            page_title="Farm Location | CowCalving",
+            page_eyebrow="Farm location",
+            page_heading="Set farm location",
+            page_intro="Pin your farm once so veterinary users can find the right destination quickly when follow-up is needed.",
+            page_header_context="Save one clear farm pin for routing",
+            header_primary_action={
+                "label": "Open service finder",
+                "url": reverse("farmers_dashboard:service_finder"),
+            },
+            extra_context={
+                "location_form": form,
+                "location_saved": profile.has_farm_location,
+                "location_source_label": profile.farm_location_label,
+                "location_updated_at": profile.farm_location_updated_at,
+                "location_initial_state": location_state,
+            },
         ),
     )
 

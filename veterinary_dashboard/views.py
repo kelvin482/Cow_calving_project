@@ -1,14 +1,36 @@
 import calendar
+from statistics import fmean
+from collections import defaultdict
+from django.http import Http404
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.contrib import messages
+from django.db.models import Q
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 
+from communications.forms import ConversationReplyForm
+from communications.services import (
+    get_notifications_for_user,
+    get_thread_for_user,
+    get_threads_for_user,
+    get_unread_notification_count,
+    get_unread_thread_count,
+    mark_notification_read,
+    mark_thread_messages_read,
+    send_thread_message,
+)
+from farmers_dashboard.models import Cow
+from communications.models import ConversationMessage
+from users.models import Profile
 from users.permissions import role_required
 from users.services import get_dashboard_url_for_user, get_or_create_profile
 
 
-def _build_navigation_sections():
+KENYA_MAP_CENTER = {"lat": -0.023559, "lng": 37.906193}
+
+
+def _build_navigation_sections(unread_message_count=0, unread_notification_count=0):
     urgent_case_count = sum(
         1 for item in _build_patient_records() if item["tone"] == "rose"
     )
@@ -34,6 +56,22 @@ def _build_navigation_sections():
                     "url": reverse("veterinary_dashboard:farm_map"),
                     "view_name": "veterinary_dashboard:farm_map",
                     "icon": "map",
+                },
+                {
+                    "label": "Messages",
+                    "url": reverse("veterinary_dashboard:messages"),
+                    "view_name": "veterinary_dashboard:messages",
+                    "icon": "messages",
+                    "badge": str(unread_message_count) if unread_message_count else None,
+                },
+                {
+                    "label": "Notifications",
+                    "url": reverse("veterinary_dashboard:notifications"),
+                    "view_name": "veterinary_dashboard:notifications",
+                    "icon": "notifications",
+                    "badge": str(unread_notification_count)
+                    if unread_notification_count
+                    else None,
                 },
             ],
         },
@@ -121,9 +159,42 @@ def _build_priority_actions():
 
 def _build_farm_overview():
     return [
-        {"name": "Moi Farm", "detail": "24 cows - 2 active alerts - Kisii", "risk": "High risk", "risk_percent": 86, "tone": "rose"},
-        {"name": "Sunrise Dairy", "detail": "31 cows - mastitis review pending - Kericho", "risk": "Medium risk", "risk_percent": 58, "tone": "amber"},
-        {"name": "Green Acres", "detail": "18 cows - vaccination plan on track - Nakuru", "risk": "Low risk", "risk_percent": 18, "tone": "teal"},
+        {
+            "name": "Moi Farm",
+            "owner": "John Otieno",
+            "location": "Kisii",
+            "cow_count": 24,
+            "alert_summary": "2 active alerts",
+            "next_step": "Visit Rosa #011 first and confirm delivery progress.",
+            "detail": "24 cows - 2 active alerts - Kisii",
+            "risk": "High risk",
+            "risk_percent": 86,
+            "tone": "rose",
+        },
+        {
+            "name": "Sunrise Dairy",
+            "owner": "Peter Kamau",
+            "location": "Kericho",
+            "cow_count": 31,
+            "alert_summary": "Mastitis review pending",
+            "next_step": "Review Daisy #003 during the scheduled health check.",
+            "detail": "31 cows - mastitis review pending - Kericho",
+            "risk": "Medium risk",
+            "risk_percent": 58,
+            "tone": "amber",
+        },
+        {
+            "name": "Green Acres",
+            "owner": "Mary Wanjiku",
+            "location": "Nakuru",
+            "cow_count": 18,
+            "alert_summary": "Vaccination plan on track",
+            "next_step": "Keep the herd vaccination route on time.",
+            "detail": "18 cows - vaccination plan on track - Nakuru",
+            "risk": "Low risk",
+            "risk_percent": 18,
+            "tone": "teal",
+        },
     ]
 
 
@@ -151,7 +222,7 @@ def _build_case_snapshots():
 
 
 def _build_patient_records():
-    return [
+    records = [
         {
             "id": "rosa-011",
             "name": "Rosa #011",
@@ -190,6 +261,10 @@ def _build_patient_records():
             "secondary_label": "Call farmer",
             "extra_url": reverse("veterinary_dashboard:schedule"),
             "extra_label": "Open route",
+            "stage_group": "assessment",
+            "stage_group_label": "Assessment",
+            "priority_group": "urgent",
+            "priority_label": "Urgent",
         },
         {
             "id": "bella-004",
@@ -228,6 +303,10 @@ def _build_patient_records():
             "secondary_label": "Open diagnosis",
             "extra_url": reverse("veterinary_dashboard:telehealth"),
             "extra_label": "Message farmer",
+            "stage_group": "treatment",
+            "stage_group_label": "Treatment",
+            "priority_group": "needs_review",
+            "priority_label": "Needs review",
         },
         {
             "id": "nuru-025",
@@ -266,6 +345,10 @@ def _build_patient_records():
             "secondary_label": "Add findings",
             "extra_url": reverse("veterinary_dashboard:telehealth"),
             "extra_label": "Share later",
+            "stage_group": "waiting_result",
+            "stage_group_label": "Waiting on result",
+            "priority_group": "needs_review",
+            "priority_label": "Needs review",
         },
         {
             "id": "daisy-003",
@@ -304,8 +387,17 @@ def _build_patient_records():
             "secondary_label": "Open telehealth",
             "extra_url": reverse("veterinary_dashboard:labs"),
             "extra_label": "Review labs",
+            "stage_group": "follow_up",
+            "stage_group_label": "Follow-up",
+            "priority_group": "needs_review",
+            "priority_label": "Needs review",
         },
     ]
+
+    for record in records:
+        record["list_summary"] = record["next_step"]
+
+    return records
 
 
 def _build_prescription_notes():
@@ -576,39 +668,197 @@ def _build_dashboard_quick_links():
     ]
 
 
-def _build_farm_map_context():
+def _build_farm_marker_label(profile):
+    farm_name = (profile.farm_name or "").strip()
+    if farm_name:
+        parts = [part[0].upper() for part in farm_name.split()[:2] if part]
+        if parts:
+            return "".join(parts)[:2]
+    display_name = profile.user.get_full_name().strip() or profile.user.username
+    parts = [part[0].upper() for part in display_name.split()[:2] if part]
+    return ("".join(parts) or "FM")[:2]
+
+
+def _build_directions_url(profile):
+    return (
+        "https://www.google.com/maps/dir/?api=1&destination="
+        f"{profile.farm_latitude},{profile.farm_longitude}"
+    )
+
+
+def _build_farm_map_context(veterinary_user):
+    farmer_profiles = list(
+        Profile.objects.filter(
+            role__slug="farmer",
+            farm_latitude__isnull=False,
+            farm_longitude__isnull=False,
+        )
+        .select_related("user", "role")
+        .order_by("farm_name", "user__username")
+    )
+
+    cows = list(
+        Cow.objects.filter(owner__profile__in=farmer_profiles).select_related("owner")
+    )
+    cows_by_owner_id = {}
+    for cow in cows:
+        cows_by_owner_id.setdefault(cow.owner_id, []).append(cow)
+
+    unread_messages_by_farmer_id = defaultdict(int)
+    unread_farmer_messages = (
+        ConversationMessage.objects.filter(
+            read_at__isnull=True,
+            sender__profile__role__slug="farmer",
+            thread__farmer__profile__in=farmer_profiles,
+        )
+        .filter(
+            Q(thread__assigned_veterinary_user=veterinary_user)
+            | Q(thread__assigned_veterinary_user__isnull=True)
+        )
+        .values_list("thread__farmer_id", flat=True)
+    )
+    for farmer_id in unread_farmer_messages:
+        unread_messages_by_farmer_id[farmer_id] += 1
+
+    markers = []
+    farm_cards = []
+    urgent_count = 0
+    due_soon_farm_count = 0
+    unread_message_farm_count = 0
+    for profile in farmer_profiles:
+        owner_cows = cows_by_owner_id.get(profile.user_id, [])
+        due_soon_count = sum(1 for cow in owner_cows if cow.is_nearing_calving())
+        alert_count = sum(1 for cow in owner_cows if cow.needs_attention)
+        unread_message_count = unread_messages_by_farmer_id.get(profile.user_id, 0)
+        has_urgent = alert_count > 0
+        has_due_soon = due_soon_count > 0
+        has_unread_messages = unread_message_count > 0
+        if alert_count:
+            tone = "rose"
+            badge = f"{alert_count} active"
+        elif due_soon_count:
+            tone = "amber"
+            badge = f"{due_soon_count} due soon"
+        else:
+            tone = "teal"
+            badge = "Location saved"
+
+        urgent_count += int(has_urgent)
+        due_soon_farm_count += int(has_due_soon)
+        unread_message_farm_count += int(has_unread_messages)
+
+        display_name = profile.user.get_full_name().strip() or profile.user.username
+        farm_name = profile.farm_name or f"{display_name} Farm"
+        markers.append(
+            {
+                "id": f"farm-{profile.pk}",
+                "label": _build_farm_marker_label(profile),
+                "name": farm_name,
+                "owner": display_name,
+                "phone": profile.phone_number,
+                "status": badge,
+                "tone": tone,
+                "lat": float(profile.farm_latitude),
+                "lng": float(profile.farm_longitude),
+                "has_urgent": has_urgent,
+                "has_due_soon": has_due_soon,
+                "has_unread_messages": has_unread_messages,
+                "unread_message_count": unread_message_count,
+                "directions_url": _build_directions_url(profile),
+            }
+        )
+        farm_cards.append(
+            {
+                "id": f"farm-{profile.pk}",
+                "name": farm_name,
+                "owner": display_name,
+                "phone": profile.phone_number or "No phone saved",
+                "cows": str(len(owner_cows)),
+                "due_soon": str(due_soon_count),
+                "alerts": f"{alert_count} active" if alert_count else "None",
+                "badge": badge,
+                "tone": tone,
+                "has_urgent": has_urgent,
+                "has_due_soon": has_due_soon,
+                "has_unread_messages": has_unread_messages,
+                "unread_message_count": unread_message_count,
+                "directions_url": _build_directions_url(profile),
+            }
+        )
+
+    if markers:
+        center_lat = fmean(marker["lat"] for marker in markers)
+        center_lng = fmean(marker["lng"] for marker in markers)
+        zoom = 8 if len(markers) > 1 else 12
+    else:
+        center_lat = KENYA_MAP_CENTER["lat"]
+        center_lng = KENYA_MAP_CENTER["lng"]
+        zoom = 6
+
     return {
-        "region_label": "Nakuru region",
-        "vet_status_label": "Dr. Njenga en route",
+        "region_label": "Saved farm locations",
+        "vet_status_label": (
+            f"{len(markers)} farm pin{'s' if len(markers) != 1 else ''} ready for routing"
+            if markers
+            else "No saved farm locations yet"
+        ),
         "legend_items": [
-            {"label": "Urgent cases", "tone": "rose"},
-            {"label": "Needs monitoring", "tone": "amber"},
-            {"label": "All clear", "tone": "teal"},
-            {"label": "Vet location", "tone": "navy"},
+            {"label": "Needs attention", "tone": "rose"},
+            {"label": "Due soon", "tone": "amber"},
+            {"label": "Unread farmer message", "tone": "navy"},
+            {"label": "Location saved", "tone": "teal"},
         ],
-        "map_markers": [
-            {"label": "MW", "name": "Mwangi", "status": "2 urgent", "tone": "rose", "top": "24%", "left": "43%"},
-            {"label": "KM", "name": "Kamau", "status": "monitor", "tone": "amber", "top": "32%", "left": "70%"},
-            {"label": "MK", "name": "Mutuku", "status": "all clear", "tone": "teal", "top": "27%", "left": "88%"},
-            {"label": "VT", "name": "Dr. Njenga", "status": "en route", "tone": "navy", "top": "46%", "left": "53%"},
-            {"label": "NG", "name": "Ngugi", "status": "all clear", "tone": "teal", "top": "62%", "left": "34%"},
-            {"label": "WN", "name": "Wanjiku", "status": "all clear", "tone": "teal", "top": "74%", "left": "57%"},
-            {"label": "OD", "name": "Odhiambo", "status": "overdue", "tone": "amber", "top": "60%", "left": "80%"},
+        "filter_options": [
+            {"value": "all", "label": "All farms", "count": len(farm_cards)},
+            {"value": "urgent", "label": "Urgent", "count": urgent_count},
+            {"value": "due_soon", "label": "Due soon", "count": due_soon_farm_count},
+            {
+                "value": "unread_messages",
+                "label": "Unread farmer messages",
+                "count": unread_message_farm_count,
+            },
         ],
-        "status_cards": [
-            {"name": "Mwangi Farm", "cows": "22", "due_soon": "6", "alerts": "3 active", "badge": "2 urgent", "tone": "rose"},
-            {"name": "Kamau Farm", "cows": "15", "due_soon": "2", "alerts": "1 active", "badge": "Monitoring", "tone": "amber"},
-            {"name": "Odhiambo Farm", "cows": "18", "due_soon": "3", "alerts": "1 active", "badge": "Overdue case", "tone": "amber"},
-            {"name": "Ngugi Farm", "cows": "11", "due_soon": "0", "alerts": "None", "badge": "All clear", "tone": "teal"},
-        ],
+        "map_center": {"lat": center_lat, "lng": center_lng, "zoom": zoom},
+        "map_markers": markers,
+        "status_cards": farm_cards,
     }
 
 
 def _build_medical_record_cards():
     return [
-        {"title": "Rosa #011", "detail": "Labour follow-up timeline, intervention summary, and escalation notes.", "status": "Open case", "tone": "rose"},
-        {"title": "Bella #004", "detail": "Treatment renewal review with withholding guidance recorded.", "status": "Follow-up", "tone": "amber"},
-        {"title": "Nuru #025", "detail": "CBC and milk panel results waiting for sign-off and farmer sharing.", "status": "Lab linked", "tone": "navy"},
+        {
+            "title": "Rosa #011",
+            "farm": "Moi Farm",
+            "owner": "John Otieno",
+            "record_type": "Labour follow-up",
+            "updated_at": "Today 10:20",
+            "next_step": "Open the active case and record the delivery outcome.",
+            "detail": "Labour follow-up timeline, intervention summary, and escalation notes.",
+            "status": "Open case",
+            "tone": "rose",
+        },
+        {
+            "title": "Bella #004",
+            "farm": "Moi Farm",
+            "owner": "John Otieno",
+            "record_type": "Treatment renewal",
+            "updated_at": "18 Mar",
+            "next_step": "Confirm symptoms before renewing the prescription.",
+            "detail": "Treatment renewal review with withholding guidance recorded.",
+            "status": "Follow-up",
+            "tone": "amber",
+        },
+        {
+            "title": "Nuru #025",
+            "farm": "Moi Farm",
+            "owner": "John Otieno",
+            "record_type": "Lab review",
+            "updated_at": "20 Mar",
+            "next_step": "Sign off the CBC and milk panel before sharing guidance.",
+            "detail": "CBC and milk panel results waiting for sign-off and farmer sharing.",
+            "status": "Lab linked",
+            "tone": "navy",
+        },
     ]
 
 
@@ -616,6 +866,8 @@ def _build_common_context(request, *, page_title, page_eyebrow, page_heading, pa
     profile = get_or_create_profile(request.user)
     display_name = request.user.get_full_name().strip() or request.user.username
     initials = "".join(part[0].upper() for part in display_name.split()[:2] if part) or "VT"
+    unread_message_count = get_unread_thread_count(request.user)
+    unread_notification_count = get_unread_notification_count(request.user)
     return {
         "dashboard_home_url": get_dashboard_url_for_user(request.user, fallback="/dashboard/profile/"),
         "back_to_website_url": reverse("Core_Web:home"),
@@ -630,8 +882,13 @@ def _build_common_context(request, *, page_title, page_eyebrow, page_heading, pa
         "page_eyebrow": page_eyebrow,
         "page_heading": page_heading,
         "page_intro": page_intro,
-        "navigation_sections": _build_navigation_sections(),
+        "navigation_sections": _build_navigation_sections(
+            unread_message_count,
+            unread_notification_count,
+        ),
         "workspace_menu_sections": _build_workspace_menu(),
+        "unread_message_count": unread_message_count,
+        "unread_notification_count": unread_notification_count,
         "header_primary_action": {
             "label": "New case update",
             "url": reverse("veterinary_dashboard:patients"),
@@ -657,6 +914,40 @@ def _build_workspace_page_context(request, *, page_title, page_eyebrow, page_hea
         }
     )
     return context
+
+
+def _build_thread_participants_for_veterinary(thread):
+    farmer_name = thread.farmer.get_full_name().strip() or thread.farmer.username
+    farm_name = getattr(thread.farmer.profile, "farm_name", "") if hasattr(thread.farmer, "profile") else ""
+    return {
+        "title": farmer_name,
+        "subtitle": farm_name or "Farmer account",
+        "meta": thread.cow.name if thread.cow else "General support",
+    }
+
+
+def _load_veterinary_message_state(request, thread_id=None):
+    selected_thread = None
+    if thread_id is not None:
+        selected_thread = get_thread_for_user(request.user, thread_id)
+        if selected_thread is None:
+            raise Http404("Conversation not found.")
+
+    if selected_thread is None:
+        thread_list = get_threads_for_user(request.user)
+        if thread_list:
+            selected_thread = thread_list[0]
+
+    if selected_thread is not None:
+        mark_thread_messages_read(selected_thread, request.user)
+
+    thread_list = get_threads_for_user(request.user)
+    if selected_thread is not None:
+        selected_thread = next(
+            (thread for thread in thread_list if thread.pk == selected_thread.pk),
+            selected_thread,
+        )
+    return thread_list, selected_thread
 
 
 @login_required
@@ -685,6 +976,102 @@ def dashboard_view(request):
 
 @login_required
 @role_required("veterinary")
+def messages_view(request, thread_id=None):
+    selected_thread = None
+    if thread_id is not None:
+        selected_thread = get_thread_for_user(request.user, thread_id)
+        if selected_thread is None:
+            raise Http404("Conversation not found.")
+
+    if request.method == "POST":
+        if selected_thread is None:
+            raise Http404("Conversation not found.")
+        reply_form = ConversationReplyForm(request.POST, request.FILES)
+        if reply_form.is_valid():
+            send_thread_message(
+                thread=selected_thread,
+                sender=request.user,
+                body=reply_form.cleaned_data["body"],
+                image=reply_form.cleaned_data.get("image"),
+            )
+            messages.success(request, "Reply sent to the farmer.")
+            return redirect("veterinary_dashboard:messages_thread", thread_id=selected_thread.pk)
+    else:
+        reply_form = ConversationReplyForm()
+
+    thread_list, selected_thread = _load_veterinary_message_state(
+        request,
+        thread_id=thread_id,
+    )
+
+    context = _build_common_context(
+        request,
+        page_title="Veterinary Messages | CowCalving",
+        page_eyebrow="Clinical messaging",
+        page_heading="Messages",
+        page_intro="Review farmer context, attachments, and the next reply in one focused inbox.",
+    )
+    context.update(
+        {
+            "header_primary_action": {
+                "label": "Open notifications",
+                "url": reverse("veterinary_dashboard:notifications"),
+            },
+            "conversation_threads": thread_list,
+            "selected_thread": selected_thread,
+            "selected_thread_participants": _build_thread_participants_for_veterinary(selected_thread)
+            if selected_thread
+            else None,
+            "reply_form": reply_form,
+        }
+    )
+    return render(request, "veterinary_dashboard/messages.html", context)
+
+
+@login_required
+@role_required("veterinary")
+def notifications_view(request):
+    notifications = list(get_notifications_for_user(request.user))
+    if request.method == "POST":
+        notification = get_object_or_404(
+            get_notifications_for_user(request.user),
+            pk=request.POST.get("notification_id"),
+        )
+        mark_notification_read(notification, request.user)
+        if notification.action_url:
+            return redirect(notification.action_url)
+        return redirect("veterinary_dashboard:notifications")
+
+    context = _build_common_context(
+        request,
+        page_title="Veterinary Notifications | CowCalving",
+        page_eyebrow="Clinical alerts",
+        page_heading="Notifications",
+        page_intro="Prioritize new farmer messages and open the right case context quickly.",
+    )
+    context.update(
+        {
+            "header_primary_action": {
+                "label": "Open inbox",
+                "url": reverse("veterinary_dashboard:messages"),
+            },
+            "notifications": notifications,
+            "notification_summary": {
+                "total": len(notifications),
+                "unread": sum(1 for item in notifications if not item.is_read),
+                "new_farmer_messages": sum(
+                    1
+                    for item in notifications
+                    if item.notification_type == item.TYPE_NEW_FARMER_MESSAGE
+                ),
+            },
+        }
+    )
+    return render(request, "veterinary_dashboard/notifications.html", context)
+
+
+@login_required
+@role_required("veterinary")
 def schedule_view(request):
     context = _build_common_context(
         request,
@@ -700,35 +1087,34 @@ def schedule_view(request):
 @login_required
 @role_required("veterinary")
 def farms_view(request):
-    farm_cards = [{"title": farm["name"], "detail": farm["detail"], "status": farm["risk"], "tone": farm["tone"], "progress_width": f"{farm['risk_percent']}%"} for farm in _build_farm_overview()]
-    return render(
+    farms = _build_farm_overview()
+    context = _build_common_context(
         request,
-        "veterinary_dashboard/workspace_page.html",
-        _build_workspace_page_context(
-            request,
-            page_title="Veterinary Farms | CowCalving",
-            page_eyebrow="My farms",
-            page_heading="Manage assigned farms",
-            page_intro="Keep the farm list short, scannable, and ready for a quick open when a route decision matters.",
-            page_focus={"label": "My Farms", "title": "See farm risk clearly", "text": "This page keeps farm counts, due-soon work, and alert level in one controlled list.", "badges": ["Assigned only", "Risk first", "Open details when needed"]},
-            page_quick_actions=[
-                {"label": "Open farm map", "description": "Switch to the region view when routing matters more than the list.", "url": reverse("veterinary_dashboard:farm_map")},
-                {"label": "Open schedule", "description": "Compare farm risk with today's visits.", "url": reverse("veterinary_dashboard:schedule")},
-                {"label": "Open active case", "description": "Jump into the case that needs action next.", "url": reverse("veterinary_dashboard:patients")},
-            ],
-            main_section={"label": "Assigned farms", "title": "Farm list and alert level", "cards": farm_cards},
-            support_section={"label": "Design rule", "title": "Why farms should be separate", "cards": [
-                {"title": "Avoid duplicate context", "detail": "Farm location, alerts, and counts are easier to read once here than on every page.", "status": "Lower cognitive load", "tone": "navy"},
-                {"title": "Support routing decisions", "detail": "Pair this page with the farm map or schedule instead of crowding the overview.", "status": "Better planning", "tone": "teal"},
-                {"title": "Hackathon-ready scope", "detail": "The list stays compact now and can expand into notes or coverage history later.", "status": "Expandable", "tone": "amber"},
-            ]},
-            extra_section={"label": "Connected workflows", "title": "Pages that use this farm context", "cards": [
-                {"title": "Active Case", "detail": "Open the current cow case after choosing the farm context.", "url": reverse("veterinary_dashboard:patients")},
-                {"title": "Farm Map", "detail": "Switch to the region view for route and urgency context.", "url": reverse("veterinary_dashboard:farm_map")},
-                {"title": "Medical Records", "detail": "Review recent farm-linked treatment and lab history.", "url": reverse("veterinary_dashboard:medical_records")},
-            ]},
-        ),
+        page_title="Veterinary Farms | CowCalving",
+        page_eyebrow="My farms",
+        page_heading="Manage assigned farms",
+        page_intro="Keep the farm list short, scannable, and easy to connect to routes, alerts, and follow-up.",
     )
+    context.update(
+        {
+            "header_primary_action": {
+                "label": "Open farm map",
+                "url": reverse("veterinary_dashboard:farm_map"),
+            },
+            "farm_records": farms,
+            "farm_summary": {
+                "total": len(farms),
+                "high_risk": sum(1 for farm in farms if farm["tone"] == "rose"),
+                "needs_planning": sum(1 for farm in farms if farm["tone"] == "amber"),
+            },
+            "farm_support_actions": [
+                {"label": "Open schedule", "description": "Compare farm risk with today's route order.", "url": reverse("veterinary_dashboard:schedule")},
+                {"label": "Open active case", "description": "Move from the farm list into the next animal that needs action.", "url": reverse("veterinary_dashboard:patients")},
+                {"label": "Open medical records", "description": "Review recent treatment and lab context for the farm.", "url": reverse("veterinary_dashboard:medical_records")},
+            ],
+        }
+    )
+    return render(request, "veterinary_dashboard/farms.html", context)
 
 
 @login_required
@@ -746,9 +1132,27 @@ def patients_view(request):
         {
             "patient_records": patient_records,
             "patient_stats": [
-                {"label": "Open cases", "value": "4"},
-                {"label": "Need review", "value": "2"},
-                {"label": "Lab linked", "value": "1"},
+                {"label": "Open cases", "value": str(len(patient_records))},
+                {
+                    "label": "Urgent",
+                    "value": str(
+                        sum(
+                            1
+                            for item in patient_records
+                            if item["priority_group"] == "urgent"
+                        )
+                    ),
+                },
+                {
+                    "label": "Waiting result",
+                    "value": str(
+                        sum(
+                            1
+                            for item in patient_records
+                            if item["stage_group"] == "waiting_result"
+                        )
+                    ),
+                },
             ],
             "patient_page_notes": [
                 "Open one case, act, then come back for the next one.",
@@ -771,42 +1175,41 @@ def farm_map_view(request):
         page_heading="Read the region at a glance",
         page_intro="Use the map only when the route or farm priority needs a wider view than the overview can show.",
     )
-    context.update(_build_farm_map_context())
+    context.update(_build_farm_map_context(request.user))
     return render(request, "veterinary_dashboard/farm_map.html", context)
 
 
 @login_required
 @role_required("veterinary")
 def medical_records_view(request):
-    record_cards = _build_medical_record_cards()
-    return render(
+    records = _build_medical_record_cards()
+    context = _build_common_context(
         request,
-        "veterinary_dashboard/workspace_page.html",
-        _build_workspace_page_context(
-            request,
-            page_title="Veterinary Medical Records | CowCalving",
-            page_eyebrow="Medical records",
-            page_heading="Review concise case history",
-            page_intro="Keep treatment history, lab summaries, and recent case notes accessible without crowding the live workflow pages.",
-            page_focus={"label": "Medical Records", "title": "Review what happened before acting", "text": "This page is for recent records and continuity, not day-of triage.", "badges": ["History first", "Search next", "Controlled access"]},
-            page_quick_actions=[
-                {"label": "Open active case", "description": "Return to the live case when a history check is enough.", "url": reverse("veterinary_dashboard:patients")},
-                {"label": "Open labs", "description": "Review full lab detail when the summary is not enough.", "url": reverse("veterinary_dashboard:labs")},
-                {"label": "Open prescriptions", "description": "Check treatment planning after reviewing the record.", "url": reverse("veterinary_dashboard:prescriptions")},
-            ],
-            main_section={"label": "Recent records", "title": "Cases and summaries worth revisiting", "cards": record_cards},
-            support_section={"label": "Why it matters", "title": "What this page keeps out of the overview", "cards": [
-                {"title": "Less homepage clutter", "detail": "Treatment detail belongs here so the overview stays decision-focused.", "status": "Cleaner dashboard", "tone": "teal"},
-                {"title": "Faster continuity", "detail": "The vet can reopen recent history before making a fresh call or visit.", "status": "Better context", "tone": "navy"},
-                {"title": "Hackathon-safe scope", "detail": "A concise records page demos real value without building a full hospital system.", "status": "Demo ready", "tone": "amber"},
-            ]},
-            extra_section={"label": "Connected pages", "title": "What usually follows record review", "cards": [
-                {"title": "Active Case", "detail": "Jump into the current case after reviewing the history.", "url": reverse("veterinary_dashboard:patients")},
-                {"title": "Schedule", "detail": "Open the route if a follow-up visit is needed.", "url": reverse("veterinary_dashboard:schedule")},
-                {"title": "Farm Map", "detail": "View the wider farm context if the pattern spans more than one farm.", "url": reverse("veterinary_dashboard:farm_map")},
-            ]},
-        ),
+        page_title="Veterinary Medical Records | CowCalving",
+        page_eyebrow="Medical records",
+        page_heading="Review concise case history",
+        page_intro="Keep treatment history, lab summaries, and recent case notes accessible without crowding live case work.",
     )
+    context.update(
+        {
+            "header_primary_action": {
+                "label": "Open active case",
+                "url": reverse("veterinary_dashboard:patients"),
+            },
+            "record_items": records,
+            "record_summary": {
+                "total": len(records),
+                "open_case": sum(1 for item in records if item["tone"] == "rose"),
+                "awaiting_review": sum(1 for item in records if item["tone"] in {"amber", "navy"}),
+            },
+            "record_support_actions": [
+                {"label": "Open labs", "description": "Review full lab detail when a summary is not enough.", "url": reverse("veterinary_dashboard:labs")},
+                {"label": "Open prescriptions", "description": "Check treatment planning after reading the recent history.", "url": reverse("veterinary_dashboard:prescriptions")},
+                {"label": "Open farm map", "description": "Switch to the region view if the next step becomes a visit.", "url": reverse("veterinary_dashboard:farm_map")},
+            ],
+        }
+    )
+    return render(request, "veterinary_dashboard/medical_records.html", context)
 
 
 @login_required

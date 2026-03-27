@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'Core_Web',
     'accounts',
     'users',
+    'communications',
     'farmers_dashboard',
     'veterinary_dashboard',
     'cow_calving_ai',
@@ -190,10 +191,11 @@ AUTHENTICATION_BACKENDS = [
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
-# Auth redirects flow through the shared /dashboard/ handoff so each role can
-# land in the right place without duplicating redirect logic across auth views.
+# Successful authentication should land users on the public home page first,
+# while the shared /dashboard/ handoff remains available for explicit routing
+# into role-aware workspaces when needed.
 LOGIN_URL = os.getenv("LOGIN_URL", "/accounts/login/")
-LOGIN_REDIRECT_URL = os.getenv("LOGIN_REDIRECT_URL", "/dashboard/")
+LOGIN_REDIRECT_URL = os.getenv("LOGIN_REDIRECT_URL", "/")
 LOGOUT_REDIRECT_URL = os.getenv("LOGOUT_REDIRECT_URL", "/accounts/login/")
 AUTHENTICATED_DEFAULT_URL = os.getenv("AUTHENTICATED_DEFAULT_URL", "/dashboard/profile/")
 CSRF_FAILURE_VIEW = "accounts.views.csrf_failure_view"
