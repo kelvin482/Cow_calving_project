@@ -213,6 +213,8 @@ def send_thread_message(*, thread, sender, body, image=None):
 
 @transaction.atomic
 def create_or_append_provider_thread(*, farmer, provider, body, image=None, cow=None):
+    # Farmer-selected live vet accounts can be embedded in the provider payload
+    # so the resulting thread lands in the right veterinary inbox immediately.
     assigned_veterinary_user = provider.get("assigned_veterinary_user")
     thread = (
         ConversationThread.objects.filter(

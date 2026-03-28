@@ -1391,6 +1391,9 @@ def _build_registered_veterinary_directory():
                 "is_registered_account": True,
                 "is_demo_profile": False,
                 "status_badge": "Active account",
+                # The service finder uses this to route the message thread into
+                # the actual veterinary dashboard account instead of a demo-only
+                # listing.
                 "assigned_veterinary_user": user,
                 "sort_priority": 0,
             }

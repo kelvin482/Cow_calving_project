@@ -612,6 +612,9 @@
                 const patient = selectedPatientRecord();
                 if (!patient) return;
 
+                // These queue actions are demo-local on purpose so the vet can
+                // show visible progress in the UI without changing database
+                // records during a presentation run.
                 patient.priority_group = 'stable';
                 patient.priority_label = 'Stable';
                 patient.tone = 'teal';
@@ -684,6 +687,8 @@
                 if (!patient) return;
 
                 const closedName = patient.name;
+                // Removing the item from the active queue makes the demo feel
+                // like a real case handoff without persisting a closed status.
                 patient.is_completed = true;
                 patient.status = 'Closed';
                 patient.status_banner = 'Case closed';

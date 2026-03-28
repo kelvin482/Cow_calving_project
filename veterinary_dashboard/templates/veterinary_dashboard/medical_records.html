@@ -991,6 +991,9 @@
                 const record = cow?.records?.[selectedRecordIndex];
                 if (!farm || !cow || !record) return;
 
+                // Keep this editor local to the page state so the record detail
+                // can be adjusted live in the demo without implying a backend
+                // save that does not exist yet.
                 record.type = (recordTypeInputEl?.value || record.type || record.label).trim();
                 cow.status = (recordStatusInputEl?.value || cow.status).trim();
                 cow.next_step = (recordNextStepInputEl?.value || cow.next_step).trim();
