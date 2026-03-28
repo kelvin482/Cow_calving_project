@@ -21,6 +21,40 @@
       white-space: nowrap;
       border: 0;
     }
+    /* Hub styles added inline to avoid touching global stylesheet for quick iteration */
+    .knowledge-hub-section { padding: 1.5rem 0 2.5rem; }
+    .hub-top { display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1rem; }
+    .hub-tabs { display:flex; gap:0.5rem; }
+    .hub-tab { background:#f3f6fb; border:1px solid #e6eef8; padding:0.5rem 0.9rem; border-radius:999px; font-weight:600; cursor:pointer; }
+    .hub-tab.is-active { background:#fff; border-color:#dbeafe; box-shadow:0 6px 18px rgba(15,23,42,0.06); }
+    .hub-actions { display:flex; gap:0.75rem; align-items:center; }
+    .hub-search input { padding:0.5rem 0.75rem; border-radius:0.6rem; border:1px solid #dbe5ef; background:#fff; }
+
+    .hub-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; margin-top:0.75rem; }
+    .hub-card { background:#fff; border-radius:0.75rem; overflow:hidden; border:1px solid #edf2f7; box-shadow:0 8px 18px rgba(15,23,42,0.04); display:flex; flex-direction:column; }
+    .hub-image { height:140px; overflow:hidden; background:#f3f6fb; }
+    .hub-image img { width:100%; height:100%; object-fit:cover; display:block; }
+    .hub-body { padding:0.75rem 0.9rem 1rem; display:flex; flex-direction:column; gap:0.4rem; }
+    .hub-kicker { background:#ffffffcc; display:inline-block; font-size:0.68rem; padding:0.18rem 0.5rem; border-radius:999px; border:1px solid #f0f4f8; color:#6b7280; }
+    .hub-body h3 { margin:0; font-size:1rem; color:#0f172a; }
+    .hub-meta { font-size:0.82rem; color:#6b7280; display:flex; gap:0.4rem; align-items:center; }
+    .hub-progress { height:4px; background:#eef5ff; border-radius:6px; margin-top:0.5rem; overflow:hidden; }
+    .hub-progress span { display:block; height:100%; background:linear-gradient(90deg,#2b87f0,#3db4ff); }
+
+    .suggested-row { margin-top:1.5rem; }
+    .suggested-row h4 { display:flex; align-items:center; gap:0.6rem; }
+    .suggested-list { display:flex; gap:1rem; margin-top:0.75rem; }
+    .suggested-item { display:flex; gap:0.8rem; align-items:center; background:#fff; padding:0.75rem; border-radius:0.7rem; border:1px solid #eef2f7; text-decoration:none; color:inherit; flex:1; }
+    .suggested-item img { width:64px; height:48px; object-fit:cover; border-radius:6px; }
+    .suggested-item .chev { margin-left:auto; color:#9ca3af; font-size:1.5rem; }
+
+    @media (max-width: 980px) {
+      .hub-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    }
+    @media (max-width: 640px) {
+      .hub-grid { grid-template-columns:1fr; }
+      .suggested-list { flex-direction:column; }
+    }
   </style>
 </head>
 
@@ -71,41 +105,102 @@
 
   <div class="knowledge-hub-section">
     <div class="main-wrap">
-      <div class="section-tag">Knowledge Hub</div>
-      <h2>Learn Practical Skills & Follow Short Courses</h2>
-      <p class="subtitle">Short learning modules and suggested reads to help you prepare for calving, improve calf care, and manage herd nutrition.</p>
-      <div class="hub-grid">
-        <a class="hub-card" href="#">
-          <img src="{% static 'Core_Web/images/cow and calf.jpg' %}" alt="Cow and calf">
-          <h3>Understanding Heat Detection Patterns</h3>
-          <p class="meta">Beginner • 15 min</p>
-        </a>
-        <a class="hub-card" href="#">
-          <img src="{% static 'Core_Web/images/1490fe2cbb1e219d53027e4d8c7cf644.jpg' %}" alt="Cow">
-          <h3>Optimizing Nutrition for Peak Lactation</h3>
-          <p class="meta">Intermediate • 25 min</p>
-        </a>
-        <a class="hub-card" href="#">
-          <img src="{% static 'Core_Web/images/00ac73aa5aaaecf17fae41d83e028216.jpg' %}" alt="Calf">
-          <h3>Calf Health: The First 24 Hours</h3>
-          <p class="meta">Beginner • 20 min</p>
-        </a>
-        <a class="hub-card" href="#">
-          <img src="{% static 'Core_Web/images/a7938517ea1668247cd5f0170c0b23e4.jpg' %}" alt="Barn">
-          <h3>Standard Operating Procedures for Milking</h3>
-          <p class="meta">Advanced • 30 min</p>
-        </a>
-        <a class="hub-card" href="#">
-          <img src="{% static 'Core_Web/images/286aa99925f3186fc15680800fa372e6.jpg' %}" alt="Pasture">
-          <h3>Disease Prevention & Biosecurity</h3>
-          <p class="meta">Intermediate • 40 min</p>
-        </a>
-        <a class="hub-card" href="#">
-          <img src="{% static 'Core_Web/images/download (1).png' %}" alt="Phone app">
-          <h3>Mastering the DairyCare Mobile App</h3>
-          <p class="meta">Quick • 10 min</p>
-        </a>
+      <div class="hub-top">
+        <div class="hub-tabs">
+          <button class="hub-tab is-active">Learning Library</button>
+          <button class="hub-tab">Alert Center</button>
+        </div>
+        <div class="hub-actions">
+          <div class="hub-search">
+            <input type="search" placeholder="Search everything...">
+          </div>
+        </div>
       </div>
+
+      <div class="hub-grid">
+        <article class="hub-card">
+          <div class="hub-image"><img src="{% static 'Core_Web/images/00ac73aa5aaaecf17fae41d83e028216.jpg' %}" alt="cow reclining"></div>
+          <div class="hub-body">
+            <div class="hub-kicker">Reproduction</div>
+            <h3>Understanding Heat Detection Patterns</h3>
+            <div class="hub-meta"><span>15 min</span><span>•</span><span>Beginner</span></div>
+            <div class="hub-progress"><span style="width:18%"></span></div>
+          </div>
+        </article>
+
+        <article class="hub-card">
+          <div class="hub-image"><img src="{% static 'Core_Web/images/1490fe2cbb1e219d53027e4d8c7cf644.jpg' %}" alt="cow head"></div>
+          <div class="hub-body">
+            <div class="hub-kicker">Nutrition</div>
+            <h3>Optimizing Nutrition for Peak Lactation</h3>
+            <div class="hub-meta"><span>25 min</span><span>•</span><span>Intermediate</span></div>
+            <div class="hub-progress"><span style="width:36%"></span></div>
+          </div>
+        </article>
+
+        <article class="hub-card">
+          <div class="hub-image"><img src="{% static 'Core_Web/images/00ac73aa5aaaecf17fae41d83e028216.jpg' %}" alt="calf"></div>
+          <div class="hub-body">
+            <div class="hub-kicker">Health</div>
+            <h3>Calf Health: The First 24 Hours</h3>
+            <div class="hub-meta"><span>20 min</span><span>•</span><span>Beginner</span></div>
+            <div class="hub-progress"><span style="width:8%"></span></div>
+          </div>
+        </article>
+
+        <article class="hub-card">
+          <div class="hub-image"><img src="{% static 'Core_Web/images/a7938517ea1668247cd5f0170c0b23e4.jpg' %}" alt="milking parlor"></div>
+          <div class="hub-body">
+            <div class="hub-kicker">Management</div>
+            <h3>Standard Operating Procedures for Milking</h3>
+            <div class="hub-meta"><span>30 min</span><span>•</span><span>Advanced</span></div>
+            <div class="hub-progress"><span style="width:62%"></span></div>
+          </div>
+        </article>
+
+        <article class="hub-card">
+          <div class="hub-image"><img src="{% static 'Core_Web/images/286aa99925f3186fc15680800fa372e6.jpg' %}" alt="pasture"></div>
+          <div class="hub-body">
+            <div class="hub-kicker">Health</div>
+            <h3>Disease Prevention &amp; Biosecurity</h3>
+            <div class="hub-meta"><span>40 min</span><span>•</span><span>Intermediate</span></div>
+            <div class="hub-progress"><span style="width:26%"></span></div>
+          </div>
+        </article>
+
+        <article class="hub-card">
+          <div class="hub-image"><img src="{% static 'Core_Web/images/download (1).png' %}" alt="app"></div>
+          <div class="hub-body">
+            <div class="hub-kicker">Software</div>
+            <h3>Mastering the DairyCare Mobile App</h3>
+            <div class="hub-meta"><span>10 min</span><span>•</span><span>Beginner</span></div>
+            <div class="hub-progress"><span style="width:4%"></span></div>
+          </div>
+        </article>
+      </div>
+
+      <div class="suggested-row">
+        <h4>Suggested for You</h4>
+        <div class="suggested-list">
+          <a class="suggested-item" href="#">
+            <img src="{% static 'Core_Web/images/00ac73aa5aaaecf17fae41d83e028216.jpg' %}" alt="cows">
+            <div>
+              <strong>Understanding Heat Detection Patterns</strong>
+              <p>Master the art of visual heat detection</p>
+            </div>
+            <span class="chev">›</span>
+          </a>
+          <a class="suggested-item" href="#">
+            <img src="{% static 'Core_Web/images/1490fe2cbb1e219d53027e4d8c7cf644.jpg' %}" alt="farmer tablet">
+            <div>
+              <strong>Optimizing Nutrition for Peak Lactation</strong>
+              <p>Strategies for maintaining high</p>
+            </div>
+            <span class="chev">›</span>
+          </a>
+        </div>
+      </div>
+
     </div>
   </div>
 
