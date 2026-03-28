@@ -1,0 +1,234 @@
+<!-- Shared dashboard assistant launcher: both farmer and vet dashboards mount
+     the same floating AI workspace so the UX stays consistent. -->
+<div
+    class="pointer-events-none fixed inset-0 z-40"
+    data-dashboard-ai-root
+    data-ai-url="{{ ai_workspace_url }}"
+    data-ai-embed-url="{{ ai_workspace_embed_url }}"
+>
+    <button
+        type="button"
+        class="pointer-events-auto fixed bottom-6 right-6 inline-flex items-center gap-3 rounded-full bg-[linear-gradient(135deg,#8f4e17,#b06b2f)] px-4 py-3 text-sm font-semibold text-white shadow-[0_22px_45px_rgba(143,78,23,0.32)] transition hover:-translate-y-0.5 hover:brightness-105"
+        data-dashboard-ai-open
+        aria-haspopup="dialog"
+        aria-expanded="false"
+    >
+        <span class="flex h-11 w-11 items-center justify-center rounded-full bg-white/12">
+            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M10 3.5c3.59 0 6.5 2.58 6.5 5.75S13.59 15 10 15H7.2L4.5 17v-3.05C3.58 12.91 3.5 11.9 3.5 9.25 3.5 6.08 6.41 3.5 10 3.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"></path>
+                <path d="M7 9.25h6M7 11.75h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+            </svg>
+        </span>
+        <span class="hidden sm:block">AI workspace</span>
+    </button>
+
+    <div class="pointer-events-none fixed inset-0 hidden bg-slate-950/30 backdrop-blur-[2px]" data-dashboard-ai-backdrop></div>
+
+    <section
+        class="pointer-events-none fixed left-1/2 top-1/2 hidden flex h-[min(42rem,calc(100vh-5rem))] w-[min(42rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden overscroll-contain rounded-[2.2rem] border border-[#eadfce] bg-[linear-gradient(180deg,#fffdf8_0%,#f7f0e7_100%)] shadow-[0_30px_80px_rgba(15,23,42,0.24)] transition-all duration-300 sm:w-[min(43rem,calc(100vw-4rem))]"
+        data-dashboard-ai-panel
+        role="dialog"
+        aria-modal="true"
+        aria-label="AI workspace"
+    >
+        <header class="flex items-center justify-between gap-4 border-b border-[#eadfce] bg-[linear-gradient(180deg,#fffdf8_0%,#faf3e8_100%)] px-5 py-4 sm:px-6">
+            <div class="min-w-0">
+                <h2 class="text-xl text-slate-950 font-display">Cow Calving Assistant</h2>
+            </div>
+            <div class="flex items-center gap-2">
+                <button
+                    type="button"
+                    class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#dccab0] bg-white/60 text-slate-500 transition hover:border-slate-300 hover:bg-white hover:text-slate-700"
+                    data-dashboard-ai-close
+                    aria-label="Close AI workspace"
+                >
+                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                        <path d="M5 5 15 15M15 5 5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <div class="min-h-0 flex-1 bg-[#f8f3ec] transition-all duration-300" data-dashboard-ai-body>
+            <iframe
+                class="h-full w-full border-0 bg-transparent"
+                title="AI workspace"
+                loading="lazy"
+                data-dashboard-ai-frame
+            ></iframe>
+        </div>
+
+        <button
+            type="button"
+            class="absolute bottom-3 right-3 hidden h-8 w-8 items-center justify-center rounded-full border border-[#dccab0] bg-white/78 text-[#8f6a44] shadow-sm transition hover:border-[#caa57d] hover:bg-white sm:inline-flex"
+            data-dashboard-ai-resize-handle
+            aria-label="Resize AI workspace"
+            title="Drag to resize"
+        >
+            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M6 14 14 6M9.5 14 14 9.5M13 14l1-1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+            </svg>
+        </button>
+    </section>
+</div>
+
+<script>
+    (() => {
+        const root = document.querySelector("[data-dashboard-ai-root]");
+        if (!root) {
+            return;
+        }
+
+        const openButton = root.querySelector("[data-dashboard-ai-open]");
+        const panel = root.querySelector("[data-dashboard-ai-panel]");
+        const backdrop = root.querySelector("[data-dashboard-ai-backdrop]");
+        const closeButton = root.querySelector("[data-dashboard-ai-close]");
+        const resizeHandle = root.querySelector("[data-dashboard-ai-resize-handle]");
+        const frame = root.querySelector("[data-dashboard-ai-frame]");
+        const aiUrl = root.dataset.aiUrl || "";
+        const aiEmbedUrl = root.dataset.aiEmbedUrl || aiUrl;
+        const pageBody = document.body;
+        const pageHtml = document.documentElement;
+        const previousBodyOverflow = pageBody.style.overflow;
+        const previousHtmlOverflow = pageHtml.style.overflow;
+        const defaultPanelSize = { width: 688, height: 672 };
+        let hasLoadedFrame = false;
+        let resizeState = null;
+
+        function getResizeBounds() {
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            const maxWidth = Math.max(360, Math.min(960, viewportWidth - 32));
+            const minWidth = Math.max(320, Math.min(560, maxWidth));
+            const maxHeight = Math.max(420, Math.min(820, viewportHeight - 24));
+            const minHeight = Math.max(360, Math.min(520, maxHeight));
+            return { minWidth, maxWidth, minHeight, maxHeight };
+        }
+
+        function clamp(value, min, max) {
+            return Math.min(max, Math.max(min, value));
+        }
+
+        function applyPanelSize(width, height) {
+            const bounds = getResizeBounds();
+            panel.style.width = `${clamp(width, bounds.minWidth, bounds.maxWidth)}px`;
+            panel.style.height = `${clamp(height, bounds.minHeight, bounds.maxHeight)}px`;
+        }
+
+        function syncPanelSize() {
+            const currentWidth = panel.offsetWidth || defaultPanelSize.width;
+            const currentHeight = panel.offsetHeight || defaultPanelSize.height;
+            applyPanelSize(currentWidth, currentHeight);
+        }
+
+        function ensureDefaultPanelSize() {
+            if (panel.style.width && panel.style.height) {
+                syncPanelSize();
+                return;
+            }
+
+            applyPanelSize(defaultPanelSize.width, defaultPanelSize.height);
+        }
+
+        function setVisibility(isOpen) {
+            backdrop.classList.toggle("hidden", !isOpen);
+            panel.classList.toggle("hidden", !isOpen);
+            backdrop.classList.toggle("pointer-events-auto", isOpen);
+            panel.classList.toggle("pointer-events-auto", isOpen);
+            openButton.setAttribute("aria-expanded", isOpen ? "true" : "false");
+            pageBody.style.overflow = isOpen ? "hidden" : previousBodyOverflow;
+            pageHtml.style.overflow = isOpen ? "hidden" : previousHtmlOverflow;
+            if (isOpen && !hasLoadedFrame && aiEmbedUrl) {
+                frame.src = aiEmbedUrl;
+                hasLoadedFrame = true;
+            }
+            if (isOpen) {
+                ensureDefaultPanelSize();
+            }
+        }
+
+        function openPanel() {
+            setVisibility(true);
+        }
+
+        function closePanel() {
+            setVisibility(false);
+        }
+
+        function startResize(event) {
+            if (window.innerWidth < 640) {
+                return;
+            }
+
+            event.preventDefault();
+            resizeState = {
+                pointerId: event.pointerId,
+                startX: event.clientX,
+                startY: event.clientY,
+                width: panel.offsetWidth,
+                height: panel.offsetHeight,
+            };
+            resizeHandle?.setPointerCapture?.(event.pointerId);
+            panel.classList.add("select-none");
+        }
+
+        function handleResize(event) {
+            if (!resizeState) {
+                return;
+            }
+
+            const nextWidth = resizeState.width + (event.clientX - resizeState.startX);
+            const nextHeight = resizeState.height + (event.clientY - resizeState.startY);
+            applyPanelSize(nextWidth, nextHeight);
+        }
+
+        function stopResize(event) {
+            if (!resizeState) {
+                return;
+            }
+
+            if (event?.pointerId !== undefined) {
+                resizeHandle?.releasePointerCapture?.(event.pointerId);
+            }
+            resizeState = null;
+            panel.classList.remove("select-none");
+        }
+
+        // Route dashboard AI links into the floating workspace, while leaving
+        // unrelated links to behave normally.
+        function shouldOpenInPanel(link) {
+            if (!(link instanceof HTMLAnchorElement)) {
+                return false;
+            }
+            const linkUrl = new URL(link.href, window.location.origin);
+            const aiPageUrl = new URL(aiUrl, window.location.origin);
+            return linkUrl.pathname === aiPageUrl.pathname;
+        }
+
+        openButton.addEventListener("click", openPanel);
+        closeButton.addEventListener("click", closePanel);
+        backdrop.addEventListener("click", closePanel);
+        resizeHandle?.addEventListener("pointerdown", startResize);
+        resizeHandle?.addEventListener("pointerup", stopResize);
+        resizeHandle?.addEventListener("pointercancel", stopResize);
+        window.addEventListener("pointermove", handleResize);
+        window.addEventListener("pointerup", stopResize);
+        window.addEventListener("pointercancel", stopResize);
+        window.addEventListener("resize", syncPanelSize);
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+                closePanel();
+            }
+        });
+
+        document.addEventListener("click", (event) => {
+            const link = event.target.closest("a");
+            if (!shouldOpenInPanel(link)) {
+                return;
+            }
+            event.preventDefault();
+            openPanel();
+        });
+    })();
+</script>

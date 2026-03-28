@@ -1,0 +1,621 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CowCalving.farm | Cow Breeding, Insemination And Calving Support</title>
+  <meta name="description"
+    content="CowCalving.farm helps dairy farmers track heat, insemination, pregnancy follow-up, and calving readiness with practical guidance and faster veterinary support.">
+  <link rel="stylesheet" href="{% static 'Core_Web/styles.css' %}{% if dev_static_version %}?v={{ dev_static_version }}{% endif %}">
+  <style>
+    .auth-context {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .preview-mock {
+      border-radius: var(--radius-sm);
+      background: #f8faf9;
+      padding: 24px;
+      text-align: left;
+      color: var(--text);
+    }
+
+    .preview-mock-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .preview-mock-stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(110px, 1fr));
+      gap: 12px;
+    }
+
+    .preview-stat {
+      border-radius: 14px;
+      background: var(--cream);
+      padding: 16px;
+    }
+
+    .preview-stat-label {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .preview-stat-value {
+      margin-top: 8px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .preview-grid {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: 1.4fr 0.95fr;
+      gap: 16px;
+    }
+
+    .preview-panel {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: white;
+      padding: 20px;
+    }
+
+    .preview-panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .preview-badge {
+      display: inline-flex;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(31, 93, 59, 0.1);
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .preview-bars {
+      margin-top: 24px;
+      height: 176px;
+      display: flex;
+      align-items: end;
+      gap: 10px;
+    }
+
+    .preview-bar {
+      flex: 1;
+      border-radius: 14px 14px 0 0;
+    }
+
+    .preview-task-list {
+      margin-top: 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .preview-task {
+      border-radius: 14px;
+      background: #f8faf9;
+      padding: 16px;
+    }
+
+    .preview-task-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .preview-task-copy {
+      margin-top: 4px;
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    .hero-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(31, 93, 59, 0.1);
+      color: var(--green-dark);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .hero-actions {
+      margin-top: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .hero-action-note {
+      margin-top: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .hero-action-note span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(31, 93, 59, 0.08);
+    }
+
+    .story-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 28px;
+    }
+
+    .story-card {
+      padding: 24px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(246, 249, 247, 0.96));
+      border: 1px solid rgba(31, 93, 59, 0.1);
+      box-shadow: 0 14px 30px rgba(31, 93, 59, 0.08);
+    }
+
+    .story-card h3 {
+      margin-top: 0;
+      color: var(--green-dark);
+      font-size: 20px;
+    }
+
+    .story-card p {
+      margin-bottom: 0;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    .benefit-grid {
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) !important;
+    }
+
+    @media (max-width: 900px) {
+      .preview-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .story-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .hero-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .hero-actions a {
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  {% include "Core_Web/includes/public_site_nav.html" %}
+
+  <div class="auth-context">
+    <span>Smart Livestock Management</span>
+    {% if request.user.is_authenticated %}
+      <a href="{{ dashboard_url|default:profile_url }}">{{ dashboard_label|default:"Complete Your Profile" }}</a>
+      <a href="{{ profile_url }}">Profile</a>
+    {% else %}
+      <a href="{% url 'accounts:login' %}">Sign In</a>
+      <a href="{% url 'accounts:signup' %}">Farmer Register</a>
+    {% endif %}
+  </div>
+
+  <div class="hero hero--home-compact">
+    <div class="hero-inner" style="display: flex; align-items: center; justify-content: space-between; gap: 40px; padding: 60px 0;">
+      <div class="hero-content" style="max-width: 650px;">
+        <div class="hero-kicker" style="background: rgba(242, 140, 40, 0.15); color: var(--amber); border-radius: 6px; padding: 6px 12px; font-weight: 700;">Smart Livestock Management</div>
+        <h1 style="font-family: 'Poppins', sans-serif; font-size: 52px; font-weight: 800; line-height: 1.15; color: var(--pine); margin-top: 24px;">
+          Calving Guidance &amp; Farm Records
+        </h1>
+        <p class="hero-desc" style="font-size: 18px; line-height: 1.6; color: var(--text-muted); margin-top: 20px; max-width: 580px;">
+          Track heat, insemination, pregnancy follow-up, and calving readiness in one clear workflow built for practical farm decisions.
+        </p>
+        <div class="hero-actions" style="margin-top: 36px; display: flex; gap: 16px; flex-wrap: wrap;">
+          {% if request.user.is_authenticated %}
+            <a href="{{ dashboard_url|default:profile_url }}" class="cta-btn-primary" style="padding: 14px 28px; font-size: 16px; border-radius: 8px;">{{ dashboard_label|default:"Open Your Dashboard" }}</a>
+            <a href="{{ profile_url }}" class="cta-btn-secondary" style="padding: 14px 28px; font-size: 16px; border-radius: 8px; border-color: var(--warm-gray); color: var(--pine);">Review Profile</a>
+          {% else %}
+            <a href="{% url 'accounts:signup' %}" class="cta-btn-primary" style="background: var(--amber); color: white; border: none; padding: 14px 28px; border-radius: 8px; font-size: 16px;">Register As Farmer</a>
+            <a href="{% url 'Core_Web:guide' %}" class="btn-outline" style="padding: 14px 28px; border-radius: 8px; font-size: 16px;">Preview The Guide</a>
+            <a href="{% url 'accounts:login' %}" class="btn-outline" style="padding: 14px 28px; border-radius: 8px; border: none; background: transparent; color: var(--pine);">Sign In</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="hero-graphic" style="flex-shrink: 0;"></div>
+    </div>
+  </div>
+
+  <div class="main-wrap">
+    <div class="how-it-works">
+      <h2>How To Start In Under A Minute</h2>
+      <div class="steps-container">
+        <div class="step-item">
+          <div class="step-number">1</div>
+          <h3>Start on home</h3>
+          <p>See what the product does, who it helps, and choose the right next action without hunting through menus.</p>
+        </div>
+        <div class="step-item">
+          <div class="step-number">2</div>
+          <h3>Choose your path</h3>
+          <p>Open the guide for learning, the checklist for action, or sign in if you already want the dashboard view.</p>
+        </div>
+        <div class="step-item">
+          <div class="step-number">3</div>
+          <h3>Continue into the dashboard</h3>
+          <p>After login or registration, the shared redirect sends each user to the correct role-based destination.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="features-section platform-features-section">
+    <div class="main-wrap">
+      <h2>Platform Features</h2>
+      <p class="subtitle">A stronger landing page should quickly explain the product, prove the value, and guide the next click.</p>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">&#128203;</div>
+          <h3>Animal Records</h3>
+          <p>Keep one digital record for breeding history, health events, and calving timelines.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#127807;</div>
+          <h3>Feed Tracking</h3>
+          <p>Track feed inputs and connect feeding decisions to cow condition and calf performance.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#128202;</div>
+          <h3>Production Monitoring</h3>
+          <p>Monitor daily production, body condition, and herd trends from one place.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#128276;</div>
+          <h3>Alerts And Reminders</h3>
+          <p>Receive reminders for calving dates, treatment windows, and key herd events.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#129302;</div>
+          <h3>AI Farm Assistant</h3>
+          <p>Ask practical questions and get quick direction before you escalate to a veterinarian.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#128197;</div>
+          <h3>Vet Coordination</h3>
+          <p>Organize appointments, follow-up visits, and urgent support around calving season.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="preview-section">
+    <div class="main-wrap">
+      <h2>See Your Farm At A Glance</h2>
+      <p class="subtitle">This preview gives judges and first-time users a fast mental model before they reach the protected app screens.</p>
+      <div class="preview-wrapper">
+        <div class="preview-mock">
+          <div class="preview-mock-top">
+            <div>
+              <div style="font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--green);font-weight:700;">Farm Dashboard</div>
+              <h3 style="margin-top:8px;font-family:'Poppins',sans-serif;font-size:30px;line-height:1.2;color:var(--green-dark);">Daily herd visibility</h3>
+              <p style="margin-top:12px;max-width:420px;font-size:15px;line-height:1.7;color:var(--text-muted);">Monitor calving readiness, milk trends, animal records, and action items from one organized workspace.</p>
+            </div>
+            <div class="preview-mock-stats">
+              <div class="preview-stat">
+                <div class="preview-stat-label">Due Soon</div>
+                <div class="preview-stat-value" style="color:var(--amber);">18</div>
+                <div style="margin-top:6px;font-size:13px;color:var(--text-muted);">close-up cows</div>
+              </div>
+              <div class="preview-stat">
+                <div class="preview-stat-label">Alerts</div>
+                <div class="preview-stat-value" style="color:var(--green);">6</div>
+                <div style="margin-top:6px;font-size:13px;color:var(--text-muted);">follow-ups today</div>
+              </div>
+            </div>
+          </div>
+          <div class="preview-grid">
+            <div class="preview-panel">
+              <div class="preview-panel-head">
+                <h4 style="font-family:'Poppins',sans-serif;font-size:18px;color:var(--green-dark);">Weekly activity</h4>
+                <span class="preview-badge">Stable</span>
+              </div>
+              <div class="preview-bars">
+                <div class="preview-bar" style="height:40%;background:#d6eadf;"></div>
+                <div class="preview-bar" style="height:62%;background:#bedfcf;"></div>
+                <div class="preview-bar" style="height:55%;background:#9cc9b1;"></div>
+                <div class="preview-bar" style="height:78%;background:#6fad8b;"></div>
+                <div class="preview-bar" style="height:88%;background:var(--green);"></div>
+                <div class="preview-bar" style="height:70%;background:var(--green-dark);"></div>
+              </div>
+            </div>
+            <div class="preview-panel">
+              <h4 style="font-family:'Poppins',sans-serif;font-size:18px;color:var(--green-dark);">Today's priorities</h4>
+              <div class="preview-task-list">
+                <div class="preview-task">
+                  <div class="preview-task-title">Calving pen checklist</div>
+                  <div class="preview-task-copy">Review supplies and bedding before 6 PM.</div>
+                </div>
+                <div class="preview-task">
+                  <div class="preview-task-title">AI support review</div>
+                  <div class="preview-task-copy">Two new calf-care follow-up questions.</div>
+                </div>
+                <div class="preview-task">
+                  <div class="preview-task-title">Vet coordination</div>
+                  <div class="preview-task-copy">Schedule tomorrow's farm visit and notes.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-wrap">
+    <div class="section-work">
+      <div class="section-work-layout">
+        <div class="section-work-main">
+          <div class="section-tag">Built For Dairy Farmers</div>
+          <h2>One clearer path from heat signs to safe calving follow-up</h2>
+          <p>CowCalving.farm is built to help farmers record the dates that matter, understand what happens next, and keep every cow moving through breeding, pregnancy, and calving with less guesswork.</p>
+          <p>The home page should explain that value fast: record what you observe, see the next important milestone, and know when to prepare on your own or bring in veterinary support.</p>
+
+          <div class="highlight-stat">
+            <span class="big-num">4 steps</span>
+            <span class="caption">Heat observed, insemination recorded, pregnancy follow-up, and calving preparation in one practical workflow.</span>
+          </div>
+        </div>
+
+        <div class="section-work-rail" aria-label="Cow breeding workflow">
+          <div class="section-work-rail-title">The workflow farmers follow</div>
+          <div class="section-work-step">
+            <span class="section-work-step-num">1</span>
+            <div>
+              <strong>Heat observed</strong>
+              <p>Start from the first visible sign that a cow is ready for service.</p>
+            </div>
+          </div>
+          <div class="section-work-step">
+            <span class="section-work-step-num">2</span>
+            <div>
+              <strong>Insemination recorded</strong>
+              <p>Save the breeding date once so the next watch window is easier to track.</p>
+            </div>
+          </div>
+          <div class="section-work-step">
+            <span class="section-work-step-num">3</span>
+            <div>
+              <strong>Pregnancy follow-up</strong>
+              <p>Keep the likely check window and return-to-heat watch visible.</p>
+            </div>
+          </div>
+          <div class="section-work-step">
+            <span class="section-work-step-num">4</span>
+            <div>
+              <strong>Calving preparation</strong>
+              <p>Move into close-up watch and know when to involve support.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-wrap">
+    <div class="story-grid">
+      <div class="story-card">
+        <h3>Track breeding dates</h3>
+        <p>Keep the heat date, insemination date, and expected follow-up visible so the next decision is easier to make.</p>
+      </div>
+      <div class="story-card">
+        <h3>See upcoming calving needs</h3>
+        <p>Know when pregnancy checks, close-up watch, and calving preparation are approaching before they become urgent.</p>
+      </div>
+      <div class="story-card">
+        <h3>Escalate sooner</h3>
+        <p>Move from self-guided farm action to veterinary support quickly when a cow stops following the normal path.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-wrap">
+    <div class="home-story-band">
+      <div class="home-story-media-grid">
+        <div class="home-story-media home-story-media--main">
+          <img src="{% static 'Core_Web/images/cow and calf.jpg' %}" alt="Cow and calf standing in a farm field">
+        </div>
+        <div class="home-story-media-stack">
+          <div class="home-story-media home-story-media--support">
+            <img src="{% static 'Core_Web/images/00ac73aa5aaaecf17fae41d83e028216.jpg' %}" alt="Farm cattle standing together in the field">
+          </div>
+          <div class="home-story-media home-story-media--support">
+            <img src="{% static 'Core_Web/images/a7938517ea1668247cd5f0170c0b23e4.jpg' %}" alt="Healthy dairy cow on pasture">
+          </div>
+        </div>
+      </div>
+      <div class="home-story-copy">
+        <div class="section-tag">Our Goal</div>
+        <h3>Give every farmer one simple record and one clear next step</h3>
+        <p>Instead of scattered notes and missed follow-up dates, the platform brings the reproductive story of each cow into one place. Farmers can start from heat, record insemination, watch for pregnancy progress, and prepare for calving with a timeline they can understand quickly.</p>
+        <div class="home-story-list">
+          <div class="home-story-point">
+            <strong>Record the key event once.</strong>
+            <span>The calendar and next actions update around the date that matters most.</span>
+          </div>
+          <div class="home-story-point">
+            <strong>See the next milestone clearly.</strong>
+            <span>Upcoming checks, close-up watch, and due dates stay visible without crowding the page.</span>
+          </div>
+          <div class="home-story-point">
+            <strong>Bring in support at the right time.</strong>
+            <span>When a routine case changes, the farmer already knows where to go next for help.</span>
+          </div>
+        </div>
+        <div class="home-story-actions">
+          <a href="{% url 'Core_Web:guide' %}" class="cta-btn-primary">See The Care Guide</a>
+          <a href="{% url 'Core_Web:checklist' %}#checklist" class="btn-outline">Open The Calving Checklist</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-wrap">
+    <div class="home-value-section">
+      <div class="home-value-head">
+        <h2>Why farmers use CowCalving.farm</h2>
+        <p class="subtitle">The platform is designed around the moments that matter most in a cow's reproductive journey, not around generic farm software screens.</p>
+      </div>
+      <div class="home-value-list">
+        <div class="home-value-item">
+          <h3>Better breeding visibility</h3>
+          <p>Keep one record for heat, insemination, pregnancy status, and calving expectations instead of relying on memory.</p>
+        </div>
+        <div class="home-value-item">
+          <h3>Earlier action on risk</h3>
+          <p>See when a cow needs closer watch, a pregnancy check, or faster intervention before the problem grows.</p>
+        </div>
+        <div class="home-value-item">
+          <h3>Cleaner farmer workflow</h3>
+          <p>Use simple pages for learning, preparation, and support while the dashboard handles the live tracking work.</p>
+        </div>
+        <div class="home-value-item">
+          <h3>Stronger demo story</h3>
+          <p>Visitors, judges, and future users can understand the problem, the workflow, and the product outcome in one pass.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="where-next">
+    <div class="main-wrap">
+      <h2>Start from the page that matches your need</h2>
+      <div class="where-next-intro">
+        <p>Each public page now does one clearer job. Learn the process on the guide or move into practical preparation on the checklist.</p>
+      </div>
+      <div class="next-grid next-grid--two">
+        <a href="{% url 'Core_Web:guide' %}" class="next-card">
+          <div class="next-card-icon">&#128214;</div>
+          <div class="next-card-body">
+            <h3>Guide</h3>
+            <p>Understand heat signs, labor stages, calf care, and the key steps behind safe calving decisions.</p>
+          </div>
+        </a>
+        <a href="{% url 'Core_Web:checklist' %}" class="next-card">
+          <div class="next-card-icon">&#10003;</div>
+          <div class="next-card-body">
+            <h3>Checklist</h3>
+            <p>Work through the practical equipment, hygiene, and readiness actions before the calving window opens.</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta-strip" style="background: linear-gradient(135deg, var(--green-dark), var(--green-light));">
+    <h2>Move Straight To The Right Page</h2>
+    <p>Start public, explain the value fast, then let authentication route users into the right working area.</p>
+    <div class="cta-btns">
+      {% if request.user.is_authenticated %}
+        <a href="{{ dashboard_url|default:profile_url }}" class="cta-btn-primary">{{ dashboard_label|default:"Open Dashboard" }}</a>
+        <a href="{% url 'Core_Web:guide' %}" class="cta-btn-secondary">Read The Guide</a>
+      {% else %}
+        <a href="{% url 'accounts:login' %}" class="cta-btn-primary">Sign In</a>
+        <a href="{% url 'accounts:signup' %}" class="cta-btn-secondary">Register</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand-name">
+          <span class="footer-brand-mark" aria-hidden="true">
+            <span class="logo-mark">{% include "includes/cow_calving_logo_mark.html" %}</span>
+          </span>
+          CowCalving.farm
+        </div>
+        <p class="footer-desc">Evidence-based, practical guidance for farmers on cow calving, calf management, and
+          daily herd care.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Pages</h4>
+        <ul>
+          <li><a href="{% url 'Core_Web:home' %}">Home</a></li>
+          <li><a href="{% url 'Core_Web:guide' %}">Guide</a></li>
+          <li><a href="{% url 'Core_Web:checklist' %}">Checklist</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Guide</h4>
+        <ul>
+          <li><a href="{% url 'Core_Web:guide' %}#signs">Signs Of Calving</a></li>
+          <li><a href="{% url 'Core_Web:guide' %}#stages">Stages Of Labor</a></li>
+          <li><a href="{% url 'Core_Web:guide' %}#colostrum">Colostrum</a></li>
+          <li><a href="{% url 'Core_Web:guide' %}#trouble">Troubleshooting</a></li>
+          <li><a href="{% url 'Core_Web:guide' %}#faq">FAQ</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Action</h4>
+        <ul>
+          <li><a href="{% url 'Core_Web:checklist' %}#checklist">Season Checklist</a></li>
+          <li><a href="{% url 'Core_Web:checklist' %}#faq">Checklist FAQ</a></li>
+          <li><a href="{% url 'Core_Web:guide' %}#trouble">Troubleshooting</a></li>
+          <li><a href="{% url 'Core_Web:guide' %}#faq">Guide FAQ</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 CowCalving.farm - For educational purposes. Always consult a qualified veterinarian for medical
+        decisions affecting your animals.</span>
+      <span>Built for farmers</span>
+    </div>
+  </footer>
+
+  <script src="{% static 'Core_Web/main.js' %}{% if dev_static_version %}?v={{ dev_static_version }}{% endif %}"></script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+{% extends "accounts/base_auth.html" %}
+{% load static %}
+
+{% block title %}Login | CowCalving{% endblock %}
+
+{% block auth_panel_title %}Sign in to access the right workspace.{% endblock %}
+{% block auth_panel_text %}Farmers use their normal account credentials. Veterinary doctors receive professional IDs and passwords from admin.{% endblock %}
+{% block auth_panel_image %}{% static 'accounts/images/register-cow-calf.jpg' %}{% endblock %}
+{% block auth_panel_points %}
+    <ul class="space-y-3 text-sm text-white/85">
+        <li class="flex items-start gap-3">
+            <span class="mt-2 h-2 w-2 rounded-full bg-sage"></span>
+            <span>Farmers create and manage their own accounts.</span>
+        </li>
+        <li class="flex items-start gap-3">
+            <span class="mt-2 h-2 w-2 rounded-full bg-sage"></span>
+            <span>Veterinary access is provisioned and verified by admin.</span>
+        </li>
+    </ul>
+{% endblock %}
+
+{% block auth_form_title %}Sign in{% endblock %}
+{% block auth_form_subtitle %}Choose your account type to continue securely.{% endblock %}
+
+{% block auth_form_fields %}
+    <div class="auth-field">
+        <span class="text-sm font-semibold text-forest">Sign-in Type</span>
+        <div class="mt-3 grid gap-3 sm:grid-cols-2">
+            {% for radio in form.login_type %}
+                <label class="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-left transition hover:border-forest/30 hover:bg-emerald-50/40">
+                    {{ radio.tag }}
+                    <span class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-forest shadow-sm shadow-slate-200/40" aria-hidden="true">
+                        {% if radio.choice_label == 'Veterinary' %}
+                            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 5 5 19"></path>
+                                <path d="M14.5 5.5 18.5 9.5"></path>
+                                <path d="M8.5 11.5 12.5 15.5"></path>
+                                <path d="M4.5 21.5 8.2 17.8"></path>
+                            </svg>
+                        {% else %}
+                            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 4c3 0 5.5 2.2 5.5 5.2 0 4.1-5.5 8.8-5.5 8.8S6.5 13.3 6.5 9.2C6.5 6.2 9 4 12 4Z"></path>
+                                <path d="M9.2 10.5c1.1-.3 2-.9 2.8-1.8.3 1.1 1.1 2 2.2 2.5"></path>
+                            </svg>
+                        {% endif %}
+                    </span>
+                    <span class="block text-sm font-semibold text-slate-900">{{ radio.choice_label }}</span>
+                </label>
+            {% endfor %}
+        </div>
+        {% if form.login_type.errors %}<small class="text-rose-600">{{ form.login_type.errors|striptags }}</small>{% endif %}
+    </div>
+
+    <div class="auth-field" data-login-mode-panel="farmer">
+        <label class="text-sm font-semibold text-forest" for="id_email">Email</label>
+        {{ form.email }}
+        {% if form.email.errors %}<small class="text-rose-600">{{ form.email.errors|striptags }}</small>{% endif %}
+    </div>
+
+    <div class="auth-field" data-login-mode-panel="veterinary">
+        <label class="text-sm font-semibold text-forest" for="id_professional_id">Professional ID</label>
+        {{ form.professional_id }}
+        {% if form.professional_id.errors %}<small class="text-rose-600">{{ form.professional_id.errors|striptags }}</small>{% endif %}
+    </div>
+
+    <div class="rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm text-cyan-900" data-login-mode-panel="veterinary">
+        Veterinary doctors do not self-register here. If you do not have your professional ID yet, contact the system admin.
+    </div>
+
+    <div class="auth-field">
+        <label class="text-sm font-semibold text-forest" for="id_password">Password</label>
+        {{ form.password }}
+        {% if form.password.errors %}<small class="text-rose-600">{{ form.password.errors|striptags }}</small>{% endif %}
+    </div>
+{% endblock %}
+
+{% block auth_form_meta %}
+    <div class="flex items-center justify-between text-sm text-slate-600">
+        <label class="inline-flex items-center gap-2">
+            <input type="checkbox" name="remember_me" class="h-4 w-4 rounded border-slate-300 text-forest">
+            <span>Remember me</span>
+        </label>
+        <a class="text-forest font-semibold hover:underline" href="{% url 'accounts:password_reset_request' %}">Forgot password?</a>
+    </div>
+    <div class="auth-divider" data-login-mode-google>OR CONTINUE WITH</div>
+    <div class="grid gap-3" data-login-mode-google>
+        <button
+            type="submit"
+            formaction="{% url 'google_login' %}"
+            formmethod="post"
+            formnovalidate
+            class="auth-action-button auth-google-button w-full justify-start rounded-2xl px-5 py-4 text-left font-semibold transition active:translate-y-px active:scale-[0.99]"
+            data-submit-feedback
+            data-pending-text="Opening Google..."
+        >
+            <span class="auth-google-mark" aria-hidden="true">
+                <svg viewBox="0 0 48 48" class="h-6 w-6">
+                    <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.7 1.1 7.8 3l5.7-5.7C34.1 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.3-.4-3.5Z"/>
+                    <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 18.9 12 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7C34.1 6.1 29.3 4 24 4c-7.7 0-14.3 4.3-17.7 10.7Z"/>
+                    <path fill="#4CAF50" d="M24 44c5.2 0 10-2 13.5-5.2l-6.2-5.2c-2.1 1.6-4.7 2.4-7.3 2.4-5.3 0-9.7-3.3-11.4-8H6.1C9.4 37.7 16.1 44 24 44Z"/>
+                    <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.2-4 5.6l6.2 5.2C36.9 39.3 44 34 44 24c0-1.2-.1-2.3-.4-3.5Z"/>
+                </svg>
+            </span>
+            <span class="text-[1.12rem] font-semibold tracking-[-0.01em] text-slate-800">Continue with Google</span>
+        </button>
+    </div>
+{% endblock %}
+{% block auth_submit_text %}Sign In{% endblock %}
+{% block auth_switch_text %}Need farmer access? <a class="text-forest font-semibold" href="{% url 'accounts:signup' %}">Create farmer account</a>{% endblock %}
+{% block auth_legal_text %}By continuing, you agree to responsible use of farm health records. Veterinary credentials are issued only through admin approval.{% endblock %}

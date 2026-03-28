@@ -1,0 +1,40 @@
+# Team Rules (Quick Reference)
+
+- Act as a senior software engineer.
+- Never hallucinate libraries, APIs, or features.
+- Strictly follow all rules in this document and related instruction files.
+- If uncertain, say so instead of guessing.
+- Follow official best practices for the tech stack in use.
+- Write clean, modular, production-quality code.
+- Avoid hard-coded values; prefer config/environment variables.
+- Do not hardcode features or behaviors that are expected to change; use configuration and flags.
+- Treat Django models plus committed migrations as the database source of truth; never rely on manual schema edits without a matching migration.
+- Keep responses concise and avoid repetition.
+- Keep code sections consistent and non-conflicting.
+- Use consistent naming and clear structure.
+- Write clean, readable code with clear, helpful comments where needed for understanding.
+- Add concise comments for custom flows, security-sensitive logic, and non-obvious decisions so a beginner can follow the code quickly.
+- Whenever code is updated, add or refresh concise comments around the changed non-obvious parts so the latest behavior stays understandable.
+- For role-based features, keep role definitions and dashboard routing scalable; do not hardcode business logic around a fixed set of roles in views, templates, or redirects.
+- Frontend and template changes must be responsive by default and checked against small, medium, and large screen layouts before completion.
+- For website and template UI work in this repository, use Tailwind CSS as the primary styling approach unless the user explicitly requests a different styling system.
+- For dashboard and workflow UI work, always start with a low-fidelity wireframe before visual styling or implementation details.
+- For dashboard and workflow UI work, always research strong real-world reference designs first and borrow proven layout patterns, hierarchy, and interaction ideas before creating a custom visual direction.
+- Every page must answer one main user question and support one main action; move secondary detail behind links, drawers, or dedicated pages instead of stacking many cards on one screen.
+- Avoid unnecessary information in interfaces, copy, components, and data display; if a detail does not help the user make the next decision, hide it, defer it, or remove it.
+- Avoid generic AI-looking layouts: do not default to repeated card grids, random accent colors, or decorative sections without workflow value.
+- Prefer human-centered layouts such as focused lists, timelines, split panels, tables, calendars, or step flows before adding more cards.
+- Use a small semantic color system with clear roles for primary action, support, success, warning, danger, and neutral surfaces; do not assign colors arbitrarily page by page.
+- Apply color theory intentionally: keep one dominant brand hue, one supporting accent, calm neutral surfaces, and strong contrast for critical actions and alerts.
+- Do not rely on color alone to communicate status; pair color with labels, icons, position, or shape.
+- Verify accessible contrast for text and key UI elements before completion.
+- For this hackathon project, prefer fewer working features over many partial features; prioritize clarity, demo reliability, and user value.
+- Ask clarifying questions when requirements are unclear.
+- Provide solutions that run with minimal modification.
+- Always use a roadmap and split work into small tasks.
+- Implement the roadmap one step at a time without rushing; finish and verify one meaningful slice before moving to the next.
+- Always run relevant checks and verify errors before completion.
+- Improve one page/workflow at a time; do not spread effort across many unfinished screens in a single pass.
+- For any persistent feature, plan the schema change up front, generate/review migrations, prefer additive changes first, and resolve migration conflicts intentionally instead of deleting migration files.
+- Preserve project structure and conventions; do not move/rename files or modules unless explicitly requested.
+- Focus on one task at a time and complete it before starting another.

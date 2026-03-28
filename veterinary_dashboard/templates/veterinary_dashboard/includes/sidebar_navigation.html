@@ -1,0 +1,96 @@
+<div class="flex h-full flex-col px-3 py-5 sm:px-4 lg:px-3.5 lg:py-5">
+    <div class="space-y-5">
+        {% for section in navigation_sections %}
+            <div class="{% if not forloop.first %}border-t border-white/10 pt-3.5{% endif %}">
+                <p class="px-2 text-[10px] font-semibold uppercase tracking-[0.28em] text-emerald-100/45">{{ section.label }}</p>
+                <nav class="mt-2 space-y-1">
+                    {% for item in section.items %}
+                        <a
+                            href="{{ item.url }}"
+                            class="flex items-center gap-2.5 rounded-r-xl rounded-l-lg px-2.5 py-2 text-[0.9rem] transition {% if request.resolver_match.view_name == item.view_name %}bg-white/12 text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]{% else %}text-slate-200/85 hover:bg-white/5 hover:text-white{% endif %}"
+                        >
+                            <span class="flex h-4.5 w-4.5 flex-shrink-0 items-center justify-center text-slate-300/85">
+                                {% if item.icon == "overview" %}
+                                    <svg class="h-4.5 w-4.5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                        <rect x="2.5" y="2.5" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.6"></rect>
+                                        <rect x="11.5" y="2.5" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.6"></rect>
+                                        <rect x="2.5" y="11.5" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.6"></rect>
+                                        <rect x="11.5" y="11.5" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.6"></rect>
+                                    </svg>
+                                {% elif item.icon == "case" %}
+                                    <svg class="h-4.5 w-4.5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                        <path d="M10 3V17M3 10H17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path>
+                                    </svg>
+                                {% elif item.icon == "map" %}
+                                    <svg class="h-4.5 w-4.5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                        <path d="M10 17s4.5-4.7 4.5-8.5A4.5 4.5 0 1 0 5.5 8.5C5.5 12.3 10 17 10 17Z" stroke="currentColor" stroke-width="1.6"></path>
+                                        <circle cx="10" cy="8.5" r="1.7" fill="currentColor"></circle>
+                                    </svg>
+                                {% elif item.icon == "schedule" %}
+                                    <svg class="h-4.5 w-4.5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                        <rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" stroke-width="1.6"></rect>
+                                        <path d="M6.5 2.75v3.5M13.5 2.75v3.5M3 8h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+                                    </svg>
+                                {% elif item.icon == "farms" %}
+                                    <svg class="h-4.5 w-4.5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                        <path d="M3 15.5 6.5 4l3.5 6 3-3 4 8.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    </svg>
+                                {% elif item.icon == "messages" %}
+                                    <svg class="h-4.5 w-4.5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                        <path d="M4 5.5h12a1.5 1.5 0 0 1 1.5 1.5v6A1.5 1.5 0 0 1 16 14.5H8l-4.5 2V7A1.5 1.5 0 0 1 5 5.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path>
+                                    </svg>
+                                {% elif item.icon == "notifications" %}
+                                    <svg class="h-4.5 w-4.5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                        <path d="M10 4.5a3 3 0 0 1 3 3V9c0 .9.3 1.77.86 2.47L15 13H5l1.14-1.53c.56-.7.86-1.57.86-2.47V7.5a3 3 0 0 1 3-3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path>
+                                        <path d="M8.5 15.5a1.5 1.5 0 0 0 3 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+                                    </svg>
+                                {% else %}
+                                    <svg class="h-4.5 w-4.5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                        <rect x="4" y="3" width="12" height="14" rx="2" stroke="currentColor" stroke-width="1.6"></rect>
+                                        <path d="M7 7.25H13M7 10.25H13M7 13.25H11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+                                    </svg>
+                                {% endif %}
+                            </span>
+                            <span class="min-w-0 flex-1 truncate font-medium">{{ item.label }}</span>
+                            {% if item.badge %}
+                                <span class="inline-flex min-w-[1.45rem] flex-shrink-0 items-center justify-center rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-[#9d5f16]">
+                                    {{ item.badge }}
+                                </span>
+                            {% endif %}
+                        </a>
+                    {% endfor %}
+                </nav>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="mt-auto pt-5">
+        <div class="border-t border-white/10 pt-3.5">
+            <p class="px-2 text-[10px] font-semibold uppercase tracking-[0.28em] text-emerald-100/45">Session</p>
+            <div class="mt-2 space-y-1">
+                <a href="{{ back_to_website_url }}" class="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[0.9rem] font-semibold text-emerald-50/82 transition hover:bg-white/6 hover:text-white">
+                    <span class="flex h-4.5 w-4.5 flex-shrink-0 items-center justify-center text-emerald-100/75">
+                        <svg class="h-4.5 w-4.5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                            <path d="M8 5 3.5 10 8 15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M4 10h8.5c2.21 0 4 1.79 4 4v.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+                        </svg>
+                    </span>
+                    <span class="min-w-0 flex-1 truncate">Back to website</span>
+                </a>
+                <form method="post" action="{% url 'accounts:logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left text-[0.9rem] font-semibold text-rose-100/90 transition hover:bg-white/6 hover:text-white">
+                        <span class="flex h-4.5 w-4.5 flex-shrink-0 items-center justify-center text-rose-200/80">
+                            <svg class="h-4.5 w-4.5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                <path d="M12.5 4.5h2a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+                                <path d="M8.5 7 5 10l3.5 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+                                <path d="M5.5 10h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+                            </svg>
+                        </span>
+                        <span class="min-w-0 flex-1 truncate">Logout</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

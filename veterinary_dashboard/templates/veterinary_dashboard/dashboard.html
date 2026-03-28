@@ -1,0 +1,777 @@
+{% extends "veterinary_dashboard/base_dashboard.html" %}
+
+{% block veterinary_dashboard_head %}
+    {{ block.super }}
+    <style>
+        .vet-overview-page {
+            --vet-ink: #15253f;
+            --vet-copy: #5f7088;
+            --vet-copy-strong: #3f536d;
+            --vet-line: #dbe6df;
+            --vet-line-soft: #e7efe8;
+            --vet-surface: #ffffff;
+            --vet-surface-soft: #fbfdf9;
+            --vet-surface-tint: #f4f8f1;
+            --vet-surface-panel: #f7fbf7;
+            --vet-green: #2f8b45;
+            --vet-green-dark: #256d37;
+            --vet-green-soft: #dff5e7;
+            --vet-green-wash: #edf9f1;
+            --vet-amber: #c88712;
+            --vet-amber-soft: #fff2c8;
+            --vet-rose: #cd4d6d;
+            --vet-rose-soft: #ffe7eb;
+            --vet-sky: #2f88c9;
+            --vet-sky-soft: #e5f2ff;
+            --vet-shadow: 0 8px 18px rgba(15, 23, 42, 0.045);
+            display: flex;
+            flex-direction: column;
+            gap: 0.95rem;
+        }
+
+        .vet-overview-card {
+            border: 1px solid var(--vet-line);
+            border-radius: 1rem;
+            background: var(--vet-surface);
+            box-shadow: var(--vet-shadow);
+        }
+
+        .vet-overview-card--soft {
+            background: radial-gradient(circle at top left, #fbfdf9 0%, #f7fbf6 38%, #f2f7ef 100%);
+        }
+
+        .vet-overview-header {
+            display: flex;
+            flex-direction: column;
+            gap: 0.9rem;
+            padding: 0.95rem 1rem 0.85rem;
+        }
+
+        .vet-overview-eyebrow {
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.32em;
+            text-transform: uppercase;
+            color: #8ea2c4;
+        }
+
+        .vet-overview-title {
+            margin-top: 0.35rem;
+            font-size: 1.45rem;
+            line-height: 1.18;
+            font-weight: 700;
+            color: var(--vet-ink);
+        }
+
+        .vet-overview-copy {
+            margin-top: 0.45rem;
+            max-width: 32rem;
+            font-size: 0.9rem;
+            line-height: 1.68;
+            color: var(--vet-copy-strong);
+        }
+
+        .vet-overview-actions,
+        .vet-overview-quick-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        .vet-overview-actions {
+            align-items: center;
+        }
+
+        .vet-overview-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            border: 1px solid var(--vet-line);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 0.58rem 0.9rem;
+            font-size: 0.86rem;
+            font-weight: 600;
+            color: var(--vet-ink);
+            transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        }
+
+        .vet-overview-pill:hover {
+            border-color: #c7d8ca;
+            background: var(--vet-surface);
+        }
+
+        .vet-overview-pill--primary {
+            border-color: var(--vet-green);
+            background: var(--vet-green);
+            color: #ffffff;
+        }
+
+        .vet-overview-pill--primary:hover {
+            border-color: var(--vet-green-dark);
+            background: var(--vet-green-dark);
+        }
+
+        .vet-overview-stats {
+            display: grid;
+            gap: 0.875rem;
+            grid-template-columns: 1fr;
+        }
+
+        .vet-overview-stat {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.8rem;
+            min-height: 6.25rem;
+            padding: 0.9rem 1rem;
+        }
+
+        .vet-overview-stat-label {
+            font-size: 0.63rem;
+            font-weight: 700;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: #94a3b8;
+        }
+
+        .vet-overview-stat-value {
+            margin-top: 0.45rem;
+            font-size: 1.8rem;
+            line-height: 1;
+            font-weight: 700;
+            color: var(--vet-ink);
+        }
+
+        .vet-overview-stat-detail {
+            margin-top: 0.5rem;
+            max-width: 13rem;
+            font-size: 0.78rem;
+            line-height: 1.5;
+            color: var(--vet-copy);
+        }
+
+        .vet-overview-stat-icon {
+            display: inline-flex;
+            height: 2.05rem;
+            width: 2.05rem;
+            flex: none;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.85rem;
+        }
+
+        .vet-overview-stat-icon svg {
+            height: 1rem;
+            width: 1rem;
+        }
+
+        .vet-overview-layout {
+            display: grid;
+            gap: 0.875rem;
+            grid-template-columns: 1fr;
+        }
+
+        .vet-overview-section {
+            padding: 0.95rem 1rem;
+        }
+
+        .vet-overview-section-header {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 0.9rem;
+        }
+
+        .vet-overview-section-header--row {
+            margin-bottom: 0;
+            padding-bottom: 0.9rem;
+            border-bottom: 1px solid #e3ebf2;
+        }
+
+        .vet-overview-section-title {
+            margin-top: 0.35rem;
+            font-size: 1.14rem;
+            line-height: 1.22;
+            font-weight: 700;
+            color: var(--vet-ink);
+        }
+
+        .vet-overview-section-copy {
+            margin-top: 0.4rem;
+            font-size: 0.86rem;
+            line-height: 1.58;
+            color: var(--vet-copy);
+        }
+
+        .vet-overview-action-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            align-self: flex-start;
+            border: 1px solid var(--vet-line);
+            border-radius: 0.85rem;
+            background: var(--vet-surface-soft);
+            padding: 0.6rem 0.95rem;
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: var(--vet-ink);
+            transition: background-color 0.15s ease, border-color 0.15s ease;
+        }
+
+        .vet-overview-action-button:hover {
+            border-color: #cbd9cf;
+            background: var(--vet-surface);
+        }
+
+        .vet-overview-tag {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            align-self: flex-start;
+            border-radius: 999px;
+            background: var(--vet-green-soft);
+            padding: 0.32rem 0.72rem;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: #0c7a4a;
+        }
+
+        .vet-overview-appointments-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .vet-overview-appointments-head {
+            background: #f1f8ef;
+        }
+
+        .vet-overview-appointments-head th {
+            padding: 0.72rem 0.9rem;
+            text-align: left;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #587293;
+        }
+
+        .vet-overview-appointments-row td {
+            padding: 0.82rem 0.9rem;
+            border-top: 1px solid #e6edf3;
+            vertical-align: top;
+            font-size: 0.86rem;
+            color: var(--vet-copy-strong);
+        }
+
+        .vet-overview-appointments-row td:first-child {
+            min-width: 8.4rem;
+        }
+
+        .vet-overview-primary-text {
+            font-size: 0.86rem;
+            font-weight: 700;
+            color: var(--vet-ink);
+        }
+
+        .vet-overview-secondary-text {
+            margin-top: 0.28rem;
+            font-size: 0.8rem;
+            line-height: 1.45;
+            color: var(--vet-copy);
+        }
+
+        .vet-overview-service-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            padding: 0.4rem 0.7rem;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .vet-overview-service-pill--rose {
+            background: var(--vet-rose-soft);
+            color: #ba375a;
+        }
+
+        .vet-overview-service-pill--amber {
+            background: var(--vet-amber-soft);
+            color: #ae6d07;
+        }
+
+        .vet-overview-service-pill--teal,
+        .vet-overview-service-pill--emerald {
+            background: #ccf4de;
+            color: #0b7a4b;
+        }
+
+        .vet-overview-row-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.55rem;
+        }
+
+        .vet-overview-row-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 4.45rem;
+            border-radius: 0.8rem;
+            padding: 0.58rem 0.8rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            line-height: 1;
+            transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        }
+
+        .vet-overview-row-button--primary {
+            background: var(--vet-green);
+            color: #ffffff;
+        }
+
+        .vet-overview-row-button--primary:hover {
+            background: var(--vet-green-dark);
+        }
+
+        .vet-overview-row-button--secondary {
+            border: 1px solid var(--vet-line);
+            background: #ffffff;
+            color: var(--vet-copy-strong);
+        }
+
+        .vet-overview-row-button--secondary:hover {
+            border-color: #cedbe6;
+            background: #f8fbfd;
+        }
+
+        .vet-overview-alerts {
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+        }
+
+        .vet-overview-alert {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+            border: 1px solid var(--vet-line-soft);
+            border-radius: 0.95rem;
+            background: #f9fcf8;
+            padding: 0.85rem 0.95rem;
+        }
+
+        .vet-overview-alert-icon {
+            display: inline-flex;
+            height: 2rem;
+            width: 2rem;
+            flex: none;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+        }
+
+        .vet-overview-alert-icon svg {
+            height: 0.95rem;
+            width: 0.95rem;
+        }
+
+        .vet-overview-alert-title {
+            font-size: 0.86rem;
+            font-weight: 700;
+            color: var(--vet-ink);
+        }
+
+        .vet-overview-alert-copy {
+            margin-top: 0.22rem;
+            font-size: 0.78rem;
+            line-height: 1.48;
+            color: var(--vet-copy);
+        }
+
+        .vet-overview-alert-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: auto;
+            border-radius: 999px;
+            padding: 0.34rem 0.62rem;
+            font-size: 0.58rem;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .vet-overview-trend-shell {
+            border: 1px solid var(--vet-line-soft);
+            border-radius: 1rem;
+            background: linear-gradient(180deg, #fcfefb 0%, #f1f7ef 100%);
+            padding: 0.9rem;
+        }
+
+        .vet-overview-trend-bars {
+            display: grid;
+            align-items: end;
+            gap: 0.75rem;
+            height: 12.6rem;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+        }
+
+        .vet-overview-trend-bar-wrap {
+            display: flex;
+            height: 100%;
+            flex-direction: column;
+            justify-content: end;
+        }
+
+        .vet-overview-trend-bar {
+            border-radius: 1rem 1rem 0 0;
+            background: linear-gradient(180deg, #a7dcb5 0%, #31904b 100%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .vet-overview-trend-label {
+            margin-top: 0.75rem;
+            text-align: center;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: #6d7f96;
+        }
+
+        .vet-overview-message-shell {
+            border: 1px solid var(--vet-line-soft);
+            border-radius: 1rem;
+            background: #fbfdfb;
+            padding: 0.9rem;
+        }
+
+        .vet-overview-message-body {
+            display: flex;
+            min-height: 11rem;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .vet-overview-message-row {
+            display: flex;
+        }
+
+        .vet-overview-message-row--vet {
+            justify-content: flex-end;
+        }
+
+        .vet-overview-bubble {
+            max-width: 15rem;
+            border-radius: 1rem;
+            padding: 0.82rem 0.92rem;
+            font-size: 0.84rem;
+            line-height: 1.62;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+        }
+
+        .vet-overview-bubble--farmer {
+            background: var(--vet-green-wash);
+            color: var(--vet-copy-strong);
+        }
+
+        .vet-overview-bubble--vet {
+            background: var(--vet-green);
+            color: #ffffff;
+        }
+
+        .vet-overview-reply {
+            margin-top: 1rem;
+            border: 1px solid var(--vet-line);
+            border-radius: 0.9rem;
+            background: #ffffff;
+            padding: 0.72rem 0.85rem;
+            font-size: 0.84rem;
+            color: #94a3b8;
+        }
+
+        .vet-overview-tone-rose {
+            background: var(--vet-rose-soft);
+            color: var(--vet-rose);
+        }
+
+        .vet-overview-tone-amber {
+            background: var(--vet-amber-soft);
+            color: var(--vet-amber);
+        }
+
+        .vet-overview-tone-navy {
+            background: var(--vet-sky-soft);
+            color: var(--vet-sky);
+        }
+
+        .vet-overview-tone-teal,
+        .vet-overview-tone-emerald {
+            background: var(--vet-green-soft);
+            color: #0f8a57;
+        }
+
+        .vet-overview-badge-rose {
+            background: var(--vet-rose-soft);
+            color: #ba375a;
+        }
+
+        .vet-overview-badge-amber {
+            background: var(--vet-amber-soft);
+            color: #ae6d07;
+        }
+
+        .vet-overview-badge-navy {
+            background: var(--vet-sky-soft);
+            color: #1f7bbc;
+        }
+
+        @media (min-width: 640px) {
+            .vet-overview-header,
+            .vet-overview-section-header,
+            .vet-overview-section-header--row {
+                flex-direction: row;
+                align-items: flex-start;
+                justify-content: space-between;
+            }
+
+            .vet-overview-stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .vet-overview-layout {
+                grid-template-columns: minmax(0, 1.12fr) minmax(19rem, 0.88fr);
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .vet-overview-appointments-table,
+            .vet-overview-appointments-table thead,
+            .vet-overview-appointments-table tbody,
+            .vet-overview-appointments-table th,
+            .vet-overview-appointments-table td,
+            .vet-overview-appointments-table tr {
+                display: block;
+                width: 100%;
+            }
+
+            .vet-overview-appointments-head {
+                display: none;
+            }
+
+            .vet-overview-appointments-row {
+                border-top: 1px solid #e2e8f0;
+                padding: 0.2rem 0;
+            }
+
+            .vet-overview-appointments-row td {
+                border-top: 0;
+                padding: 0.35rem 1rem;
+            }
+
+            .vet-overview-appointments-row td:last-child {
+                padding-bottom: 1rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block veterinary_dashboard_content %}
+    <section class="vet-overview-page">
+        <article class="vet-overview-card vet-overview-card--soft">
+            <div class="vet-overview-header">
+                <div class="min-w-0">
+                    <p class="vet-overview-eyebrow">Clinic overview</p>
+                    <h2 class="vet-overview-title">What the veterinary team should handle next</h2>
+                    <p class="vet-overview-copy">Use one focused dashboard for route coverage, urgent cases, follow-up risk, and the latest farmer message.</p>
+                </div>
+                <div class="vet-overview-actions">
+                    <a href="{% url 'veterinary_dashboard:schedule' %}" class="vet-overview-pill">Review route</a>
+                    <a href="{% url 'veterinary_dashboard:patients' %}" class="vet-overview-pill vet-overview-pill--primary">Open urgent case</a>
+                </div>
+            </div>
+
+            <div class="px-4 pb-4">
+                <div class="vet-overview-quick-links">
+                    {% for item in dashboard_quick_links %}
+                        <a href="{{ item.url }}" class="vet-overview-pill">{{ item.label }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </article>
+
+        <section class="vet-overview-stats">
+            {% for card in summary_cards %}
+                <article class="vet-overview-card vet-overview-stat">
+                    <div class="min-w-0">
+                        <p class="vet-overview-stat-label">{{ card.label }}</p>
+                        <p class="vet-overview-stat-value">{{ card.value }}</p>
+                        <p class="vet-overview-stat-detail">{{ card.detail }}</p>
+                    </div>
+                    <span class="vet-overview-stat-icon {% if card.tone == 'rose' %}vet-overview-tone-rose{% elif card.tone == 'amber' %}vet-overview-tone-amber{% elif card.tone == 'navy' %}vet-overview-tone-navy{% else %}vet-overview-tone-teal{% endif %}">
+                        {% if card.icon == "farms" %}
+                            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                <path d="M3 15.5 6.5 4l3.5 6 3-3 4 8.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </svg>
+                        {% elif card.icon == "cows" %}
+                            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                <path d="M4.5 8.5c0-2.49 2.01-4.5 4.5-4.5h2c2.49 0 4.5 2.01 4.5 4.5V12a3 3 0 0 1-3 3H7.5a3 3 0 0 1-3-3V8.5Z" stroke="currentColor" stroke-width="1.6"></path>
+                                <path d="M7 9.5h.01M13 9.5h.01M8 12.5c.7.5 1.37.75 2 .75s1.3-.25 2-.75" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+                            </svg>
+                        {% elif card.icon == "alert" %}
+                            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                <path d="M10 3.5 17 16.5H3L10 3.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path>
+                                <path d="M10 8v3.5M10 14h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+                            </svg>
+                        {% else %}
+                            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                <path d="M5 4.5v11M10 7v8.5M15 3.5v12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+                            </svg>
+                        {% endif %}
+                    </span>
+                </article>
+            {% endfor %}
+        </section>
+
+        <section class="vet-overview-layout">
+            <article class="vet-overview-card vet-overview-section">
+                <div class="vet-overview-section-header vet-overview-section-header--row">
+                    <div>
+                        <p class="vet-overview-eyebrow">Upcoming appointments</p>
+                        <h2 class="vet-overview-section-title">Upcoming field visits</h2>
+                        <p class="vet-overview-section-copy">Calendar and route list with clear next actions for each planned stop.</p>
+                    </div>
+                    <a href="{% url 'veterinary_dashboard:schedule' %}" class="vet-overview-action-button">View calendar</a>
+                </div>
+
+                <table class="vet-overview-appointments-table">
+                    <thead class="vet-overview-appointments-head">
+                        <tr>
+                            <th>Time</th>
+                            <th>Farmer</th>
+                            <th>Location</th>
+                            <th>Service</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for visit in overview_schedule_rows %}
+                            <tr class="vet-overview-appointments-row">
+                                <td>
+                                    <p class="vet-overview-primary-text">{{ visit.time }}</p>
+                                    <p class="vet-overview-secondary-text">{{ visit.farm }} - {{ visit.detail }}</p>
+                                </td>
+                                <td>
+                                    <p class="vet-overview-primary-text">{{ visit.farmer }}</p>
+                                </td>
+                                <td>
+                                    <p class="vet-overview-primary-text">{{ visit.location }}</p>
+                                </td>
+                                <td>
+                                    <span class="vet-overview-service-pill {% if visit.service_tone == 'rose' %}vet-overview-service-pill--rose{% elif visit.service_tone == 'amber' %}vet-overview-service-pill--amber{% else %}vet-overview-service-pill--teal{% endif %}">
+                                        {{ visit.service }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="vet-overview-row-actions">
+                                        <a href="{% url 'veterinary_dashboard:schedule' %}" class="vet-overview-row-button vet-overview-row-button--primary">Start</a>
+                                        <a href="{% url 'veterinary_dashboard:patients' %}" class="vet-overview-row-button vet-overview-row-button--secondary">File</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </article>
+
+            <article class="vet-overview-card vet-overview-section">
+                <div class="vet-overview-section-header">
+                    <div>
+                        <p class="vet-overview-eyebrow">System alerts</p>
+                        <h2 class="vet-overview-section-title">Signals that need a clinical decision</h2>
+                        <p class="vet-overview-section-copy">Low conception, due follow-up, and pending lab review in one short list.</p>
+                    </div>
+                    <span class="vet-overview-tag">{{ dashboard_alerts|length }} new</span>
+                </div>
+
+                <div class="vet-overview-alerts">
+                    {% for item in dashboard_alerts %}
+                        <article class="vet-overview-alert">
+                            <span class="vet-overview-alert-icon {% if item.tone == 'rose' %}vet-overview-tone-rose{% elif item.tone == 'amber' %}vet-overview-tone-amber{% else %}vet-overview-tone-navy{% endif %}">
+                                <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                    <path d="M10 4.5 15 14.5H5L10 4.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path>
+                                    <path d="M10 8v2.5M10 12.8h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+                                </svg>
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-3">
+                                    <p class="vet-overview-alert-title">{{ item.title }}</p>
+                                    <span class="vet-overview-alert-badge {% if item.tone == 'rose' %}vet-overview-badge-rose{% elif item.tone == 'amber' %}vet-overview-badge-amber{% else %}vet-overview-badge-navy{% endif %}">{{ item.badge }}</span>
+                                </div>
+                                <p class="vet-overview-alert-copy">{{ item.detail }}</p>
+                                <p class="vet-overview-alert-copy">{{ item.meta }}</p>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            </article>
+        </section>
+
+        <section class="vet-overview-layout">
+            <article class="vet-overview-card vet-overview-section">
+                <div class="vet-overview-section-header">
+                    <div>
+                        <p class="vet-overview-eyebrow">Conception rate trends</p>
+                        <h2 class="vet-overview-section-title">Herd follow-up trend</h2>
+                        <p class="vet-overview-section-copy">{{ dashboard_trend_points.summary }}</p>
+                    </div>
+                    <span class="vet-overview-tag">{{ dashboard_trend_points.range_label }}</span>
+                </div>
+
+                <div class="vet-overview-trend-shell">
+                    <div class="vet-overview-trend-bars">
+                        {% for point in dashboard_trend_points.points %}
+                            <div class="vet-overview-trend-bar-wrap">
+                                <div class="vet-overview-trend-bar" style="height: {% widthratio point.value 70 100 %}%"></div>
+                                <p class="vet-overview-trend-label">{{ point.label }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </article>
+
+            <article class="vet-overview-card vet-overview-section">
+                <div class="vet-overview-section-header">
+                    <div>
+                        <p class="vet-overview-eyebrow">Recent messages</p>
+                        <h2 class="vet-overview-section-title">Farmer message preview</h2>
+                        <p class="vet-overview-section-copy">Mock chat preview with farmers.</p>
+                    </div>
+                    <a href="{{ dashboard_message_preview.inbox_url }}" class="vet-overview-action-button">Open inbox</a>
+                </div>
+
+                <div class="vet-overview-message-shell">
+                    <div class="vet-overview-message-body">
+                        {% for item in dashboard_message_preview.messages %}
+                            <div class="vet-overview-message-row {% if item.sender == 'vet' %}vet-overview-message-row--vet{% endif %}">
+                                <div class="vet-overview-bubble {% if item.sender == 'vet' %}vet-overview-bubble--vet{% else %}vet-overview-bubble--farmer{% endif %}">
+                                    {{ item.text }}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="vet-overview-reply">Reply to {{ dashboard_message_preview.farmer_name }}...</div>
+                </div>
+            </article>
+        </section>
+    </section>
+{% endblock %}

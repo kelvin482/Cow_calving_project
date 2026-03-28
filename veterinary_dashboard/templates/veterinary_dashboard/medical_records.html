@@ -1,0 +1,1011 @@
+{% extends "veterinary_dashboard/base_dashboard.html" %}
+
+{% block veterinary_dashboard_head %}
+    {{ block.super }}
+    <style>
+        .records-redesign-page {
+            display: grid;
+        }
+
+        .records-redesign-shell {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .records-library-card,
+        .records-detail-card {
+            border: 1px solid #dce5ef;
+            border-radius: 1rem;
+            background: #ffffff;
+            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.05);
+        }
+
+        .records-library-card {
+            overflow: hidden;
+        }
+
+        .records-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 0.95rem 1rem;
+            border-bottom: 1px solid #e7eef5;
+            background: #fcfdff;
+        }
+
+        .records-search {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.65rem;
+            min-width: min(100%, 16rem);
+            border: 1px solid #dbe5ef;
+            border-radius: 0.75rem;
+            background: #f8fbff;
+            padding: 0.7rem 0.85rem;
+            color: #90a0b7;
+        }
+
+        .records-search input {
+            width: 100%;
+            border: 0;
+            background: transparent;
+            outline: 0;
+            font: inherit;
+            color: #334155;
+        }
+
+        .records-library-table {
+            display: grid;
+        }
+
+        .records-table-head,
+        .records-farm-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1.45fr) minmax(7rem, 0.9fr) minmax(5rem, 0.65fr) minmax(6rem, 0.7fr) minmax(5.8rem, 0.7fr) auto;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.9rem 1rem;
+        }
+
+        .records-table-head {
+            border-bottom: 1px solid #e7eef5;
+            background: #fbfdff;
+            font-size: 0.69rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #91a3ba;
+        }
+
+        .records-farm-row {
+            width: 100%;
+            border: 0;
+            border-bottom: 1px solid #edf2f7;
+            background: #ffffff;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .records-farm-row:hover,
+        .records-farm-row.is-selected {
+            background: #f7fbff;
+            box-shadow: inset 4px 0 0 #2b87f0;
+        }
+
+        .records-farm-row:last-child {
+            border-bottom: 0;
+        }
+
+        .records-farmer-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            min-width: 0;
+        }
+
+        .records-farmer-cell img {
+            width: 2.55rem;
+            height: 2.55rem;
+            border-radius: 999px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .records-row-name {
+            margin: 0;
+            font-size: 0.98rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .records-row-sub,
+        .records-row-meta {
+            margin: 0.18rem 0 0;
+            font-size: 0.8rem;
+            line-height: 1.45;
+            color: #70839a;
+        }
+
+        .records-rate {
+            font-size: 0.96rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .records-rate.is-alert {
+            color: #e24a63;
+        }
+
+        .records-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            padding: 0.38rem 0.72rem;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .tone-rose {
+            background: #ffe7ec;
+            color: #da4c68;
+        }
+
+        .tone-amber {
+            background: #fff2cd;
+            color: #b86f00;
+        }
+
+        .tone-navy {
+            background: #dcebff;
+            color: #2475c6;
+        }
+
+        .tone-emerald {
+            background: #dff5e7;
+            color: #138a51;
+        }
+
+        .records-row-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 999px;
+            border: 1px solid #dbe5ef;
+            color: #8ea0b7;
+            background: #ffffff;
+        }
+
+        .records-detail-card {
+            padding: 1rem;
+        }
+
+        .records-detail-top {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .records-profile {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e7eef5;
+        }
+
+        .records-profile-main {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.85rem;
+            min-width: 0;
+        }
+
+        .records-profile-main img {
+            width: 3.25rem;
+            height: 3.25rem;
+            border-radius: 999px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .records-profile-name {
+            margin: 0;
+            font-size: 1.35rem;
+            line-height: 1.15;
+            letter-spacing: -0.03em;
+            color: #0f172a;
+        }
+
+        .records-profile-meta,
+        .records-profile-summary {
+            margin: 0.3rem 0 0;
+            font-size: 0.85rem;
+            line-height: 1.55;
+            color: #6d8197;
+        }
+
+        .records-profile-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+
+        .records-action-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.8rem;
+            border: 1px solid #dce5ef;
+            background: #ffffff;
+            padding: 0.68rem 0.95rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #334155;
+            text-decoration: none;
+        }
+
+        .records-action-button.is-primary {
+            background: #2b87f0;
+            border-color: #2b87f0;
+            color: #ffffff;
+        }
+
+        .records-section-kicker {
+            margin: 0;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: #8ea0b7;
+        }
+
+        .records-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.75rem;
+        }
+
+        .records-stat-box {
+            border: 1px solid #e3eaf2;
+            border-radius: 0.9rem;
+            background: #ffffff;
+            padding: 0.85rem 0.9rem;
+        }
+
+        .records-stat-box p:first-child {
+            margin: 0;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: #8ea0b7;
+        }
+
+        .records-stat-box p:last-child {
+            margin: 0.35rem 0 0;
+            font-size: 1.55rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .records-alert {
+            border: 1px solid #ffd7da;
+            border-radius: 0.95rem;
+            background: #fff2f2;
+            padding: 0.95rem 1rem;
+        }
+
+        .records-alert-title {
+            margin: 0;
+            font-size: 0.94rem;
+            font-weight: 700;
+            color: #d4485f;
+        }
+
+        .records-alert-copy {
+            margin: 0.32rem 0 0;
+            font-size: 0.83rem;
+            line-height: 1.55;
+            color: #c15a6c;
+        }
+
+        .records-cow-section {
+            padding-top: 0.2rem;
+        }
+
+        .records-cow-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .records-cow-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.75rem;
+        }
+
+        .records-cow-card {
+            display: grid;
+            grid-template-columns: 2.5rem minmax(0, 1fr);
+            gap: 0.7rem;
+            width: 100%;
+            border: 1px solid #e3eaf2;
+            border-radius: 0.92rem;
+            background: #ffffff;
+            padding: 0.8rem;
+            text-align: left;
+            cursor: pointer;
+            transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+        }
+
+        .records-cow-card:hover,
+        .records-cow-card.is-selected {
+            border-color: #b8d8ff;
+            box-shadow: 0 12px 24px rgba(43, 135, 240, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .records-cow-card img {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 999px;
+            object-fit: cover;
+        }
+
+        .records-cow-name {
+            margin: 0;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .records-cow-meta,
+        .records-cow-note {
+            margin: 0.18rem 0 0;
+            font-size: 0.76rem;
+            line-height: 1.45;
+            color: #6d8197;
+        }
+
+        .records-record-card {
+            border-top: 1px solid #e7eef5;
+            padding-top: 1rem;
+        }
+
+        .records-record-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.9rem;
+            margin-bottom: 0.9rem;
+        }
+
+        .records-record-title {
+            margin: 0.22rem 0 0;
+            font-size: 1.15rem;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+            color: #0f172a;
+        }
+
+        .records-record-meta {
+            margin: 0.28rem 0 0;
+            font-size: 0.82rem;
+            line-height: 1.5;
+            color: #6d8197;
+        }
+
+        .records-record-chips {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+
+        .records-date-chip {
+            border-radius: 999px;
+            background: #eef4ff;
+            padding: 0.42rem 0.78rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #476587;
+        }
+
+        .records-record-layout {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .records-record-image {
+            overflow: hidden;
+            border: 1px solid #e3eaf2;
+            border-radius: 1rem;
+            background: #f5f8fc;
+        }
+
+        .records-record-image img {
+            width: 100%;
+            height: 100%;
+            min-height: 16rem;
+            object-fit: cover;
+        }
+
+        .records-record-sidebar {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .records-info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.75rem;
+        }
+
+        .records-info-card,
+        .records-editor {
+            border: 1px solid #e3eaf2;
+            border-radius: 0.92rem;
+            background: #ffffff;
+            padding: 0.8rem 0.85rem;
+        }
+
+        .records-info-card p:first-child,
+        .records-editor p:first-child {
+            margin: 0;
+            font-size: 0.66rem;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: #8ea0b7;
+        }
+
+        .records-info-card p:last-child {
+            margin: 0.3rem 0 0;
+            font-size: 0.95rem;
+            font-weight: 700;
+            line-height: 1.45;
+            color: #0f172a;
+        }
+
+        .records-editor-copy {
+            margin: 0.38rem 0 0;
+            font-size: 0.8rem;
+            line-height: 1.55;
+            color: #6d8197;
+        }
+
+        .records-editor-grid {
+            display: grid;
+            gap: 0.72rem;
+            margin-top: 0.8rem;
+        }
+
+        .records-editor-grid label {
+            display: grid;
+            gap: 0.32rem;
+        }
+
+        .records-editor-grid span {
+            font-size: 0.66rem;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: #8ea0b7;
+        }
+
+        .records-editor-grid select,
+        .records-editor-grid input,
+        .records-editor-grid textarea {
+            width: 100%;
+            border: 1px solid #d6e0ea;
+            border-radius: 0.8rem;
+            background: #fbfdff;
+            padding: 0.72rem 0.82rem;
+            font: inherit;
+            color: #334155;
+            outline: 0;
+        }
+
+        .records-editor-grid textarea {
+            min-height: 5.6rem;
+            resize: vertical;
+        }
+
+        .records-editor-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            margin-top: 0.85rem;
+        }
+
+        .records-editor-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 0;
+            border-radius: 999px;
+            background: #15834b;
+            padding: 0.72rem 1.08rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #ffffff;
+            cursor: pointer;
+        }
+
+        .records-demo-status {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #15834b;
+        }
+
+        @media (min-width: 1080px) {
+            .records-redesign-shell {
+                grid-template-columns: minmax(0, 1.48fr) minmax(21rem, 0.92fr);
+                align-items: start;
+            }
+
+            .records-detail-card {
+                position: sticky;
+                top: 1.5rem;
+            }
+
+            .records-record-layout {
+                grid-template-columns: minmax(0, 1.05fr) minmax(16rem, 0.95fr);
+            }
+        }
+
+        @media (max-width: 820px) {
+            .records-table-head {
+                display: none;
+            }
+
+            .records-farm-row {
+                grid-template-columns: 1fr;
+                align-items: start;
+            }
+
+            .records-cow-grid,
+            .records-stats-grid,
+            .records-info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block veterinary_dashboard_content %}
+    <section class="records-redesign-page">
+        <div class="records-redesign-shell">
+            <section class="records-library-card">
+                <div class="records-toolbar">
+                    <label class="records-search">
+                        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 3.473 9.765l3.63 3.63a.75.75 0 1 0 1.06-1.06l-3.629-3.63A5.5 5.5 0 0 0 9 3.5ZM5 9a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" clip-rule="evenodd"></path>
+                        </svg>
+                        <input id="farm-record-search" type="text" placeholder="Search by name or region...">
+                    </label>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="records-pill tone-emerald">{{ medical_record_summary.farm_count }} farms</span>
+                        <span class="records-pill tone-rose">Medical records</span>
+                    </div>
+                </div>
+
+                <div class="records-library-table">
+                    <div class="records-table-head">
+                        <span>Farmer</span>
+                        <span>Location</span>
+                        <span>Herd size</span>
+                        <span>Conception</span>
+                        <span>Status</span>
+                        <span>Action</span>
+                    </div>
+                    <div id="farm-case-list">
+                        {% for farm in medical_record_farms %}
+                            <button type="button" class="records-farm-row{% if farm.id == medical_record_seed_farm.id %} is-selected{% endif %}" data-farm-select data-farm-id="{{ farm.id }}">
+                                <div class="records-farmer-cell">
+                                    <img src="{{ farm.cover_photo_url }}" alt="{{ farm.cover_photo_alt }}">
+                                    <span class="min-w-0">
+                                        <span class="records-row-name">{{ farm.owner }}</span>
+                                        <span class="records-row-sub">{{ farm.owner_code }}</span>
+                                        <span class="records-row-meta">{{ farm.name }}</span>
+                                    </span>
+                                </div>
+                                <span class="records-row-meta">{{ farm.location }}<br>{{ farm.region }}</span>
+                                <span class="records-row-meta">{{ farm.herd_size }} cows</span>
+                                <span class="records-rate{% if farm.conception_rate < 70 %} is-alert{% endif %}">{{ farm.conception_rate }}%</span>
+                                <span class="records-pill tone-{{ farm.tone }}">{{ farm.farm_status }}</span>
+                                <span class="records-row-action">&rsaquo;</span>
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+
+            <aside class="records-detail-card">
+                <section class="records-detail-top">
+                    <div class="records-profile">
+                        <div class="records-profile-main">
+                            <img id="selected-farm-image" src="{{ medical_record_seed_farm.cover_photo_url }}" alt="{{ medical_record_seed_farm.cover_photo_alt }}">
+                            <div class="min-w-0">
+                                <h2 id="selected-farm-name" class="records-profile-name">{{ medical_record_seed_farm.owner }}</h2>
+                                <p id="selected-farm-owner" class="records-profile-meta">{{ medical_record_seed_farm.location }} · {{ medical_record_seed_farm.contact_phone }}</p>
+                                <p id="selected-farm-summary" class="records-profile-summary">{{ medical_record_seed_farm.name }} · {{ medical_record_seed_farm.summary }}</p>
+                            </div>
+                        </div>
+                        <div class="records-profile-actions">
+                            <a href="{% url 'veterinary_dashboard:messages' %}" class="records-action-button">Message</a>
+                            <a href="{% url 'veterinary_dashboard:schedule' %}" class="records-action-button is-primary">Schedule</a>
+                        </div>
+                    </div>
+
+                    <section>
+                        <p class="records-section-kicker">Herd overview</p>
+                        <div class="records-stats-grid mt-3">
+                            <article class="records-stat-box">
+                                <p>Herd size</p>
+                                <p id="selected-farm-herd-size">{{ medical_record_seed_farm.herd_size }}</p>
+                            </article>
+                            <article class="records-stat-box">
+                                <p>Conception rate</p>
+                                <p id="selected-farm-rate">{{ medical_record_seed_farm.conception_rate }}%</p>
+                            </article>
+                            <article class="records-stat-box">
+                                <p>Affected cows</p>
+                                <p id="selected-farm-count">{{ medical_record_seed_farm.affected_cow_count }}</p>
+                            </article>
+                            <article class="records-stat-box">
+                                <p>Record events</p>
+                                <p id="selected-farm-record-count">{{ medical_record_seed_farm.record_count }}</p>
+                            </article>
+                        </div>
+                    </section>
+
+                    <section class="records-alert">
+                        <p id="selected-farm-status" class="records-alert-title">{{ medical_record_seed_farm.farm_status }}</p>
+                        <p id="selected-farm-next-action" class="records-alert-copy">{{ medical_record_seed_farm.next_action }}</p>
+                    </section>
+
+                    <section class="records-cow-section">
+                        <div class="records-cow-head">
+                            <div>
+                                <p class="records-section-kicker">Active cow list</p>
+                                <h3 class="records-profile-name text-[1.05rem]">View full herd</h3>
+                            </div>
+                            <span class="records-pill tone-navy">{{ medical_record_seed_farm.active_case_count }} active</span>
+                        </div>
+                        <div id="farm-record-list" class="records-cow-grid">
+                        </div>
+                    </section>
+
+                    <section class="records-record-card">
+                        <div class="records-record-head">
+                            <div>
+                                <p class="records-section-kicker">Selected record</p>
+                                <h3 id="selected-record-title" class="records-record-title">{{ medical_record_seed_record.title }}</h3>
+                                <p id="selected-record-cow" class="records-record-meta">{{ medical_record_seed_cow.name }} - {{ medical_record_seed_cow.problem }}</p>
+                            </div>
+                            <div class="records-record-chips">
+                                <span id="selected-record-date" class="records-date-chip">{{ medical_record_seed_record.date }}</span>
+                                <span id="selected-record-type" class="records-pill tone-{{ medical_record_seed_cow.tone }}">{{ medical_record_seed_record.type }}</span>
+                            </div>
+                        </div>
+
+                        <div class="records-record-layout">
+                            <figure class="records-record-image">
+                                <img id="selected-cow-image" src="{{ medical_record_seed_cow.photo_url }}" alt="{{ medical_record_seed_cow.photo_alt }}">
+                            </figure>
+                            <div class="records-record-sidebar">
+                                <div class="records-info-grid">
+                                    <article class="records-info-card"><p>Farm</p><p id="selected-record-farm">{{ medical_record_seed_farm.name }}</p></article>
+                                    <article class="records-info-card"><p>Status</p><p id="selected-cow-status">{{ medical_record_seed_cow.status }}</p></article>
+                                    <article class="records-info-card"><p>Cow number</p><p id="selected-record-number">{{ medical_record_seed_cow.cow_number }}</p></article>
+                                    <article class="records-info-card"><p>Tag</p><p id="selected-record-tag">{{ medical_record_seed_cow.tag }}</p></article>
+                                    <article class="records-info-card"><p>Breed</p><p id="selected-record-breed">{{ medical_record_seed_cow.breed }}</p></article>
+                                    <article class="records-info-card"><p>AI date</p><p id="selected-record-ai-date">{{ medical_record_seed_cow.insemination_date }}</p></article>
+                                    <article class="records-info-card"><p>AI type</p><p id="selected-record-ai-type">{{ medical_record_seed_cow.insemination_type }}</p></article>
+                                    <article class="records-info-card"><p>Expected calving</p><p id="selected-record-calving-date">{{ medical_record_seed_cow.expected_calving_date }}</p></article>
+                                    <article class="records-info-card"><p>Location</p><p id="selected-record-location">{{ medical_record_seed_cow.location_detail }}</p></article>
+                                </div>
+
+                                <article class="records-info-card">
+                                    <p>Record note</p>
+                                    <p id="selected-record-detail" class="records-editor-copy">{{ medical_record_seed_record.detail }}</p>
+                                </article>
+
+                                <article class="records-info-card">
+                                    <p>Next step</p>
+                                    <p id="selected-cow-next-step" class="records-editor-copy">{{ medical_record_seed_cow.next_step }}</p>
+                                </article>
+
+                                <article class="records-editor">
+                                    <p>Vet update</p>
+                                    <p class="records-editor-copy">Use this dummy editor during the demo to change the record type, status, and note directly in the selected record card.</p>
+                                    <div class="records-editor-grid">
+                                        <label><span>Record type</span><select id="selected-record-type-input"><option value="Clinical note">Clinical note</option><option value="Treatment">Treatment</option><option value="Insemination">Insemination</option><option value="Follow-up">Follow-up</option><option value="Lab">Lab</option><option value="Delivery">Delivery</option><option value="Image">Image</option></select></label>
+                                        <label><span>Vet status</span><select id="selected-record-status-input"><option value="Open case">Open case</option><option value="Follow-up">Follow-up</option><option value="Needs review">Needs review</option><option value="Lab pending">Lab pending</option><option value="Closed">Closed</option></select></label>
+                                        <label><span>Next step</span><input id="selected-record-next-step-input" type="text" value="{{ medical_record_seed_cow.next_step }}"></label>
+                                        <label><span>Vet note</span><textarea id="selected-record-note-input">{{ medical_record_seed_record.detail }}</textarea></label>
+                                    </div>
+                                    <div class="records-editor-actions">
+                                        <button id="save-record-update" type="button" class="records-editor-button">Save demo update</button>
+                                        <span id="record-save-feedback" class="records-demo-status"></span>
+                                    </div>
+                                </article>
+                            </div>
+                        </div>
+                    </section>
+                </section>
+            </aside>
+        </div>
+    </section>
+
+    {{ medical_record_farms|json_script:"medical-record-farms-data" }}
+{% endblock %}
+
+{% block veterinary_dashboard_scripts %}
+    {{ block.super }}
+    <script>
+        (() => {
+            const seedElement = document.getElementById("medical-record-farms-data");
+            if (!seedElement) return;
+
+            const farms = JSON.parse(seedElement.textContent);
+            const searchInput = document.getElementById("farm-record-search");
+            const farmListEl = document.getElementById("farm-case-list");
+            const cowGridEl = document.getElementById("farm-record-list");
+            const farmNameEl = document.getElementById("selected-farm-name");
+            const farmOwnerEl = document.getElementById("selected-farm-owner");
+            const farmSummaryEl = document.getElementById("selected-farm-summary");
+            const farmStatusEl = document.getElementById("selected-farm-status");
+            const farmNextActionEl = document.getElementById("selected-farm-next-action");
+            const farmImageEl = document.getElementById("selected-farm-image");
+            const farmHerdSizeEl = document.getElementById("selected-farm-herd-size");
+            const farmRateEl = document.getElementById("selected-farm-rate");
+            const farmCountEl = document.getElementById("selected-farm-count");
+            const farmRecordCountEl = document.getElementById("selected-farm-record-count");
+            const recordTitleEl = document.getElementById("selected-record-title");
+            const recordCowEl = document.getElementById("selected-record-cow");
+            const recordDateEl = document.getElementById("selected-record-date");
+            const recordTypeEl = document.getElementById("selected-record-type");
+            const recordFarmEl = document.getElementById("selected-record-farm");
+            const recordNumberEl = document.getElementById("selected-record-number");
+            const recordTagEl = document.getElementById("selected-record-tag");
+            const recordBreedEl = document.getElementById("selected-record-breed");
+            const recordAiDateEl = document.getElementById("selected-record-ai-date");
+            const recordAiTypeEl = document.getElementById("selected-record-ai-type");
+            const recordCalvingDateEl = document.getElementById("selected-record-calving-date");
+            const recordLocationEl = document.getElementById("selected-record-location");
+            const recordDetailEl = document.getElementById("selected-record-detail");
+            const cowStatusEl = document.getElementById("selected-cow-status");
+            const cowImageEl = document.getElementById("selected-cow-image");
+            const cowNextStepEl = document.getElementById("selected-cow-next-step");
+            const recordTypeInputEl = document.getElementById("selected-record-type-input");
+            const recordStatusInputEl = document.getElementById("selected-record-status-input");
+            const recordNextStepInputEl = document.getElementById("selected-record-next-step-input");
+            const recordNoteInputEl = document.getElementById("selected-record-note-input");
+            const saveRecordButtonEl = document.getElementById("save-record-update");
+            const recordSaveFeedbackEl = document.getElementById("record-save-feedback");
+
+            let selectedFarmId = farms[0]?.id || "";
+            let selectedCowId = farms[0]?.cows?.[0]?.id || "";
+            let selectedRecordIndex = 0;
+
+            function escapeHtml(value) {
+                return String(value ?? "")
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#39;");
+            }
+
+            function toneClass(tone) {
+                if (tone === "rose") return "tone-rose";
+                if (tone === "amber") return "tone-amber";
+                if (tone === "navy") return "tone-navy";
+                return "tone-emerald";
+            }
+
+            function visibleFarms() {
+                const term = (searchInput?.value || "").trim().toLowerCase();
+                if (!term) return farms;
+
+                return farms.filter((farm) => {
+                    const cowText = farm.cows
+                        .map((cow) => [
+                            cow.name,
+                            cow.cow_number,
+                            cow.tag,
+                            cow.breed,
+                            cow.insemination_date,
+                            cow.insemination_type,
+                            cow.expected_calving_date,
+                            cow.location_detail,
+                            cow.current_record?.title,
+                            cow.current_record?.type,
+                        ].join(" "))
+                        .join(" ");
+                    const haystack = [
+                        farm.name,
+                        farm.owner,
+                        farm.location,
+                        farm.region,
+                        farm.summary,
+                        cowText,
+                    ].join(" ").toLowerCase();
+                    return haystack.includes(term);
+                });
+            }
+
+            function ensureSelection(filteredFarms) {
+                if (!filteredFarms.some((farm) => farm.id === selectedFarmId)) {
+                    selectedFarmId = filteredFarms[0]?.id || "";
+                }
+
+                const selectedFarm = filteredFarms.find((farm) => farm.id === selectedFarmId) || null;
+                if (!selectedFarm) {
+                    selectedCowId = "";
+                    return { selectedFarm: null, selectedCow: null, selectedRecord: null };
+                }
+
+                if (!selectedFarm.cows.some((cow) => cow.id === selectedCowId)) {
+                    selectedCowId = selectedFarm.cows[0]?.id || "";
+                    selectedRecordIndex = 0;
+                }
+
+                const selectedCow = selectedFarm.cows.find((cow) => cow.id === selectedCowId) || null;
+                const selectedRecord = selectedCow?.records?.[selectedRecordIndex] || selectedCow?.records?.[0] || null;
+                return { selectedFarm, selectedCow, selectedRecord };
+            }
+
+            function renderFarmList(filteredFarms) {
+                if (!farmListEl) return;
+
+                if (!filteredFarms.length) {
+                    farmListEl.innerHTML = '<div class="p-4 text-sm text-slate-500">No farms match this search.</div>';
+                    return;
+                }
+
+                farmListEl.innerHTML = filteredFarms.map((farm) => `
+                    <button type="button" class="records-farm-row${farm.id === selectedFarmId ? " is-selected" : ""}" data-farm-select data-farm-id="${escapeHtml(farm.id)}">
+                        <div class="records-farmer-cell">
+                            <img src="${escapeHtml(farm.cover_photo_url)}" alt="${escapeHtml(farm.cover_photo_alt)}">
+                            <span class="min-w-0">
+                                <span class="records-row-name">${escapeHtml(farm.owner)}</span>
+                                <span class="records-row-sub">${escapeHtml(farm.owner_code)}</span>
+                                <span class="records-row-meta">${escapeHtml(farm.name)}</span>
+                            </span>
+                        </div>
+                        <span class="records-row-meta">${escapeHtml(farm.location)}<br>${escapeHtml(farm.region)}</span>
+                        <span class="records-row-meta">${escapeHtml(farm.herd_size)} cows</span>
+                        <span class="records-rate${farm.conception_rate < 70 ? " is-alert" : ""}">${escapeHtml(farm.conception_rate)}%</span>
+                        <span class="records-pill ${toneClass(farm.tone)}">${escapeHtml(farm.farm_status)}</span>
+                        <span class="records-row-action">&rsaquo;</span>
+                    </button>
+                `).join("");
+            }
+
+            function renderFarmDetails(farm) {
+                farmNameEl.textContent = farm.owner;
+                farmOwnerEl.textContent = `${farm.location} · ${farm.contact_phone}`;
+                farmSummaryEl.textContent = `${farm.name} · ${farm.summary}`;
+                farmStatusEl.textContent = `Clinical concern: ${farm.farm_status}`;
+                farmNextActionEl.textContent = farm.next_action;
+                farmImageEl.src = farm.cover_photo_url;
+                farmImageEl.alt = farm.cover_photo_alt;
+                farmHerdSizeEl.textContent = farm.herd_size;
+                farmRateEl.textContent = `${farm.conception_rate}%`;
+                farmCountEl.textContent = farm.affected_cow_count;
+                farmRecordCountEl.textContent = farm.record_count;
+            }
+
+            function renderCowGrid(farm) {
+                if (!cowGridEl) return;
+
+                cowGridEl.innerHTML = farm.cows.map((cow) => `
+                    <button type="button" class="records-cow-card${cow.id === selectedCowId ? " is-selected" : ""}" data-cow-select data-cow-id="${escapeHtml(cow.id)}">
+                        <img src="${escapeHtml(cow.photo_url)}" alt="${escapeHtml(cow.photo_alt)}">
+                        <span class="min-w-0">
+                            <span class="records-cow-name">${escapeHtml(cow.cow_number)}</span>
+                            <span class="records-cow-meta">${escapeHtml(cow.name)} · ${escapeHtml(cow.breed)}</span>
+                            <span class="records-cow-note">${escapeHtml(cow.status)} · ${escapeHtml(cow.expected_calving_date)}</span>
+                        </span>
+                    </button>
+                `).join("");
+            }
+
+            function renderSelectedRecord(farm, cow, record) {
+                if (!cow || !record) return;
+
+                recordTitleEl.textContent = record.title;
+                recordCowEl.textContent = `${cow.name} - ${cow.cow_number} - ${cow.problem}`;
+                recordDateEl.textContent = record.date || record.time;
+                recordTypeEl.className = `records-pill ${toneClass(cow.tone)}`;
+                recordTypeEl.textContent = record.type || record.label;
+                recordFarmEl.textContent = farm.name;
+                recordNumberEl.textContent = cow.cow_number;
+                recordTagEl.textContent = cow.tag;
+                recordBreedEl.textContent = cow.breed;
+                recordAiDateEl.textContent = cow.insemination_date;
+                recordAiTypeEl.textContent = cow.insemination_type;
+                recordCalvingDateEl.textContent = cow.expected_calving_date;
+                recordLocationEl.textContent = cow.location_detail;
+                recordDetailEl.textContent = record.detail;
+                cowStatusEl.textContent = cow.status;
+                cowImageEl.src = cow.photo_url;
+                cowImageEl.alt = cow.photo_alt;
+                cowNextStepEl.textContent = cow.next_step;
+
+                if (recordTypeInputEl) recordTypeInputEl.value = record.type || record.label;
+                if (recordStatusInputEl) recordStatusInputEl.value = cow.status;
+                if (recordNextStepInputEl) recordNextStepInputEl.value = cow.next_step;
+                if (recordNoteInputEl) recordNoteInputEl.value = record.detail;
+                if (recordSaveFeedbackEl) recordSaveFeedbackEl.textContent = "";
+            }
+
+            function render() {
+                const filteredFarms = visibleFarms();
+                const { selectedFarm, selectedCow, selectedRecord } = ensureSelection(filteredFarms);
+                renderFarmList(filteredFarms);
+                if (!selectedFarm || !selectedCow || !selectedRecord) return;
+
+                renderFarmDetails(selectedFarm);
+                renderCowGrid(selectedFarm);
+                renderSelectedRecord(selectedFarm, selectedCow, selectedRecord);
+            }
+
+            farmListEl?.addEventListener("click", (event) => {
+                const button = event.target.closest("[data-farm-select]");
+                if (!button) return;
+                selectedFarmId = button.dataset.farmId || "";
+                const farm = farms.find((item) => item.id === selectedFarmId);
+                selectedCowId = farm?.cows?.[0]?.id || "";
+                selectedRecordIndex = 0;
+                render();
+            });
+
+            cowGridEl?.addEventListener("click", (event) => {
+                const button = event.target.closest("[data-cow-select]");
+                if (!button) return;
+                selectedCowId = button.dataset.cowId || "";
+                selectedRecordIndex = 0;
+                render();
+            });
+
+            saveRecordButtonEl?.addEventListener("click", () => {
+                const farm = farms.find((item) => item.id === selectedFarmId);
+                const cow = farm?.cows?.find((item) => item.id === selectedCowId);
+                const record = cow?.records?.[selectedRecordIndex];
+                if (!farm || !cow || !record) return;
+
+                // Keep this editor local to the page state so the record detail
+                // can be adjusted live in the demo without implying a backend
+                // save that does not exist yet.
+                record.type = (recordTypeInputEl?.value || record.type || record.label).trim();
+                cow.status = (recordStatusInputEl?.value || cow.status).trim();
+                cow.next_step = (recordNextStepInputEl?.value || cow.next_step).trim();
+                record.detail = (recordNoteInputEl?.value || record.detail).trim();
+                record.date = "Just now";
+                record.time = "Just now";
+                render();
+                if (recordSaveFeedbackEl) recordSaveFeedbackEl.textContent = "Demo update saved locally.";
+            });
+
+            searchInput?.addEventListener("input", render);
+            render();
+        })();
+    </script>
+{% endblock %}

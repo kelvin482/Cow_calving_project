@@ -1,0 +1,16 @@
+.venv/
+env/
+node_modules/
+.env
+.env.*
+!.env.example
+db.sqlite3
+runserver*.log
+__pycache__/
+*.pyc
+.vscode/
+Thumbs.db
+desktop.ini
+*.egg-info/
+dist/
+build/

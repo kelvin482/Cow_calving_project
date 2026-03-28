@@ -1,0 +1,312 @@
+{% extends "veterinary_dashboard/base_dashboard.html" %}
+
+{% block veterinary_dashboard_content %}
+    <section class="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
+        <article class="rounded-[1.45rem] border border-slate-200 bg-white p-5 shadow-[0_12px_28px_rgba(15,23,42,0.06)] sm:p-6">
+            <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Schedule planner</p>
+                    <h2 class="mt-2 text-2xl tracking-tight text-slate-950 font-display">Calendar and route view</h2>
+                    <p class="mt-2 text-sm leading-6 text-slate-600">Pick a day, review the agenda, and keep the route simple.</p>
+                </div>
+                <div class="rounded-[1rem] border border-slate-200 bg-slate-50/80 px-4 py-3">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Month</p>
+                    <p class="mt-1 text-lg font-semibold text-slate-950">{{ month_label }}</p>
+                </div>
+            </div>
+
+            <div class="mt-6 grid grid-cols-7 gap-2 text-center">
+                {% for label in weekday_labels %}
+                    <div class="py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">{{ label }}</div>
+                {% endfor %}
+                {% for day in calendar_days %}
+                    {% if day.empty %}
+                        <div class="aspect-square rounded-[1rem] border border-transparent"></div>
+                    {% else %}
+                        <button
+                            type="button"
+                            class="schedule-day aspect-square rounded-[1rem] border px-2 py-2 text-left transition {% if day.selected %}border-slate-300 bg-slate-50 shadow-sm{% else %}border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70{% endif %}"
+                            data-day="{{ day.day }}"
+                            data-selected="{% if day.selected %}true{% else %}false{% endif %}"
+                        >
+                            <div class="flex h-full flex-col justify-between">
+                                <span class="text-sm font-semibold text-slate-800">{{ day.day }}</span>
+                                <div class="flex items-center justify-between">
+                                    {% if day.has_items %}
+                                        <span class="text-[11px] font-semibold text-slate-500">
+                                            {{ day.visit_count }} visit{% if day.visit_count != 1 %}s{% endif %}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-[11px] text-slate-300">Free</span>
+                                    {% endif %}
+                                    {% if day.has_urgent %}
+                                        <span class="h-2.5 w-2.5 rounded-full bg-rose-400"></span>
+                                    {% elif day.has_items %}
+                                        <span class="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </button>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <div class="mt-6 grid gap-3 border-t border-slate-200 pt-5 sm:grid-cols-[1fr_auto] sm:items-end">
+                <div class="grid gap-3 sm:grid-cols-3">
+                    {% for stat in planner_stats %}
+                        <div class="rounded-[1rem] border border-slate-200 bg-slate-50/80 px-4 py-3">
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">{{ stat.label }}</p>
+                            <p class="mt-2 text-xl font-semibold tracking-tight text-slate-950">{{ stat.value }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <button type="button" id="jump-to-today" class="inline-flex items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-50">
+                    Jump to today
+                </button>
+            </div>
+        </article>
+
+        <article class="rounded-[1.45rem] border border-slate-200 bg-white p-5 shadow-[0_12px_28px_rgba(15,23,42,0.06)] sm:p-6">
+            <div class="flex flex-col gap-3 border-b border-slate-200 pb-5">
+                <div class="flex items-center justify-between gap-4">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Selected day</p>
+                        <h2 id="selected-date-label" class="mt-2 text-2xl tracking-tight text-slate-950 font-display">{{ selected_date_label }}</h2>
+                    </div>
+                    <a href="{% url 'veterinary_dashboard:telehealth' %}" class="inline-flex items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-50">
+                        Open telehealth
+                    </a>
+                </div>
+                <p id="selected-day-summary" class="text-sm leading-6 text-slate-600">{{ selected_day_summary }}</p>
+            </div>
+
+            <div class="mt-5">
+                <div class="flex items-center justify-between gap-4">
+                    <p class="text-sm font-semibold uppercase tracking-[0.22em] text-slate-500">Agenda</p>
+                    <span id="agenda-count" class="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-600">
+                        {{ schedule_initial_items|length }} items
+                    </span>
+                </div>
+
+                <div id="agenda-list" class="mt-4 space-y-3"></div>
+            </div>
+
+            <div class="mt-6 rounded-[0.95rem] border border-slate-200 bg-slate-50/70 p-4">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <p class="text-sm font-semibold text-slate-950">Add visit to selected day</p>
+                        <p class="mt-1 text-sm leading-6 text-slate-600">This planner saves draft visits in this browser for the demo.</p>
+                    </div>
+                    <span class="rounded-full bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-600">Local</span>
+                </div>
+
+                <form id="planner-form" class="mt-4 grid gap-3 sm:grid-cols-2">
+                    <label class="block">
+                        <span class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Time</span>
+                        <input name="time" type="time" required class="mt-2 w-full rounded-[0.9rem] border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-slate-300">
+                    </label>
+                    <label class="block">
+                        <span class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Farm</span>
+                        <input name="farm" type="text" required placeholder="Farm name" class="mt-2 w-full rounded-[0.9rem] border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-slate-300">
+                    </label>
+                    <label class="block">
+                        <span class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Farmer or animal</span>
+                        <input name="subject" type="text" required placeholder="John Otieno or Rosa #011" class="mt-2 w-full rounded-[0.9rem] border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-slate-300">
+                    </label>
+                    <label class="block">
+                        <span class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Visit type</span>
+                        <select name="visit_type" class="mt-2 w-full rounded-[0.9rem] border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-slate-300">
+                            <option value="Scheduled">Scheduled</option>
+                            <option value="Urgent">Urgent</option>
+                            <option value="Pending">Pending</option>
+                        </select>
+                    </label>
+                    <label class="block sm:col-span-2">
+                        <span class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Note</span>
+                        <input name="detail" type="text" required placeholder="Short note for the visit" class="mt-2 w-full rounded-[0.9rem] border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-slate-300">
+                    </label>
+                    <div class="sm:col-span-2 flex flex-wrap gap-3">
+                        <button type="submit" class="inline-flex items-center justify-center rounded-full bg-[#14532d] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#114524]">
+                            Add visit
+                        </button>
+                        <a href="{% url 'veterinary_dashboard:patients' %}" class="inline-flex items-center justify-center rounded-full border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-50">
+                            Open patient files
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <div class="mt-6 rounded-[0.95rem] border border-slate-200 bg-white p-4">
+                <p class="text-sm font-semibold text-slate-950">Keep this page simple</p>
+                <ul class="mt-3 space-y-2 text-sm leading-6 text-slate-600">
+                    {% for note in planner_help %}
+                        <li class="flex items-start gap-2">
+                            <span class="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-slate-400"></span>
+                            <span>{{ note }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </article>
+    </section>
+
+    {{ schedule_seed_items|json_script:"schedule-seed-data" }}
+    <script>
+        (() => {
+            const seedElement = document.getElementById('schedule-seed-data');
+            if (!seedElement) return;
+
+            const seedItems = JSON.parse(seedElement.textContent);
+            const storageKey = 'vet-schedule-demo-items';
+            const dayButtons = Array.from(document.querySelectorAll('.schedule-day'));
+            const agendaList = document.getElementById('agenda-list');
+            const agendaCount = document.getElementById('agenda-count');
+            const dateLabel = document.getElementById('selected-date-label');
+            const daySummary = document.getElementById('selected-day-summary');
+            const plannerForm = document.getElementById('planner-form');
+            const jumpToToday = document.getElementById('jump-to-today');
+
+            const monthLabel = '{{ month_label|escapejs }}';
+            const defaultDay = {{ selected_day }};
+            let selectedDay = defaultDay;
+
+            function loadStoredItems() {
+                try {
+                    return JSON.parse(localStorage.getItem(storageKey) || '{}');
+                } catch {
+                    return {};
+                }
+            }
+
+            function saveStoredItems(items) {
+                localStorage.setItem(storageKey, JSON.stringify(items));
+            }
+
+            function toneClasses(tone) {
+                if (tone === 'rose') return 'bg-rose-100 text-rose-700';
+                if (tone === 'amber') return 'bg-amber-100 text-amber-700';
+                if (tone === 'emerald') return 'bg-emerald-100 text-emerald-700';
+                return 'bg-slate-100 text-slate-700';
+            }
+
+            function itemActions(item) {
+                const buttons = [];
+                if (item.primary_url) {
+                    buttons.push(`<a href="${item.primary_url}" class="inline-flex items-center justify-center rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50">${item.primary_label || 'Open'}</a>`);
+                }
+                if (item.secondary_url) {
+                    buttons.push(`<a href="${item.secondary_url}" class="inline-flex items-center justify-center rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50">${item.secondary_label || 'Open'}</a>`);
+                }
+                if (item.is_local) {
+                    buttons.push(`<button type="button" data-local-id="${item.local_id}" class="remove-local-visit inline-flex items-center justify-center rounded-full border border-rose-100 px-3 py-1.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-50">Remove</button>`);
+                }
+                return buttons.join('');
+            }
+
+            function buildAgendaItems(day) {
+                const stored = loadStoredItems();
+                const dayKey = String(day);
+                const items = [...(seedItems[dayKey] || []), ...(stored[dayKey] || [])];
+                return items.sort((a, b) => a.time.localeCompare(b.time));
+            }
+
+            function renderDay(day) {
+                selectedDay = Number(day);
+                const items = buildAgendaItems(selectedDay);
+
+                dayButtons.forEach((button) => {
+                    const isSelected = Number(button.dataset.day) === selectedDay;
+                    button.dataset.selected = String(isSelected);
+                    button.classList.toggle('border-slate-300', isSelected);
+                    button.classList.toggle('bg-slate-50', isSelected);
+                    button.classList.toggle('shadow-sm', isSelected);
+                });
+
+                dateLabel.textContent = `${selectedDay} ${monthLabel}`;
+                daySummary.textContent = items.length
+                    ? `${items.length} planned item${items.length === 1 ? '' : 's'} for this day.`
+                    : 'No visits planned yet. Use Add visit to draft one.';
+                agendaCount.textContent = `${items.length} item${items.length === 1 ? '' : 's'}`;
+
+                if (!items.length) {
+                    agendaList.innerHTML = `
+                        <div class="rounded-[1rem] border border-dashed border-slate-300 bg-slate-50/70 px-4 py-5 text-sm text-slate-600">
+                            No visits on this day yet. Add one below or choose another date.
+                        </div>
+                    `;
+                    return;
+                }
+
+                agendaList.innerHTML = items.map((item) => `
+                    <article class="rounded-[0.95rem] border border-slate-200 bg-white px-4 py-3 shadow-sm">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="min-w-0">
+                                <div class="flex flex-wrap items-center gap-3">
+                                    <p class="font-mono text-lg font-bold tracking-tight text-slate-950">${item.time}</p>
+                                    <span class="rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${toneClasses(item.tone)}">${item.status}</span>
+                                </div>
+                                <p class="mt-3 text-base font-semibold text-slate-950">${item.farm} - ${item.farmer || item.subject || item.animal}</p>
+                                <p class="mt-1 text-sm leading-6 text-slate-600">${item.animal || item.subject} - ${item.type}</p>
+                                <p class="mt-1 text-sm leading-6 text-slate-500">${item.detail}</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex flex-wrap gap-2">
+                            ${itemActions(item)}
+                        </div>
+                    </article>
+                `).join('');
+            }
+
+            plannerForm?.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const formData = new FormData(plannerForm);
+                const visitType = String(formData.get('visit_type'));
+                const tone = visitType === 'Urgent' ? 'rose' : (visitType === 'Pending' ? 'amber' : 'emerald');
+                const stored = loadStoredItems();
+                const dayKey = String(selectedDay);
+                const currentItems = stored[dayKey] || [];
+                currentItems.push({
+                    local_id: `${Date.now()}`,
+                    is_local: true,
+                    time: String(formData.get('time')),
+                    farm: String(formData.get('farm')),
+                    farmer: '',
+                    subject: String(formData.get('subject')),
+                    animal: String(formData.get('subject')),
+                    type: visitType,
+                    detail: String(formData.get('detail')),
+                    status: visitType,
+                    tone,
+                    primary_url: '{% url "veterinary_dashboard:patients" %}',
+                    primary_label: 'Open patients',
+                    secondary_url: '{% url "veterinary_dashboard:telehealth" %}',
+                    secondary_label: 'Open telehealth',
+                });
+                stored[dayKey] = currentItems;
+                saveStoredItems(stored);
+                plannerForm.reset();
+                renderDay(selectedDay);
+            });
+
+            agendaList?.addEventListener('click', (event) => {
+                const target = event.target.closest('.remove-local-visit');
+                if (!target) return;
+
+                const stored = loadStoredItems();
+                const dayKey = String(selectedDay);
+                stored[dayKey] = (stored[dayKey] || []).filter((item) => item.local_id !== target.dataset.localId);
+                saveStoredItems(stored);
+                renderDay(selectedDay);
+            });
+
+            dayButtons.forEach((button) => {
+                button.addEventListener('click', () => renderDay(button.dataset.day));
+            });
+
+            jumpToToday?.addEventListener('click', () => renderDay(defaultDay));
+
+            renderDay(selectedDay);
+        })();
+    </script>
+{% endblock %}

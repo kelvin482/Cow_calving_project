@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "build:dashboard-css": "tailwindcss -c tailwind.dashboard.config.js -i ./dashboard_assets/tailwind.dashboard.css -o ./Core_Web/static/Core_Web/dashboard-tailwind.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}

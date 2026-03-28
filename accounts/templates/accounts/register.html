@@ -1,0 +1,82 @@
+{% extends "accounts/base_auth.html" %}
+{% load static %}
+
+{% block title %}Create Account | CowCalving{% endblock %}
+
+{% block auth_panel_image %}{% static 'accounts/images/register-cow-calf.jpg' %}{% endblock %}
+{% block auth_panel_title %}Welcome to CowCalving{% endblock %}
+{% block auth_panel_text %}Create your farmer account to start tracking calving activity from the shared website.{% endblock %}
+{% block auth_panel_points %}
+    <ul class="space-y-3 text-sm text-white/85">
+        <li class="flex items-start gap-3">
+            <span class="mt-2 h-2 w-2 rounded-full bg-white/80"></span>
+            Farmer access is self-service.
+        </li>
+        <li class="flex items-start gap-3">
+            <span class="mt-2 h-2 w-2 rounded-full bg-white/80"></span>
+            Veterinary accounts are created by admin.
+        </li>
+    </ul>
+{% endblock %}
+
+{% block auth_form_title %}Create farmer account{% endblock %}
+{% block auth_form_subtitle %}Set up your CowCalving farmer profile.{% endblock %}
+{% block auth_form_class %}auth-card--signup{% endblock %}
+
+{% block auth_form_fields %}
+    <div class="auth-grid">
+        <div class="auth-field">
+            <label class="text-sm font-semibold text-forest" for="id_first_name">First Name</label>
+            {{ form.first_name }}
+            {% if form.first_name.errors %}<small class="text-rose-600">{{ form.first_name.errors|striptags }}</small>{% endif %}
+        </div>
+        <div class="auth-field">
+            <label class="text-sm font-semibold text-forest" for="id_last_name">Last Name</label>
+            {{ form.last_name }}
+            {% if form.last_name.errors %}<small class="text-rose-600">{{ form.last_name.errors|striptags }}</small>{% endif %}
+        </div>
+    </div>
+
+    <div class="auth-field">
+        <!-- Restore the original signup details so onboarding still asks for the full profile fields the project started with. -->
+        <label class="text-sm font-semibold text-forest" for="id_username">Username</label>
+        {{ form.username }}
+        {% if form.username.errors %}<small class="text-rose-600">{{ form.username.errors|striptags }}</small>{% endif %}
+    </div>
+
+    <div class="auth-field">
+        <label class="text-sm font-semibold text-forest" for="id_email">Email</label>
+        {{ form.email }}
+        {% if form.email.errors %}<small class="text-rose-600">{{ form.email.errors|striptags }}</small>{% endif %}
+    </div>
+
+    <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+        This registration page is for farmers only. Veterinary doctors receive their access credentials from admin.
+    </div>
+
+    <div class="auth-field">
+        <label class="text-sm font-semibold text-forest" for="id_farm_name">Farm Name</label>
+        {{ form.farm_name }}
+        {% if form.farm_name.errors %}<small class="text-rose-600">{{ form.farm_name.errors|striptags }}</small>{% endif %}
+    </div>
+
+    <div class="auth-grid">
+        <div class="auth-field">
+            <label class="text-sm font-semibold text-forest" for="id_password1">Password</label>
+            {{ form.password1 }}
+            <div class="password-strength mt-2 h-2 rounded-full bg-sage/40 overflow-hidden">
+                <span class="password-strength-bar block h-full w-1/4 bg-clay transition-all"></span>
+            </div>
+            {% if form.password1.errors %}<small class="text-rose-600">{{ form.password1.errors|striptags }}</small>{% endif %}
+        </div>
+        <div class="auth-field">
+            <label class="text-sm font-semibold text-forest" for="id_password2">Confirm Password</label>
+            {{ form.password2 }}
+            {% if form.password2.errors %}<small class="text-rose-600">{{ form.password2.errors|striptags }}</small>{% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block auth_submit_text %}Create Farmer Account{% endblock %}
+{% block auth_switch_text %}Already have an account? <a class="text-forest font-semibold" href="{% url 'accounts:login' %}">Sign in</a>{% endblock %}
+{% block auth_legal_text %}By creating an account, you agree to proper handling of animal health data.{% endblock %}

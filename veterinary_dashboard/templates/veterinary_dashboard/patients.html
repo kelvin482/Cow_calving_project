@@ -1,0 +1,791 @@
+{% extends "veterinary_dashboard/base_dashboard.html" %}
+
+{% block veterinary_dashboard_content %}
+    <section class="grid gap-4 xl:grid-cols-[1.12fr_0.88fr]">
+        <article class="rounded-[1.25rem] border border-slate-200 bg-white p-4 shadow-[0_10px_22px_rgba(15,23,42,0.05)]">
+            <div class="border-b border-slate-200 pb-5">
+                <div class="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+                    <label class="flex w-full items-center gap-3 rounded-[1rem] border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-500 xl:max-w-[22rem]">
+                        <svg class="h-4 w-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 3.473 9.765l3.63 3.63a.75.75 0 1 0 1.06-1.06l-3.629-3.63A5.5 5.5 0 0 0 9 3.5ZM5 9a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" clip-rule="evenodd"></path>
+                        </svg>
+                        <input id="patient-search" type="text" placeholder="Search patient, farm, or farmer" class="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400">
+                    </label>
+
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" class="queue-toggle inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50" data-queue-filter="all">All cases</button>
+                        <button type="button" class="queue-toggle inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50" data-queue-filter="urgent">High alert</button>
+                        <button type="button" class="queue-toggle inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50" data-queue-filter="waiting_result">Waiting result</button>
+                    </div>
+                </div>
+
+                <details class="mt-4 overflow-hidden rounded-[0.9rem] border border-slate-200 bg-slate-50/70">
+                    <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-3 marker:content-none">
+                        <span class="text-sm font-semibold text-slate-900">More filters</span>
+                        <span class="text-slate-300">+</span>
+                    </summary>
+                    <div class="space-y-4 border-t border-slate-200 px-4 py-3">
+                        <div>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Case stage</p>
+                            <div class="mt-2 flex flex-wrap gap-2">
+                                <button type="button" class="stage-filter inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700" data-stage-filter="all">All</button>
+                                <button type="button" class="stage-filter inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-white" data-stage-filter="assessment">Assessment</button>
+                                <button type="button" class="stage-filter inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-white" data-stage-filter="treatment">Treatment</button>
+                                <button type="button" class="stage-filter inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-white" data-stage-filter="follow_up">Follow-up</button>
+                                <button type="button" class="stage-filter inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-white" data-stage-filter="waiting_result">Waiting on result</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Priority</p>
+                            <div class="mt-2 flex flex-wrap gap-2">
+                                <button type="button" class="priority-filter inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700" data-priority-filter="all">All</button>
+                                <button type="button" class="priority-filter inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-white" data-priority-filter="urgent">Urgent</button>
+                                <button type="button" class="priority-filter inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-white" data-priority-filter="needs_review">Needs review</button>
+                                <button type="button" class="priority-filter inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-white" data-priority-filter="stable">Stable</button>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+            </div>
+
+            <div class="mt-5 overflow-hidden rounded-[1rem] border border-slate-200 bg-white">
+                <div class="hidden grid-cols-[1.35fr_1fr_0.9fr_0.9fr_auto] gap-4 bg-[#f7fbf7] px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 md:grid">
+                    <p>Patient</p>
+                    <p>Farm</p>
+                    <p>Priority</p>
+                    <p>Status</p>
+                    <p>Action</p>
+                </div>
+                <div id="patient-list"></div>
+            </div>
+        </article>
+
+        <article class="rounded-[1.25rem] border border-slate-200 bg-white shadow-[0_10px_22px_rgba(15,23,42,0.05)] xl:sticky xl:top-6 xl:self-start">
+            <div class="border-b border-slate-200 px-4 py-4">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div class="flex items-start gap-4">
+                        <div id="patient-avatar" class="flex h-16 w-16 items-center justify-center rounded-full bg-rose-100 text-lg font-semibold text-rose-700">
+                            RS
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Selected active case</p>
+                            <div class="mt-2 flex flex-wrap items-center gap-2">
+                                <h2 id="patient-name" class="text-xl tracking-tight text-slate-950 font-display">{{ patient_seed_record.name }}</h2>
+                                <span id="patient-status-pill" class="inline-flex rounded-full bg-rose-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-rose-700">{{ patient_seed_record.priority_label }}</span>
+                            </div>
+                            <p id="patient-summary" class="mt-2 text-sm leading-6 text-slate-600">{{ patient_seed_record.summary }}</p>
+                            <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600">
+                                <span id="patient-farm">{{ patient_seed_record.farm }}</span>
+                                <span id="patient-location">{{ patient_seed_record.location }}</span>
+                                <span id="patient-owner">{{ patient_seed_record.owner }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2">
+                        <a id="patient-secondary-action" href="{{ patient_seed_record.secondary_url }}" class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">{{ patient_seed_record.secondary_label }}</a>
+                        <a id="patient-extra-action" href="{{ patient_seed_record.extra_url }}" class="inline-flex items-center justify-center rounded-full bg-[#2c8af0] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1976db]">{{ patient_seed_record.extra_label }}</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-4 px-4 py-4">
+                <section class="rounded-[0.95rem] border border-slate-200 bg-slate-50/80 px-4 py-4">
+                    <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Quick actions</p>
+                            <h3 class="mt-2 text-base tracking-tight text-slate-950 font-display">Move this case forward</h3>
+                        </div>
+                        <p id="patient-action-feedback" class="text-sm leading-6 text-slate-500">
+                            Use one action at a time to update the selected case during the demo.
+                        </p>
+                    </div>
+
+                    <div class="mt-4 grid gap-2 sm:grid-cols-2">
+                        <button id="patient-mark-reviewed" type="button" class="inline-flex items-center justify-center rounded-[0.9rem] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100">
+                            Mark as reviewed
+                        </button>
+                        <button id="patient-open-message-panel" type="button" class="inline-flex items-center justify-center rounded-[0.9rem] border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-semibold text-sky-700 transition hover:bg-sky-100">
+                            Send farmer update
+                        </button>
+                        <button id="patient-open-follow-up-panel" type="button" class="inline-flex items-center justify-center rounded-[0.9rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700 transition hover:bg-amber-100">
+                            Schedule follow-up
+                        </button>
+                        <button id="patient-complete-case" type="button" class="inline-flex items-center justify-center rounded-[0.9rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 transition hover:bg-rose-100">
+                            Complete case
+                        </button>
+                    </div>
+
+                    <div class="mt-4 grid gap-3 xl:grid-cols-2">
+                        <div id="patient-message-panel" class="hidden rounded-[0.9rem] border border-slate-200 bg-white p-3">
+                            <label for="patient-message-input" class="block text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Farmer update</label>
+                            <textarea id="patient-message-input" class="mt-2 min-h-[6rem] w-full rounded-[0.85rem] border border-slate-200 bg-slate-50/70 px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-sky-300 focus:ring-2 focus:ring-sky-100" placeholder="Write the update the farmer should receive next..."></textarea>
+                            <button id="patient-send-update" type="button" class="mt-3 inline-flex items-center justify-center rounded-[0.85rem] bg-[#2c8af0] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1976db]">
+                                Send update now
+                            </button>
+                        </div>
+
+                        <div id="patient-follow-up-panel" class="hidden rounded-[0.9rem] border border-slate-200 bg-white p-3">
+                            <label for="patient-follow-up-select" class="block text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Follow-up timing</label>
+                            <select id="patient-follow-up-select" class="mt-2 w-full rounded-[0.85rem] border border-slate-200 bg-slate-50/70 px-3 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-amber-300 focus:ring-2 focus:ring-amber-100">
+                                <option value="Later today">Later today</option>
+                                <option value="Tomorrow morning">Tomorrow morning</option>
+                                <option value="Next route visit">Next route visit</option>
+                            </select>
+                            <input id="patient-follow-up-note" type="text" class="mt-2 w-full rounded-[0.85rem] border border-slate-200 bg-slate-50/70 px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-amber-300 focus:ring-2 focus:ring-amber-100" placeholder="Optional note for the follow-up">
+                            <button id="patient-schedule-follow-up" type="button" class="mt-3 inline-flex items-center justify-center rounded-[0.85rem] bg-[#14532d] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#114524]">
+                                Save follow-up
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <div class="flex items-center justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Case health bar</p>
+                            <h3 class="mt-2 text-base tracking-tight text-slate-950 font-display">Rapid clinical overview</h3>
+                        </div>
+                        <span id="patient-banner" class="inline-flex items-center justify-center rounded-full bg-rose-100 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] text-rose-700">{{ patient_seed_record.status_banner }}</span>
+                    </div>
+
+                    <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                        <article class="rounded-[0.85rem] border border-slate-200 bg-[#f9fbff] px-3.5 py-3">
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Priority</p>
+                            <p id="patient-priority-label" class="mt-2 text-xl font-semibold tracking-tight text-slate-950">{{ patient_seed_record.priority_label }}</p>
+                        </article>
+                        <article class="rounded-[0.85rem] border border-slate-200 bg-[#fff9f8] px-3.5 py-3">
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Stage</p>
+                            <p id="patient-stage-badge" class="mt-2 text-xl font-semibold tracking-tight text-slate-950">{{ patient_seed_record.stage_group_label }}</p>
+                        </article>
+                        <article class="rounded-[0.85rem] border border-slate-200 bg-white px-3.5 py-3">
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Last update</p>
+                            <p id="patient-last-update" class="mt-2 text-base font-semibold text-slate-950">{{ patient_seed_record.last_update }}</p>
+                        </article>
+                        <article class="rounded-[0.85rem] border border-slate-200 bg-white px-3.5 py-3">
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Tag / Breed</p>
+                            <p id="patient-tag-breed" class="mt-2 text-base font-semibold text-slate-950">#{{ patient_seed_record.tag_number }} - {{ patient_seed_record.breed }}</p>
+                        </article>
+                    </div>
+                </section>
+
+                <section class="rounded-[0.95rem] border border-rose-200 bg-rose-50/80 px-4 py-3">
+                    <p class="text-xs font-semibold uppercase tracking-[0.22em] text-rose-500">Clinical snapshot</p>
+                    <p id="patient-issue" class="mt-2 text-base font-semibold text-rose-700">{{ patient_seed_record.issue }}</p>
+                    <p id="patient-next-step" class="mt-2 text-sm leading-6 text-rose-700/80">{{ patient_seed_record.next_step }}</p>
+                    <a id="patient-primary-action" href="{{ patient_seed_record.primary_url }}" class="mt-4 inline-flex items-center text-sm font-semibold text-rose-700 transition hover:text-rose-800">
+                        {{ patient_seed_record.primary_label }}
+                    </a>
+                </section>
+
+                <section>
+                    <div class="flex items-center justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Active cow list</p>
+                            <h3 class="mt-2 text-base tracking-tight text-slate-950 font-display">Case metrics</h3>
+                        </div>
+                        <a href="{% url 'veterinary_dashboard:medical_records' %}" class="text-sm font-semibold text-[#2c8af0] transition hover:text-[#1976db]">
+                            View full herd
+                        </a>
+                    </div>
+                    <div id="patient-stats-grid" class="mt-4 grid gap-3 sm:grid-cols-2">
+                        {% for stat in patient_seed_record.stats %}
+                            <article class="rounded-[0.85rem] border border-slate-200 bg-white px-3.5 py-3">
+                                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{{ stat.label }}</p>
+                                <p class="mt-2 text-base font-semibold text-slate-950">{{ stat.value }}</p>
+                            </article>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <section>
+                    <div class="flex items-center justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Progress tracker</p>
+                            <h3 class="mt-2 text-base tracking-tight text-slate-950 font-display">Clinical path</h3>
+                        </div>
+                        <a href="{% url 'veterinary_dashboard:schedule' %}" class="text-sm font-semibold text-slate-700 transition hover:text-slate-950">
+                            Open route
+                        </a>
+                    </div>
+                    <div id="patient-stage-list" class="mt-4 grid gap-2 sm:grid-cols-2"></div>
+                </section>
+
+                <section>
+                    <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Care kit</p>
+                    <div id="patient-medication-list" class="mt-4 flex flex-wrap gap-2">
+                        {% for item in patient_seed_record.medications %}
+                            <span class="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700">{{ item }}</span>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <section>
+                    <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Recent activity</p>
+                    <div id="patient-history-list" class="mt-4 space-y-3">
+                        {% for item in patient_seed_record.history %}
+                            <article class="rounded-[0.85rem] border border-slate-200 bg-slate-50/70 px-3.5 py-3">
+                                <div class="flex flex-wrap items-center justify-between gap-3">
+                                    <p class="text-sm font-semibold text-slate-950">{{ item.title }}</p>
+                                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{{ item.date }}</p>
+                                </div>
+                                <p class="mt-2 text-sm leading-6 text-slate-600">{{ item.detail }}</p>
+                            </article>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <section class="rounded-[0.85rem] border border-slate-200 bg-slate-50/70 px-3.5 py-3">
+                    <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Clinical snapshot</p>
+                    <p id="patient-medical-note" class="mt-3 text-sm leading-7 text-slate-700">{{ patient_seed_record.medical_note }}</p>
+                </section>
+            </div>
+        </article>
+    </section>
+
+    {{ patient_records|json_script:"patient-records-data" }}
+{% endblock %}
+
+{% block veterinary_dashboard_scripts %}
+    {{ block.super }}
+    <script>
+        (() => {
+            const seedElement = document.getElementById('patient-records-data');
+            if (!seedElement) return;
+
+            const patients = JSON.parse(seedElement.textContent);
+            const searchInput = document.getElementById('patient-search');
+            const listContainer = document.getElementById('patient-list');
+            const queueButtons = Array.from(document.querySelectorAll('.queue-toggle'));
+            const stageButtons = Array.from(document.querySelectorAll('.stage-filter'));
+            const priorityButtons = Array.from(document.querySelectorAll('.priority-filter'));
+            const actionFeedbackEl = document.getElementById('patient-action-feedback');
+            const markReviewedButton = document.getElementById('patient-mark-reviewed');
+            const completeCaseButton = document.getElementById('patient-complete-case');
+            const openMessagePanelButton = document.getElementById('patient-open-message-panel');
+            const openFollowUpPanelButton = document.getElementById('patient-open-follow-up-panel');
+            const messagePanelEl = document.getElementById('patient-message-panel');
+            const messageInputEl = document.getElementById('patient-message-input');
+            const sendUpdateButton = document.getElementById('patient-send-update');
+            const followUpPanelEl = document.getElementById('patient-follow-up-panel');
+            const followUpSelectEl = document.getElementById('patient-follow-up-select');
+            const followUpNoteEl = document.getElementById('patient-follow-up-note');
+            const scheduleFollowUpButton = document.getElementById('patient-schedule-follow-up');
+
+            let activeQueueFilter = 'all';
+            let activeStageFilter = 'all';
+            let activePriorityFilter = 'all';
+            let selectedId = patients[0]?.id || '';
+            let openMenuId = '';
+            let activeActionPanel = '';
+            let actionFeedbackMessage = 'Use one action at a time to update the selected case during the demo.';
+
+            const avatarEl = document.getElementById('patient-avatar');
+            const nameEl = document.getElementById('patient-name');
+            const summaryEl = document.getElementById('patient-summary');
+            const statusPillEl = document.getElementById('patient-status-pill');
+            const bannerEl = document.getElementById('patient-banner');
+            const stageBadgeEl = document.getElementById('patient-stage-badge');
+            const lastUpdateEl = document.getElementById('patient-last-update');
+            const priorityLabelEl = document.getElementById('patient-priority-label');
+            const farmEl = document.getElementById('patient-farm');
+            const ownerEl = document.getElementById('patient-owner');
+            const locationEl = document.getElementById('patient-location');
+            const issueEl = document.getElementById('patient-issue');
+            const nextStepEl = document.getElementById('patient-next-step');
+            const tagBreedEl = document.getElementById('patient-tag-breed');
+            const stageListEl = document.getElementById('patient-stage-list');
+            const statsGridEl = document.getElementById('patient-stats-grid');
+            const medicationListEl = document.getElementById('patient-medication-list');
+            const historyListEl = document.getElementById('patient-history-list');
+            const medicalNoteEl = document.getElementById('patient-medical-note');
+            const primaryActionEl = document.getElementById('patient-primary-action');
+            const secondaryActionEl = document.getElementById('patient-secondary-action');
+            const extraActionEl = document.getElementById('patient-extra-action');
+
+            function escapeHtml(value) {
+                return String(value ?? '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            }
+
+            function initialsFromName(name) {
+                return String(name || '')
+                    .split(/\s+/)
+                    .filter(Boolean)
+                    .slice(0, 2)
+                    .map((part) => part[0].toUpperCase())
+                    .join('') || 'AC';
+            }
+
+            function toneClasses(tone) {
+                if (tone === 'rose') return 'border-rose-200 bg-rose-100 text-rose-700';
+                if (tone === 'amber') return 'border-amber-200 bg-amber-100 text-amber-700';
+                if (tone === 'navy') return 'border-sky-200 bg-sky-100 text-sky-700';
+                return 'border-emerald-200 bg-emerald-100 text-emerald-700';
+            }
+
+            function toneAvatarClasses(tone) {
+                if (tone === 'rose') return 'bg-rose-100 text-rose-700';
+                if (tone === 'amber') return 'bg-amber-100 text-amber-700';
+                if (tone === 'navy') return 'bg-sky-100 text-sky-700';
+                return 'bg-emerald-100 text-emerald-700';
+            }
+
+            function toneRowAccentClasses(tone) {
+                if (tone === 'rose') return 'border-l-rose-400';
+                if (tone === 'amber') return 'border-l-amber-400';
+                if (tone === 'navy') return 'border-l-sky-400';
+                return 'border-l-emerald-400';
+            }
+
+            function setActionFeedback(message, tone = 'neutral') {
+                actionFeedbackMessage = message;
+                if (!actionFeedbackEl) return;
+                actionFeedbackEl.textContent = message;
+                actionFeedbackEl.className = 'text-sm leading-6';
+                if (tone === 'success') {
+                    actionFeedbackEl.classList.add('text-emerald-700');
+                } else if (tone === 'warning') {
+                    actionFeedbackEl.classList.add('text-amber-700');
+                } else if (tone === 'danger') {
+                    actionFeedbackEl.classList.add('text-rose-700');
+                } else {
+                    actionFeedbackEl.classList.add('text-slate-500');
+                }
+            }
+
+            function setActiveActionPanel(panelName) {
+                activeActionPanel = activeActionPanel === panelName ? '' : panelName;
+                messagePanelEl?.classList.toggle('hidden', activeActionPanel !== 'message');
+                followUpPanelEl?.classList.toggle('hidden', activeActionPanel !== 'follow-up');
+
+                const toggleButtonClasses = [
+                    [openMessagePanelButton, activeActionPanel === 'message', 'border-sky-300', 'bg-sky-100'],
+                    [openFollowUpPanelButton, activeActionPanel === 'follow-up', 'border-amber-300', 'bg-amber-100'],
+                ];
+                toggleButtonClasses.forEach(([button, on, borderClass, bgClass]) => {
+                    if (!button) return;
+                    button.classList.toggle(borderClass, on);
+                    button.classList.toggle(bgClass, on);
+                });
+            }
+
+            function currentTimestamp() {
+                return 'Just now';
+            }
+
+            function prependHistory(patient, title, detail, date = currentTimestamp()) {
+                patient.history = [
+                    { title, detail, date },
+                    ...(patient.history || []),
+                ];
+            }
+
+            function selectedPatientRecord() {
+                return patients.find((patient) => patient.id === selectedId) || null;
+            }
+
+            function selectPatient(patientId) {
+                selectedId = patientId || '';
+            }
+
+            function visiblePatients() {
+                const term = (searchInput?.value || '').trim().toLowerCase();
+                return patients.filter((patient) => {
+                    if (patient.is_completed) return false;
+                    const matchesQueue = activeQueueFilter === 'all'
+                        || (activeQueueFilter === 'urgent' && patient.priority_group === 'urgent')
+                        || (activeQueueFilter === 'waiting_result' && patient.stage_group === 'waiting_result');
+                    const matchesStage = activeStageFilter === 'all' || patient.stage_group === activeStageFilter;
+                    const matchesPriority = activePriorityFilter === 'all' || patient.priority_group === activePriorityFilter;
+                    const haystack = [patient.name, patient.farm, patient.owner, patient.issue, patient.summary, patient.location].join(' ').toLowerCase();
+                    const matchesSearch = !term || haystack.includes(term);
+                    return matchesQueue && matchesStage && matchesPriority && matchesSearch;
+                });
+            }
+
+            function ensureSelectedPatient(filtered) {
+                if (!filtered.some((patient) => patient.id === selectedId)) {
+                    selectedId = filtered[0]?.id || '';
+                }
+                return filtered.find((patient) => patient.id === selectedId) || null;
+            }
+
+            function renderButtonState(buttons, activeValue, key) {
+                buttons.forEach((button) => {
+                    const on = button.dataset[key] === activeValue;
+                    button.classList.toggle('border-[#2c8af0]', on);
+                    button.classList.toggle('bg-[#eaf4ff]', on);
+                    button.classList.toggle('text-[#1769c2]', on);
+                    button.classList.toggle('border-slate-200', !on);
+                    button.classList.toggle('bg-white', !on);
+                    button.classList.toggle('text-slate-700', !on);
+                });
+            }
+
+            function renderList() {
+                const filtered = visiblePatients();
+                const selected = ensureSelectedPatient(filtered);
+
+                renderButtonState(queueButtons, activeQueueFilter, 'queueFilter');
+                renderButtonState(stageButtons, activeStageFilter, 'stageFilter');
+                renderButtonState(priorityButtons, activePriorityFilter, 'priorityFilter');
+                setActionFeedback(actionFeedbackMessage);
+
+                if (!filtered.length) {
+                    listContainer.innerHTML = '<div class="px-5 py-6 text-sm leading-6 text-slate-600">No active cases match this filter yet.</div>';
+                    renderDetail(null);
+                    return;
+                }
+
+                listContainer.innerHTML = filtered.map((patient, index) => {
+                    const selectedRow = patient.id === selectedId;
+                    const rowClasses = selectedRow
+                        ? `bg-[#eef6ff] border-l-4 ${toneRowAccentClasses(patient.tone)}`
+                        : 'bg-white border-l-4 border-l-transparent hover:bg-slate-50/80';
+                    const menuOpen = patient.id === openMenuId;
+
+                    return `
+                        <div class="patient-row relative block w-full text-left transition ${rowClasses} ${index === filtered.length - 1 ? '' : 'border-b border-slate-200'}" data-patient-id="${escapeHtml(patient.id)}">
+                            <div class="grid gap-4 px-5 py-4 md:grid-cols-[1.35fr_1fr_0.9fr_0.9fr_auto] md:items-center">
+                                <div class="min-w-0 cursor-pointer" data-patient-select data-patient-id="${escapeHtml(patient.id)}">
+                                    <div class="flex items-start gap-3">
+                                        <span class="flex h-11 w-11 items-center justify-center rounded-full ${toneAvatarClasses(patient.tone)} text-sm font-semibold">${escapeHtml(initialsFromName(patient.name))}</span>
+                                        <span class="min-w-0">
+                                            <span class="block truncate text-base font-semibold text-slate-950">${escapeHtml(patient.name)}</span>
+                                            <span class="mt-1 block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">ID: ${escapeHtml(patient.tag_number)}</span>
+                                            <span class="mt-2 block text-sm leading-6 text-slate-600">${escapeHtml(patient.list_summary)}</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="min-w-0 cursor-pointer" data-patient-select data-patient-id="${escapeHtml(patient.id)}">
+                                    <p class="text-sm font-semibold text-slate-900">${escapeHtml(patient.farm)}</p>
+                                    <p class="mt-1 text-sm text-slate-600">${escapeHtml(patient.location)}</p>
+                                </div>
+                                <div class="min-w-0 cursor-pointer" data-patient-select data-patient-id="${escapeHtml(patient.id)}">
+                                    <span class="inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${toneClasses(patient.tone)}">${escapeHtml(patient.priority_label)}</span>
+                                    <p class="mt-2 text-sm font-semibold text-slate-900">${escapeHtml(patient.issue)}</p>
+                                </div>
+                                <div class="min-w-0 cursor-pointer" data-patient-select data-patient-id="${escapeHtml(patient.id)}">
+                                    <p class="text-sm font-semibold text-slate-900">${escapeHtml(patient.stage_group_label)}</p>
+                                    <p class="mt-1 text-sm text-slate-500">${escapeHtml(patient.last_update)}</p>
+                                </div>
+                                <div class="relative flex items-center justify-start md:justify-end">
+                                    ${menuOpen ? `
+                                        <div class="patient-row-menu absolute right-12 top-1/2 z-20 w-60 -translate-y-1/2 rounded-[1rem] border border-slate-200 bg-white p-2.5 shadow-[0_18px_36px_rgba(15,23,42,0.12)]" data-row-menu>
+                                            <p class="px-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Case actions</p>
+                                            <a href="${escapeHtml(patient.primary_url)}" class="flex w-full items-center justify-between rounded-[0.8rem] px-3 py-2 text-left text-sm font-semibold text-slate-800 transition hover:bg-slate-50" data-row-menu-link>
+                                                <span>${escapeHtml(patient.primary_label)}</span>
+                                                <span class="text-slate-300">&rsaquo;</span>
+                                            </a>
+                                            <a href="${escapeHtml(patient.secondary_url)}" class="mt-1 flex w-full items-center justify-between rounded-[0.8rem] px-3 py-2 text-left text-sm font-semibold text-slate-700 transition hover:bg-slate-50" data-row-menu-link>
+                                                <span>${escapeHtml(patient.secondary_label)}</span>
+                                                <span class="text-slate-300">&rsaquo;</span>
+                                            </a>
+                                            <a href="${escapeHtml(patient.extra_url)}" class="mt-1 flex w-full items-center justify-between rounded-[0.8rem] px-3 py-2 text-left text-sm font-semibold text-slate-700 transition hover:bg-slate-50" data-row-menu-link>
+                                                <span>${escapeHtml(patient.extra_label)}</span>
+                                                <span class="text-slate-300">&rsaquo;</span>
+                                            </a>
+                                            <div class="mx-1 my-2 border-t border-slate-100"></div>
+                                            <button type="button" class="flex w-full items-center rounded-[0.8rem] px-3 py-2 text-left text-sm font-semibold text-slate-700 transition hover:bg-slate-50" data-row-menu-action="open_case" data-patient-id="${escapeHtml(patient.id)}">
+                                                Open in detail panel
+                                            </button>
+                                            <button type="button" class="mt-1 flex w-full items-center rounded-[0.8rem] px-3 py-2 text-left text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50" data-row-menu-action="mark_reviewed" data-patient-id="${escapeHtml(patient.id)}">
+                                                Mark reviewed
+                                            </button>
+                                            <button type="button" class="mt-1 flex w-full items-center rounded-[0.8rem] px-3 py-2 text-left text-sm font-semibold text-sky-700 transition hover:bg-sky-50" data-row-menu-action="message_farmer" data-patient-id="${escapeHtml(patient.id)}">
+                                                Send update
+                                            </button>
+                                            <button type="button" class="mt-1 flex w-full items-center rounded-[0.8rem] px-3 py-2 text-left text-sm font-semibold text-amber-700 transition hover:bg-amber-50" data-row-menu-action="schedule_follow_up" data-patient-id="${escapeHtml(patient.id)}">
+                                                Schedule follow-up
+                                            </button>
+                                        </div>
+                                    ` : ''}
+                                    <button type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition hover:border-slate-300 hover:text-slate-600 ${menuOpen ? 'border-[#2c8af0] bg-[#eef6ff] text-[#1769c2]' : ''}" data-row-menu-toggle data-patient-id="${escapeHtml(patient.id)}" aria-expanded="${menuOpen ? 'true' : 'false'}" aria-label="Open case actions">
+                                        &rsaquo;
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                renderDetail(selected);
+            }
+
+            function renderDetail(patient) {
+                if (!patient) {
+                    setActiveActionPanel('');
+                    avatarEl.textContent = 'AC';
+                    avatarEl.className = 'flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-lg font-semibold text-slate-600';
+                    nameEl.textContent = 'No case selected';
+                    summaryEl.textContent = 'Choose a patient file from the list.';
+                    statusPillEl.textContent = 'Waiting';
+                    statusPillEl.className = 'inline-flex rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600';
+                    bannerEl.textContent = 'Queue empty';
+                    bannerEl.className = 'inline-flex items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-600';
+                    stageBadgeEl.textContent = 'No stage';
+                    lastUpdateEl.textContent = '-';
+                    priorityLabelEl.textContent = 'None';
+                    farmEl.textContent = '';
+                    ownerEl.textContent = '';
+                    locationEl.textContent = '';
+                    issueEl.textContent = 'No active issue';
+                    nextStepEl.textContent = 'Select a case to reopen the next useful action.';
+                    tagBreedEl.textContent = '-';
+                    stageListEl.innerHTML = '';
+                    statsGridEl.innerHTML = '';
+                    medicationListEl.innerHTML = '';
+                    historyListEl.innerHTML = '';
+                    medicalNoteEl.textContent = '';
+                    primaryActionEl.href = '#';
+                    primaryActionEl.textContent = 'Log update';
+                    secondaryActionEl.href = '#';
+                    secondaryActionEl.textContent = 'Call farmer';
+                    extraActionEl.href = '#';
+                    extraActionEl.textContent = 'Open route';
+                    return;
+                }
+
+                if (messageInputEl) messageInputEl.value = '';
+                if (followUpNoteEl) followUpNoteEl.value = '';
+                avatarEl.textContent = initialsFromName(patient.name);
+                avatarEl.className = `flex h-16 w-16 items-center justify-center rounded-full text-lg font-semibold ${toneAvatarClasses(patient.tone)}`;
+                nameEl.textContent = patient.name;
+                summaryEl.textContent = patient.summary;
+                statusPillEl.textContent = patient.priority_label;
+                statusPillEl.className = `inline-flex rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${toneClasses(patient.tone)}`;
+                bannerEl.textContent = patient.status_banner || patient.status;
+                bannerEl.className = `inline-flex items-center justify-center rounded-full px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] ${toneClasses(patient.tone)}`;
+                stageBadgeEl.textContent = patient.stage_group_label;
+                lastUpdateEl.textContent = patient.last_update;
+                priorityLabelEl.textContent = patient.priority_label;
+                farmEl.textContent = patient.farm;
+                ownerEl.textContent = patient.owner;
+                locationEl.textContent = patient.location;
+                issueEl.textContent = patient.issue;
+                nextStepEl.textContent = patient.next_step;
+                tagBreedEl.textContent = `#${patient.tag_number} - ${patient.breed}`;
+
+                statsGridEl.innerHTML = patient.stats.map((stat) => `
+                    <article class="rounded-[0.85rem] border border-slate-200 bg-white px-3.5 py-3">
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">${escapeHtml(stat.label)}</p>
+                        <p class="mt-2 text-base font-semibold text-slate-950">${escapeHtml(stat.value)}</p>
+                    </article>
+                `).join('');
+
+                stageListEl.innerHTML = patient.care_stages.map((stage, index) => `
+                    <div class="rounded-[1rem] border px-3 py-3 ${index === patient.current_stage ? 'border-[#2c8af0] bg-[#eef6ff] text-[#1769c2]' : index < patient.current_stage ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-slate-50 text-slate-500'}">
+                        <p class="text-xs font-semibold uppercase tracking-[0.18em]">${escapeHtml(stage)}</p>
+                    </div>
+                `).join('');
+
+                medicationListEl.innerHTML = patient.medications.map((item) => `
+                    <span class="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700">${escapeHtml(item)}</span>
+                `).join('');
+
+                historyListEl.innerHTML = patient.history.map((item) => `
+                    <article class="rounded-[0.85rem] border border-slate-200 bg-slate-50/70 px-3.5 py-3">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <p class="text-sm font-semibold text-slate-950">${escapeHtml(item.title)}</p>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">${escapeHtml(item.date)}</p>
+                        </div>
+                        <p class="mt-2 text-sm leading-6 text-slate-600">${escapeHtml(item.detail)}</p>
+                    </article>
+                `).join('');
+
+                medicalNoteEl.textContent = patient.medical_note || '';
+                primaryActionEl.href = patient.primary_url;
+                primaryActionEl.textContent = patient.primary_label;
+                secondaryActionEl.href = patient.secondary_url;
+                secondaryActionEl.textContent = patient.secondary_label;
+                extraActionEl.href = patient.extra_url;
+                extraActionEl.textContent = patient.extra_label;
+            }
+
+            function markPatientReviewed() {
+                const patient = selectedPatientRecord();
+                if (!patient) return;
+
+                // These queue actions are demo-local on purpose so the vet can
+                // show visible progress in the UI without changing database
+                // records during a presentation run.
+                patient.priority_group = 'stable';
+                patient.priority_label = 'Stable';
+                patient.tone = 'teal';
+                patient.status = 'Reviewed';
+                patient.status_banner = 'Reviewed';
+                patient.next_step = 'Monitor the farmer response and reopen only if new symptoms are reported.';
+                patient.last_update = currentTimestamp();
+                prependHistory(
+                    patient,
+                    'Case marked as reviewed',
+                    'The vet reviewed this file and lowered the urgency for the active queue.'
+                );
+                openMenuId = '';
+                setActionFeedback(`${patient.name} marked as reviewed.`, 'success');
+                renderList();
+            }
+
+            function sendFarmerUpdate() {
+                const patient = selectedPatientRecord();
+                const message = (messageInputEl?.value || '').trim();
+                if (!patient) return;
+                if (!message) {
+                    setActionFeedback('Write the farmer update before sending it.', 'warning');
+                    setActiveActionPanel('message');
+                    return;
+                }
+
+                patient.status = 'Waiting for farmer';
+                patient.status_banner = 'Farmer update sent';
+                patient.stage_group = 'follow_up';
+                patient.stage_group_label = 'Follow-up';
+                patient.next_step = 'Wait for the farmer reply or the next photo update.';
+                patient.last_update = currentTimestamp();
+                patient.summary = 'A fresh update was sent to the farmer and the case is waiting for a reply.';
+                prependHistory(patient, 'Farmer update sent', message);
+                if (messageInputEl) messageInputEl.value = '';
+                openMenuId = '';
+                setActionFeedback(`Update sent for ${patient.name}.`, 'success');
+                setActiveActionPanel('');
+                renderList();
+            }
+
+            function scheduleFollowUp() {
+                const patient = selectedPatientRecord();
+                if (!patient) return;
+
+                const followUpSlot = followUpSelectEl?.value || 'Later today';
+                const followUpNote = (followUpNoteEl?.value || '').trim();
+                const detail = followUpNote
+                    ? `${followUpSlot} - ${followUpNote}`
+                    : `${followUpSlot} follow-up saved for this case.`;
+
+                patient.status = 'Follow-up booked';
+                patient.status_banner = 'Follow-up booked';
+                patient.stage_group = 'follow_up';
+                patient.stage_group_label = 'Follow-up';
+                patient.next_step = `Reopen the case during ${followUpSlot.toLowerCase()}.`;
+                patient.last_update = currentTimestamp();
+                patient.summary = `The case is booked for ${followUpSlot.toLowerCase()} with the next clinical review kept visible.`;
+                prependHistory(patient, 'Follow-up scheduled', detail);
+                if (followUpNoteEl) followUpNoteEl.value = '';
+                openMenuId = '';
+                setActionFeedback(`${patient.name} scheduled for ${followUpSlot.toLowerCase()}.`, 'success');
+                setActiveActionPanel('');
+                renderList();
+            }
+
+            function completePatientCase() {
+                const patient = selectedPatientRecord();
+                if (!patient) return;
+
+                const closedName = patient.name;
+                // Removing the item from the active queue makes the demo feel
+                // like a real case handoff without persisting a closed status.
+                patient.is_completed = true;
+                patient.status = 'Closed';
+                patient.status_banner = 'Case closed';
+                patient.priority_group = 'stable';
+                patient.priority_label = 'Stable';
+                patient.tone = 'teal';
+                patient.last_update = currentTimestamp();
+                prependHistory(
+                    patient,
+                    'Case closed',
+                    'The active case was completed and removed from the live queue.'
+                );
+                openMenuId = '';
+                setActiveActionPanel('');
+                setActionFeedback(`${closedName} was completed and removed from the active queue.`, 'success');
+                renderList();
+            }
+
+            listContainer?.addEventListener('click', (event) => {
+                const menuToggle = event.target.closest('[data-row-menu-toggle]');
+                if (menuToggle) {
+                    const patientId = menuToggle.dataset.patientId || '';
+                    openMenuId = openMenuId === patientId ? '' : patientId;
+                    renderList();
+                    return;
+                }
+
+                const menuAction = event.target.closest('[data-row-menu-action]');
+                if (menuAction) {
+                    const patientId = menuAction.dataset.patientId || '';
+                    selectPatient(patientId);
+                    const actionName = menuAction.dataset.rowMenuAction || '';
+                    if (actionName === 'open_case') {
+                        openMenuId = '';
+                        setActiveActionPanel('');
+                        setActionFeedback(`Opened ${selectedPatientRecord()?.name || 'the case'} in the detail panel.`, 'neutral');
+                        renderList();
+                    } else if (actionName === 'mark_reviewed') {
+                        markPatientReviewed();
+                    } else if (actionName === 'message_farmer') {
+                        openMenuId = '';
+                        setActiveActionPanel('message');
+                        setActionFeedback(`Write the update you want to send for ${selectedPatientRecord()?.name || 'this case'}.`, 'neutral');
+                        renderList();
+                    } else if (actionName === 'schedule_follow_up') {
+                        openMenuId = '';
+                        setActiveActionPanel('follow-up');
+                        setActionFeedback(`Choose the follow-up timing for ${selectedPatientRecord()?.name || 'this case'}.`, 'neutral');
+                        renderList();
+                    }
+                    return;
+                }
+
+                const rowSelection = event.target.closest('[data-patient-select]');
+                if (rowSelection) {
+                    selectPatient(rowSelection.dataset.patientId || '');
+                    openMenuId = '';
+                    setActiveActionPanel('');
+                    renderList();
+                }
+            });
+
+            searchInput?.addEventListener('input', renderList);
+            queueButtons.forEach((button) => button.addEventListener('click', () => {
+                activeQueueFilter = button.dataset.queueFilter || 'all';
+                renderList();
+            }));
+            stageButtons.forEach((button) => button.addEventListener('click', () => {
+                activeStageFilter = button.dataset.stageFilter || 'all';
+                renderList();
+            }));
+            priorityButtons.forEach((button) => button.addEventListener('click', () => {
+                activePriorityFilter = button.dataset.priorityFilter || 'all';
+                renderList();
+            }));
+            markReviewedButton?.addEventListener('click', markPatientReviewed);
+            completeCaseButton?.addEventListener('click', completePatientCase);
+            openMessagePanelButton?.addEventListener('click', () => setActiveActionPanel('message'));
+            openFollowUpPanelButton?.addEventListener('click', () => setActiveActionPanel('follow-up'));
+            sendUpdateButton?.addEventListener('click', sendFarmerUpdate);
+            scheduleFollowUpButton?.addEventListener('click', scheduleFollowUp);
+            document.addEventListener('click', (event) => {
+                if (!event.target.closest('[data-row-menu-toggle]') && !event.target.closest('[data-row-menu]')) {
+                    if (openMenuId) {
+                        openMenuId = '';
+                        renderList();
+                    }
+                }
+            });
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && openMenuId) {
+                    openMenuId = '';
+                    renderList();
+                }
+            });
+
+            renderList();
+        })();
+    </script>
+{% endblock %}

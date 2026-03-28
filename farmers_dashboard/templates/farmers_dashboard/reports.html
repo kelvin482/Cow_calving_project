@@ -1,0 +1,60 @@
+{% extends "farmers_dashboard/base_dashboard.html" %}
+
+{% block farmer_dashboard_content %}
+    <section class="rounded-[1.8rem] border border-slate-200 bg-white px-5 py-5 shadow-[0_12px_32px_rgba(15,23,42,0.05)] sm:px-6">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Follow-up queue</p>
+                <h2 class="mt-2 text-2xl tracking-tight text-slate-950 font-display">Next meaningful date per cow</h2>
+                <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600">This page only keeps the next follow-up date that helps the farmer know what to review next.</p>
+            </div>
+            <a href="{% url 'farmers_dashboard:herd' %}" class="inline-flex items-center justify-center rounded-[1rem] border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:border-slate-300 hover:bg-slate-50">
+                Open herd
+            </a>
+        </div>
+    </section>
+
+    <section class="rounded-[2rem] border border-slate-200 bg-white px-5 py-5 shadow-[0_16px_40px_rgba(15,23,42,0.06)] sm:px-7 sm:py-7">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Follow-up schedule</p>
+            <h2 class="mt-2 text-2xl tracking-tight text-slate-950 font-display">Action list</h2>
+        </div>
+
+        {% if follow_up_rows %}
+            <div class="mt-6 overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white">
+                {% for row in follow_up_rows %}
+                    <article class="grid gap-4 px-4 py-5 lg:grid-cols-[minmax(0,1fr)_13rem_minmax(0,1fr)_auto] lg:items-center {% if not forloop.last %}border-b border-slate-200{% endif %}">
+                        <div class="min-w-0">
+                            <p class="text-sm font-semibold text-slate-900">{{ row.cow.name }} {{ row.cow.cow_number }}</p>
+                            <p class="mt-1 text-sm leading-6 text-slate-600">{{ row.cow.summary_text }}</p>
+                        </div>
+
+                        <div>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">{{ row.next_label }}</p>
+                            <p class="mt-2 text-sm font-semibold text-slate-900">{{ row.next_date|date:"d M Y" }}</p>
+                            <p class="mt-1 text-sm text-slate-600">{{ row.next_timing }}</p>
+                        </div>
+
+                        <div class="min-w-0">
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Why it matters</p>
+                            <p class="mt-2 text-sm leading-6 text-slate-700">{{ row.detail }}</p>
+                        </div>
+
+                        <div class="flex flex-col gap-3 lg:min-w-[11rem]">
+                            <a href="{% url 'farmers_dashboard:cow_tracking' row.cow.pk %}" class="inline-flex items-center justify-center rounded-[1rem] bg-[#14532d] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#114524]">
+                                Track cow
+                            </a>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="mt-6 rounded-[2rem] border border-dashed border-slate-300 bg-slate-50/60 px-6 py-14 text-center">
+                <h3 class="text-2xl tracking-tight text-slate-950 font-display sm:text-3xl">No follow-up scheduled yet</h3>
+                <p class="mx-auto mt-3 max-w-2xl text-base leading-8 text-slate-600">
+                    Add a cow and include pregnancy or calving details to build the follow-up schedule.
+                </p>
+            </div>
+        {% endif %}
+    </section>
+{% endblock %}

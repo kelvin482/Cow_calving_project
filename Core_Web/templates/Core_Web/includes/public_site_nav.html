@@ -1,0 +1,107 @@
+<nav>
+  <a href="{% url 'Core_Web:home' %}" class="nav-logo">
+    <div class="logo-icon" aria-hidden="true">
+      <span class="logo-icon-shell">
+        <span class="logo-mark">{% include "includes/cow_calving_logo_mark.html" %}</span>
+      </span>
+    </div>
+    <div class="nav-brand-copy">
+      <span class="logo-text">CowCalving.farm</span>
+      <span class="nav-brand-subtitle">Clear guidance for calving season</span>
+    </div>
+  </a>
+
+  <div class="nav-shell">
+    <ul class="nav-links" aria-label="Primary navigation">
+      <li><a href="{% url 'Core_Web:home' %}" class="{% if page_key == 'home' %}nav-current{% endif %}">Home</a></li>
+      <li class="nav-item dropdown">
+        <button class="nav-dropdown-toggle {% if page_key == 'guide' %}nav-current{% endif %}" type="button"
+          aria-expanded="false" aria-haspopup="true">
+          Guide
+          <span class="nav-caret" aria-hidden="true">&#9662;</span>
+        </button>
+        <div class="nav-dropdown nav-dropdown-panel" aria-label="Guide shortcuts">
+          <p class="nav-dropdown-eyebrow">Guide Library</p>
+          <p class="nav-dropdown-summary">Move from the full guide into the exact topic you need without hunting through
+            the page.</p>
+          <div class="nav-dropdown-list">
+            <a href="{% url 'Core_Web:guide' %}" class="nav-dropdown-link nav-dropdown-main">
+              <span class="nav-dropdown-label">Guide Overview</span>
+              <span class="nav-dropdown-copy">Open the full learning page with the complete calving flow.</span>
+            </a>
+            <a href="{% url 'Core_Web:guide' %}#quickstart" class="nav-dropdown-link">
+              <span class="nav-dropdown-label">Quick Start</span>
+              <span class="nav-dropdown-copy">Jump to the five-step decision flow for fast field use.</span>
+            </a>
+            <a href="{% url 'Core_Web:guide' %}#signs" class="nav-dropdown-link">
+              <span class="nav-dropdown-label">Signs Of Calving</span>
+              <span class="nav-dropdown-copy">Review the early warning signs before active labor starts.</span>
+            </a>
+            <a href="{% url 'Core_Web:guide' %}#stages" class="nav-dropdown-link">
+              <span class="nav-dropdown-label">Stages Of Labor</span>
+              <span class="nav-dropdown-copy">See what normal progress should look like at each stage.</span>
+            </a>
+            <a href="{% url 'Core_Web:guide' %}#trouble" class="nav-dropdown-link">
+              <span class="nav-dropdown-label">Troubleshooting</span>
+              <span class="nav-dropdown-copy">Open the warning signs that should trigger faster escalation.</span>
+            </a>
+          </div>
+        </div>
+      </li>
+      <li><a href="{% url 'Core_Web:checklist' %}"
+          class="{% if page_key == 'checklist' %}nav-current{% endif %}">Checklist</a></li>
+    </ul>
+
+    <div class="nav-auth">
+      {% if request.user.is_authenticated %}
+      <a href="{{ dashboard_url|default:profile_url }}" class="nav-auth-primary">{{ dashboard_label|default:"Open Dashboard" }}</a>
+      <form method="post" action="{% url 'accounts:logout' %}" class="nav-auth-form">
+        {% csrf_token %}
+        <button type="submit">Sign out</button>
+      </form>
+      {% else %}
+      <a href="{% url 'accounts:login' %}" class="nav-auth-primary">Sign In</a>
+      <a href="{% url 'accounts:signup' %}" class="nav-auth-link">Create Account</a>
+      {% endif %}
+    </div>
+
+    <button type="button" class="nav-toggle" aria-label="Open navigation" aria-expanded="false" data-mobile-menu-toggle>
+      <span aria-hidden="true">&#9776;</span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-nav-panel" data-mobile-menu hidden>
+  <div class="mobile-nav-group">
+    <p class="mobile-nav-heading">Primary</p>
+    <a href="{% url 'Core_Web:home' %}"
+      class="mobile-nav-link {% if page_key == 'home' %}mobile-nav-link-current{% endif %}">Home</a>
+    <a href="{% url 'Core_Web:checklist' %}"
+      class="mobile-nav-link {% if page_key == 'checklist' %}mobile-nav-link-current{% endif %}">Checklist</a>
+  </div>
+
+  <div class="mobile-nav-group">
+    <p class="mobile-nav-heading">Guide Shortcuts</p>
+    <a href="{% url 'Core_Web:guide' %}"
+      class="mobile-nav-link {% if page_key == 'guide' %}mobile-nav-link-current{% endif %}">Guide Overview</a>
+    <a href="{% url 'Core_Web:guide' %}#quickstart" class="mobile-nav-link">Quick Start</a>
+    <a href="{% url 'Core_Web:guide' %}#signs" class="mobile-nav-link">Signs Of Calving</a>
+    <a href="{% url 'Core_Web:guide' %}#stages" class="mobile-nav-link">Stages Of Labor</a>
+    <a href="{% url 'Core_Web:guide' %}#trouble" class="mobile-nav-link">Troubleshooting</a>
+  </div>
+
+  <div class="mobile-nav-group">
+    <p class="mobile-nav-heading">Account</p>
+    {% if request.user.is_authenticated %}
+    <a href="{{ dashboard_url|default:profile_url }}" class="mobile-nav-primary">{{ dashboard_label|default:"Open Dashboard" }}</a>
+    <a href="{{ profile_url }}" class="mobile-nav-link">My Profile</a>
+    <form method="post" action="{% url 'accounts:logout' %}" class="nav-auth-form">
+      {% csrf_token %}
+      <button type="submit" class="mobile-nav-link mobile-nav-button">Sign out</button>
+    </form>
+    {% else %}
+    <a href="{% url 'accounts:login' %}" class="mobile-nav-primary">Sign In</a>
+    <a href="{% url 'accounts:signup' %}" class="mobile-nav-link">Create Account</a>
+    {% endif %}
+  </div>
+</div>

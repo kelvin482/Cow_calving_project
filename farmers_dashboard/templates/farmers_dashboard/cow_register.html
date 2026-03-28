@@ -1,0 +1,244 @@
+{% extends "farmers_dashboard/base_dashboard.html" %}
+
+{% block farmer_dashboard_content %}
+    <section class="mx-auto max-w-5xl rounded-[2rem] border border-slate-200 bg-white px-5 py-5 shadow-[0_18px_48px_rgba(148,163,184,0.14)] sm:px-8 sm:py-8">
+        <div class="flex items-center gap-4">
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-3xl">&#128004;</div>
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">New cow registration</p>
+                <h2 class="mt-2 text-3xl tracking-tight text-slate-950 font-display">Register a cow</h2>
+            </div>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="mt-8 space-y-6">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="rounded-[1.2rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_18rem]">
+                <div class="space-y-6">
+                    <div class="grid gap-5 sm:grid-cols-2">
+                        <div>
+                            <label for="{{ form.cow_number.id_for_label }}" class="mb-2 block text-sm font-semibold text-slate-900">Cow Number *</label>
+                            {{ form.cow_number }}
+                            {% if form.cow_number.errors %}<p class="mt-2 text-sm text-rose-600">{{ form.cow_number.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.name.id_for_label }}" class="mb-2 block text-sm font-semibold text-slate-900">Cow Name *</label>
+                            {{ form.name }}
+                            {% if form.name.errors %}<p class="mt-2 text-sm text-rose-600">{{ form.name.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="grid gap-5 sm:grid-cols-2">
+                        <div>
+                            <label for="{{ form.breed.id_for_label }}" class="mb-2 block text-sm font-semibold text-slate-900">Breed *</label>
+                            {{ form.breed }}
+                            {% if form.breed.errors %}<p class="mt-2 text-sm text-rose-600">{{ form.breed.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.date_of_birth.id_for_label }}" class="mb-2 block text-sm font-semibold text-slate-900">Date of Birth</label>
+                            {{ form.date_of_birth }}
+                            {% if form.date_of_birth.errors %}<p class="mt-2 text-sm text-rose-600">{{ form.date_of_birth.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="mb-3">
+                            <p class="text-sm font-semibold text-slate-900">Where is this cow starting today? *</p>
+                            <p class="mt-1 text-sm text-slate-600">Choose the reproductive path first so we only ask for the details needed now.</p>
+                        </div>
+
+                        <div class="grid gap-3 md:grid-cols-2">
+                            {% for option in form.reproductive_status %}
+                                <label for="{{ option.id_for_label }}" class="block cursor-pointer">
+                                    {{ option.tag }}
+                                    <div class="rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-4 transition peer-checked:border-emerald-300 peer-checked:bg-emerald-50 peer-checked:shadow-[0_0_0_1px_rgba(110,231,183,0.4)]">
+                                        <p class="text-sm font-semibold text-slate-900">{{ option.choice_label }}</p>
+                                        <p class="mt-2 text-sm leading-6 text-slate-600">
+                                            {% if option.choice_label == "Not inseminated yet" %}
+                                                Start with heat timing and the insemination path.
+                                            {% elif option.choice_label == "Already inseminated" %}
+                                                Continue from the insemination date and track the next follow-up.
+                                            {% elif option.choice_label == "Pregnancy confirmed" %}
+                                                Keep pregnancy progress and expected calving visible.
+                                            {% else %}
+                                                Move straight into calving watch and preparation.
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </label>
+                            {% endfor %}
+                        </div>
+                        {% if form.reproductive_status.errors %}<p class="mt-2 text-sm text-rose-600">{{ form.reproductive_status.errors.0 }}</p>{% endif %}
+                    </div>
+
+                    <div class="grid gap-5 sm:grid-cols-2">
+                        <div data-conditional="not_inseminated">
+                            <label for="{{ form.last_heat_date.id_for_label }}" class="mb-2 block text-sm font-semibold text-slate-900">Last Heat Date</label>
+                            {{ form.last_heat_date }}
+                            <p class="mt-2 text-xs text-slate-500">Use the latest heat you observed before requesting insemination.</p>
+                            {% if form.last_heat_date.errors %}<p class="mt-2 text-sm text-rose-600">{{ form.last_heat_date.errors.0 }}</p>{% endif %}
+                        </div>
+
+                        <div data-conditional="not_inseminated">
+                            <label for="{{ form.insemination_type.id_for_label }}" class="mb-2 block text-sm font-semibold text-slate-900">Insemination Type</label>
+                            {{ form.insemination_type }}
+                            <p class="mt-2 text-xs text-slate-500">This will guide the next service step in the workflow.</p>
+                            {% if form.insemination_type.errors %}<p class="mt-2 text-sm text-rose-600">{{ form.insemination_type.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="grid gap-5 sm:grid-cols-2">
+                        <div data-conditional="inseminated">
+                            <label for="{{ form.insemination_date.id_for_label }}" class="mb-2 block text-sm font-semibold text-slate-900">Insemination Date</label>
+                            {{ form.insemination_date }}
+                            <p class="mt-2 text-xs text-slate-500">The tracker will use this date as the start of the next follow-up.</p>
+                            {% if form.insemination_date.errors %}<p class="mt-2 text-sm text-rose-600">{{ form.insemination_date.errors.0 }}</p>{% endif %}
+                        </div>
+
+                        <div data-conditional="pregnancy_confirmed">
+                            <label for="{{ form.pregnancy_confirmation_date.id_for_label }}" class="mb-2 block text-sm font-semibold text-slate-900">Pregnancy Confirmation Date</label>
+                            {{ form.pregnancy_confirmation_date }}
+                            <p class="mt-2 text-xs text-slate-500">Use the date the pregnancy was checked or confirmed.</p>
+                            {% if form.pregnancy_confirmation_date.errors %}<p class="mt-2 text-sm text-rose-600">{{ form.pregnancy_confirmation_date.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="grid gap-5 sm:grid-cols-2">
+                        <div data-conditional="pregnancy_confirmed near_calving">
+                            <label for="{{ form.expected_calving_date.id_for_label }}" class="mb-2 block text-sm font-semibold text-slate-900">Expected Calving Date</label>
+                            {{ form.expected_calving_date }}
+                            <p class="mt-2 text-xs text-slate-500">This date keeps the tracker, alerts, and calving watch aligned.</p>
+                            {% if form.expected_calving_date.errors %}<p class="mt-2 text-sm text-rose-600">{{ form.expected_calving_date.errors.0 }}</p>{% endif %}
+                        </div>
+
+                        <label class="rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-4">
+                            <div class="flex items-center justify-between gap-4">
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-900">Currently Lactating?</p>
+                                    <p class="mt-1 text-sm text-slate-600">Use this if the cow is currently producing milk.</p>
+                                </div>
+                                {{ form.is_lactating }}
+                            </div>
+                        </label>
+                    </div>
+
+                    <div>
+                        <label for="{{ form.notes.id_for_label }}" class="mb-2 block text-sm font-semibold text-slate-900">Notes</label>
+                        {{ form.notes }}
+                        {% if form.notes.errors %}<p class="mt-2 text-sm text-rose-600">{{ form.notes.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="rounded-[1.6rem] border border-slate-200 bg-slate-50 p-4">
+                        <p class="text-sm font-semibold text-slate-900">Cow image</p>
+                        <p class="mt-1 text-sm leading-6 text-slate-600">Add a photo so the farmer can identify the cow quickly on the dashboard.</p>
+
+                        <label for="id_photo" class="mt-4 flex cursor-pointer flex-col items-center justify-center gap-3 rounded-[1.4rem] border border-dashed border-slate-300 bg-white px-4 py-8 text-center transition hover:border-emerald-300 hover:bg-emerald-50/40">
+                            <div id="photo-preview" class="flex h-20 w-20 items-center justify-center rounded-full bg-slate-100 text-4xl">&#128004;</div>
+                            <div>
+                                <p class="text-sm font-semibold text-slate-900">Upload image</p>
+                                <p class="mt-1 text-xs text-slate-500">PNG, JPG, WEBP or GIF up to 5 MB</p>
+                            </div>
+                        </label>
+                        {{ form.photo }}
+                        {% if form.photo.errors %}<p class="mt-2 text-sm text-rose-600">{{ form.photo.errors.0 }}</p>{% endif %}
+                    </div>
+
+                    <div class="rounded-[1.6rem] border border-slate-200 bg-[#fbfcff] p-4">
+                        <p class="text-sm font-semibold text-slate-900">What happens next?</p>
+                        <p class="mt-2 text-sm leading-6 text-slate-600">
+                            After registration, the farmer goes straight to the cow tracker with the starting reproductive path already set.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3 border-t border-slate-200 pt-6 sm:flex-row">
+                <button type="submit" class="inline-flex items-center justify-center rounded-[1rem] bg-[#14532d] px-6 py-4 text-base font-semibold text-white transition hover:bg-[#114524]">
+                    Register Cow
+                </button>
+                <a href="{% url 'farmers_dashboard:dashboard' %}" class="inline-flex items-center justify-center rounded-[1rem] border border-slate-200 bg-white px-6 py-4 text-base font-semibold text-slate-900 transition hover:border-slate-300 hover:bg-slate-50">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </section>
+
+    <style>
+        .form-input {
+            width: 100%;
+            border: 1px solid rgb(203 213 225);
+            border-radius: 1rem;
+            background: white;
+            padding: 0.95rem 1rem;
+            font-size: 1rem;
+            line-height: 1.5rem;
+            color: rgb(15 23 42);
+        }
+
+        .form-input:focus {
+            outline: 2px solid rgb(167 243 208);
+            border-color: rgb(110 231 183);
+            outline-offset: 1px;
+        }
+
+        input[type="checkbox"] {
+            width: 1.3rem;
+            height: 1.3rem;
+            accent-color: #166534;
+        }
+    </style>
+
+    <script>
+        (() => {
+            const input = document.getElementById("id_photo");
+            const preview = document.getElementById("photo-preview");
+            const statusInputs = Array.from(document.querySelectorAll(".reproductive-status-input"));
+            const conditionalGroups = Array.from(document.querySelectorAll("[data-conditional]"));
+
+            const updateConditionalGroups = () => {
+                const selectedStatus = statusInputs.find((item) => item.checked)?.value || "";
+
+                conditionalGroups.forEach((group) => {
+                    const allowedStatuses = (group.dataset.conditional || "").split(" ").filter(Boolean);
+                    const shouldShow = selectedStatus && allowedStatuses.includes(selectedStatus);
+                    group.classList.toggle("hidden", !shouldShow);
+
+                    group.querySelectorAll("input, select, textarea").forEach((field) => {
+                        field.disabled = !shouldShow;
+                    });
+                });
+            };
+
+            statusInputs.forEach((radio) => {
+                radio.addEventListener("change", updateConditionalGroups);
+            });
+            updateConditionalGroups();
+
+            if (!input || !preview) {
+                return;
+            }
+
+            input.addEventListener("change", () => {
+                const [file] = input.files || [];
+                if (!file) {
+                    preview.textContent = "cow";
+                    preview.innerHTML = "&#128004;";
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    preview.innerHTML = `<img src="${event.target?.result}" alt="Selected cow" class="h-20 w-20 rounded-full object-cover">`;
+                };
+                reader.readAsDataURL(file);
+            });
+        })();
+    </script>
+{% endblock %}

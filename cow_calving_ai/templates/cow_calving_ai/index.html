@@ -1,0 +1,189 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calving Care AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pasture: "#4E7E63",
+                        barn: "#6A4C37",
+                        dusk: "#182431",
+                        cream: "#F5F6F2"
+                    },
+                    fontFamily: {
+                        display: ["Cormorant Garamond", "serif"],
+                        body: ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    boxShadow: {
+                        soft: "0 28px 58px -34px rgba(24, 36, 49, 0.45)"
+                    }
+                }
+            }
+        };
+    </script>
+    <!-- Use the shared dev-only asset version so local CSS edits appear on refresh. -->
+    <link rel="stylesheet" href="{% static 'cow_calving_ai/css/ai-demo.css' %}{% if dev_static_version %}?v={{ dev_static_version }}{% endif %}">
+</head>
+<body class="{% if embedded %}bg-transparent{% else %}bg-cream{% endif %} text-dusk min-h-screen font-body">
+    <main class="{% if embedded %}h-screen{% else %}max-w-7xl mx-auto px-4 py-5 sm:py-9{% endif %}">
+        {% if messages %}
+            <div class="{% if embedded %}px-4 pt-4{% else %}mb-4 space-y-3{% endif %}">
+                {% for message in messages %}
+                    <!-- Reuse the same timed feedback behavior as the auth pages. -->
+                    <div
+                        class="rounded-2xl border px-4 py-3 text-sm shadow-sm {% if message.tags == 'error' %}border-rose-200 bg-rose-50 text-rose-700{% else %}border-emerald-200 bg-emerald-50 text-emerald-800{% endif %}"
+                        data-auto-dismiss-message
+                        data-dismiss-after="5000"
+                    >
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <section class="chat-shell {% if embedded %}embedded-shell h-full rounded-none border-0 shadow-none{% else %}rounded-[2rem] border border-dusk/10 bg-white/90 shadow-soft{% endif %} overflow-hidden">
+            {% if embedded %}
+                <section class="chat-stage embedded-chat-stage">
+                    <h1 class="sr-only">Cow Calving Assistant</h1>
+                    <div class="embedded-stage-toolbar">
+                        <div class="hero-meta hero-meta-compact">
+                            <span class="presence-pill">
+                                <span class="presence-dot" aria-hidden="true"></span>
+                                Online
+                            </span>
+                            <p id="status" class="status-text status-normal embedded-status text-sm">Ready for your question.</p>
+                        </div>
+                        <button
+                            type="button"
+                            class="prompt-toggle"
+                            data-quick-prompts-toggle
+                            aria-expanded="false"
+                            aria-controls="quick-prompts-panel"
+                        >
+                            Show prompts
+                        </button>
+                    </div>
+
+                    <div id="quick-prompts-panel" class="quick-prompts-panel" hidden>
+                        <div id="quick-questions" class="prompt-list prompt-grid prompt-list-embedded">
+                            <button class="option-chip option-chip-embedded" type="button" data-question="My cow hasn't shown heat in 45 days. What should I do?">No heat after 45 days</button>
+                            <button class="option-chip option-chip-embedded" type="button" data-question="What signs show the best insemination window for this cow?">Best insemination window</button>
+                            <button class="option-chip option-chip-embedded" type="button" data-question="Which labour signs mean I should call a vet immediately?">Urgent labour signs</button>
+                            <button class="option-chip option-chip-embedded" type="button" data-question="What should I monitor in the first 12 hours after calving?">First 12-hour monitoring</button>
+                            <button class="option-chip option-chip-embedded" type="button" data-question="How do I support a weak newborn calf in the first hour?">Weak calf support</button>
+                        </div>
+                    </div>
+
+                    <div class="chat-surface embedded-chat-surface">
+                        <div id="chat-log" class="chat-log embedded-chat-log px-3 sm:px-5">
+                            <article class="chat-row assistant chat-row-intro">
+                                <div class="bubble bubble-assistant bubble-assistant-intro markdown">
+                                    <h3>Ask one clear farm question.</h3>
+                                    <p>Share the key symptom, timing, or concern and I will help with the next practical step.</p>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+
+                    <div class="embedded-interaction-dock">
+                        <form id="ai-form" class="composer embedded-composer" data-ai-endpoint="{% url 'cow_calving_ai:ai_test' %}">
+                            <label class="sr-only" for="question">Question</label>
+                            <div class="composer-shell">
+                                <textarea id="question" name="q" rows="1" placeholder="Ask a clear farm question..." class="composer-input" required></textarea>
+                                <button id="submit-btn" type="submit" class="composer-primary">Ask AI</button>
+                            </div>
+                            <div class="embedded-composer-footer">
+                                <p class="composer-note">Short, direct questions usually work best.</p>
+                                <button id="clear-btn" type="button" class="composer-secondary">Clear chat</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+            {% else %}
+                <header class="topbar px-5 sm:px-8 py-7 border-b border-dusk/10">
+                    <div class="workspace-bar">
+                        <div class="workspace-brand">
+                            {% include "includes/cow_calving_logo.html" with logo_wrap_class="assistant-brand-mark assistant-brand-mark-compact" logo_icon_wrap_class="flex items-center justify-center" logo_icon_class="h-11 w-11 text-[#1a6a31]" logo_text_wrap_class="sr-only" logo_text_class="sr-only" logo_tagline_class="hidden" %}
+                            <div class="workspace-brand-copy">
+                                <h1 class="assistant-title assistant-title-compact">Cow Calving Assistant</h1>
+                                <p class="workspace-subtitle">Ask, review the response, and move to the next practical farm step.</p>
+                            </div>
+                        </div>
+                        <div class="hero-meta hero-meta-compact">
+                            <span class="presence-pill">
+                                <span class="presence-dot" aria-hidden="true"></span>
+                                Online
+                            </span>
+                            <p id="status" class="status-text status-normal text-sm">Ready for your question.</p>
+                        </div>
+                    </div>
+                </header>
+
+                <div class="workspace-layout min-h-[78vh]">
+                    <section class="workspace-pane">
+                        <div class="prompt-toolbar">
+                            <div class="prompt-toolbar-copy">
+                                <p class="prompt-toolbar-eyebrow">Quick prompts</p>
+                                <p class="prompt-toggle-note">Starter ideas for common farm questions.</p>
+                            </div>
+                            <button
+                                type="button"
+                                class="prompt-toggle"
+                                data-quick-prompts-toggle
+                                aria-expanded="false"
+                                aria-controls="quick-prompts-panel"
+                            >
+                                Show prompts
+                            </button>
+                        </div>
+
+                        <div id="quick-prompts-panel" class="quick-prompts-panel" hidden>
+                            <div id="quick-questions" class="prompt-list prompt-grid">
+                                <button class="option-chip" type="button" data-question="My cow hasn't shown heat in 45 days. What should I do?">No heat after 45 days</button>
+                                <button class="option-chip" type="button" data-question="What signs show the best insemination window for this cow?">Best insemination window</button>
+                                <button class="option-chip" type="button" data-question="What should I prepare in the calving pen before labor starts?">Calving pen checklist</button>
+                                <button class="option-chip" type="button" data-question="Which labour signs mean I should call a vet immediately?">Urgent labour signs</button>
+                                <button class="option-chip" type="button" data-question="How do I support a weak newborn calf in the first hour?">Weak calf support</button>
+                            </div>
+                        </div>
+
+                        <div class="chat-surface">
+                            <div id="chat-log" class="chat-log px-3 sm:px-5">
+                                <article class="chat-row assistant chat-row-intro">
+                                    <div class="bubble bubble-assistant bubble-assistant-intro markdown">
+                                        <h3>Ask one clear farm question.</h3>
+                                        <p>Share the key symptom, timing, or concern and I will help with the next practical step.</p>
+                                    </div>
+                                </article>
+                            </div>
+                        </div>
+
+                        <form id="ai-form" class="composer" data-ai-endpoint="{% url 'cow_calving_ai:ai_test' %}">
+                            <label class="sr-only" for="question">Question</label>
+                            <div class="composer-shell">
+                                <textarea id="question" name="q" rows="1" placeholder="Ask a clear farm question..." class="composer-input" required></textarea>
+                                <button id="submit-btn" type="submit" class="composer-primary">Ask AI</button>
+                            </div>
+                            <div class="embedded-composer-footer">
+                                <p class="composer-note">Short, direct questions usually work best.</p>
+                                <button id="clear-btn" type="button" class="composer-secondary">Clear chat</button>
+                            </div>
+                        </form>
+                    </section>
+                </div>
+            {% endif %}
+        </section>
+    </main>
+
+    <script src="{% static 'accounts/feedback.js' %}{% if dev_static_version %}?v={{ dev_static_version }}{% endif %}" defer></script>
+    <script src="{% static 'cow_calving_ai/js/ai-demo.js' %}{% if dev_static_version %}?v={{ dev_static_version }}{% endif %}" defer></script>
+</body>
+</html>
