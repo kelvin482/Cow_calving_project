@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
+import sys
 from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
@@ -21,6 +22,28 @@ def env(key, default=None):
     if val is None:
         raise ImproperlyConfigured(f"Set the {key} environment variable")
     return val
+
+
+def env_bool(key, default=False):
+    raw = os.getenv(key)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
+def env_int(key, default=0):
+    raw = os.getenv(key)
+    if raw is None:
+        return default
+    try:
+        return int(raw)
+    except (TypeError, ValueError):
+        return default
+
+
+def env_list(key, default=""):
+    raw = os.getenv(key, default)
+    return [item.strip() for item in str(raw).split(",") if item.strip()]
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,8 +60,52 @@ SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False').strip().lower() in {'1', 'true', 'yes', 'y'}
+RUNNING_TESTS = "test" in sys.argv
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+ALLOWED_HOSTS = env_list('ALLOWED_HOSTS', '127.0.0.1,localhost')
+CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", "")
+
+# Keep the safer defaults for non-debug environments while still allowing
+# local HTTP development and Django's test client to work without extra setup.
+ENABLE_HTTPS_HARDENING_BY_DEFAULT = not DEBUG and not RUNNING_TESTS
+
+SECURE_SSL_REDIRECT = env_bool(
+    "SECURE_SSL_REDIRECT",
+    default=ENABLE_HTTPS_HARDENING_BY_DEFAULT,
+)
+SESSION_COOKIE_SECURE = env_bool(
+    "SESSION_COOKIE_SECURE",
+    default=ENABLE_HTTPS_HARDENING_BY_DEFAULT,
+)
+CSRF_COOKIE_SECURE = env_bool(
+    "CSRF_COOKIE_SECURE",
+    default=ENABLE_HTTPS_HARDENING_BY_DEFAULT,
+)
+SECURE_HSTS_SECONDS = env_int(
+    "SECURE_HSTS_SECONDS",
+    default=31536000 if ENABLE_HTTPS_HARDENING_BY_DEFAULT else 0,
+)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool(
+    "SECURE_HSTS_INCLUDE_SUBDOMAINS",
+    default=ENABLE_HTTPS_HARDENING_BY_DEFAULT,
+)
+SECURE_HSTS_PRELOAD = env_bool(
+    "SECURE_HSTS_PRELOAD",
+    default=ENABLE_HTTPS_HARDENING_BY_DEFAULT,
+)
+SECURE_CONTENT_TYPE_NOSNIFF = env_bool("SECURE_CONTENT_TYPE_NOSNIFF", default=True)
+SECURE_REFERRER_POLICY = (
+    os.getenv(
+        "SECURE_REFERRER_POLICY",
+        "same-origin" if DEBUG else "strict-origin-when-cross-origin",
+    ).strip()
+    or "same-origin"
+)
+X_FRAME_OPTIONS = os.getenv("X_FRAME_OPTIONS", "DENY").strip() or "DENY"
+
+if env_bool("USE_X_FORWARDED_PROTO", default=False):
+    # Reverse proxies commonly set X-Forwarded-Proto for HTTPS termination.
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 
 # Application definition

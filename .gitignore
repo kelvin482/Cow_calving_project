@@ -4,6 +4,7 @@ node_modules/
 .env
 .env.*
 !.env.example
+media/
 db.sqlite3
 runserver*.log
 __pycache__/

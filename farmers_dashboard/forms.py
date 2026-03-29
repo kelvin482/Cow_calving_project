@@ -1,5 +1,6 @@
 from django import forms
-from django.core.validators import FileExtensionValidator
+
+from communications.upload_validation import validate_uploaded_image
 
 from .models import Cow, ReproductiveEvent
 
@@ -160,12 +161,12 @@ class CowRegistrationForm(forms.ModelForm):
         if not photo:
             return photo
 
-        content_type = getattr(photo, "content_type", "")
-        if content_type and not content_type.startswith("image/"):
-            raise forms.ValidationError("Upload an image file only.")
-        if photo.size > 5 * 1024 * 1024:
-            raise forms.ValidationError("Image size should be 5 MB or less.")
-        return photo
+        # Route cow photo checks through the shared helper so size and MIME
+        # rules stay consistent with the messaging upload surfaces.
+        return validate_uploaded_image(
+            photo,
+            allowed_extensions=("jpg", "jpeg", "png", "webp", "gif"),
+        )
 
 
 class ReproductiveEventForm(forms.Form):
@@ -222,9 +223,6 @@ class ReproductiveEventForm(forms.Form):
 
 
 class ServiceProviderMessageForm(forms.Form):
-    image_validator = FileExtensionValidator(
-        allowed_extensions=["jpg", "jpeg", "png", "webp"]
-    )
     provider_key = forms.CharField(widget=forms.HiddenInput())
     county = forms.CharField(required=False, widget=forms.HiddenInput())
     service_type = forms.CharField(required=False, widget=forms.HiddenInput())
@@ -260,7 +258,9 @@ class ServiceProviderMessageForm(forms.Form):
     def clean_image(self):
         image = self.cleaned_data.get("image")
         if image:
-            self.image_validator(image)
+            # Messaging attachments use the same guardrails as other image
+            # uploads to avoid one form becoming the weaker path.
+            validate_uploaded_image(image)
         return image
 
 

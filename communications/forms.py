@@ -1,11 +1,9 @@
 from django import forms
-from django.core.validators import FileExtensionValidator
+
+from .upload_validation import validate_uploaded_image
 
 
 class ConversationReplyForm(forms.Form):
-    image_validator = FileExtensionValidator(
-        allowed_extensions=["jpg", "jpeg", "png", "webp"]
-    )
     body = forms.CharField(
         label="Message",
         widget=forms.Textarea(
@@ -37,5 +35,7 @@ class ConversationReplyForm(forms.Form):
     def clean_image(self):
         image = self.cleaned_data.get("image")
         if image:
-            self.image_validator(image)
+            # Reuse the shared validation path so message uploads stay aligned
+            # with the farmer workflow and future attachment forms.
+            validate_uploaded_image(image)
         return image
