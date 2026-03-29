@@ -1,6 +1,6 @@
 # Role Dashboard Blueprint
 
-This document explains the planned structure for the CowCalving website in a simpler and more understandable way.
+This document explains the role-based structure for the CowCalving website in a simpler and more understandable way.
 
 The goal is:
 - one shared website
@@ -32,11 +32,11 @@ Example:
 - farmer -> shared website home first, then farmer dashboard through the website
 - veterinary -> veterinary dashboard
 
-## Planned Apps
+## Project Apps
 
-We plan to organize the project into these Django apps:
+The project is organized into these Django apps:
 
-### `core`
+### `Core_Web`
 **Descriptive title:** Website & Public Pages
 
 This app will handle:
@@ -98,20 +98,17 @@ This app will handle:
 
 ## Current Implementation Status
 
-The first implementation slice has now started.
-
 Already implemented:
+- `Core_Web` public website app
 - `users` app
 - role/profile data layer
 - shared `/dashboard/` redirect entry point
-- `farmers_dashboard` placeholder app
-- `veterinary_dashboard` placeholder app
+- `farmers_dashboard` role-protected pages
+- `veterinary_dashboard` role-protected pages
 
 Still planned next:
-- `core` public website app
 - full role-aware navigation
-- final styled dashboard screens
-- richer farmer and veterinary modules
+- additional farmer and veterinary workflow modules
 
 ## How the Website Will Work
 
@@ -274,7 +271,7 @@ To keep veterinary access professional and controlled:
 
 To avoid conflicts, we should build in this order:
 
-1. Create `core` for the shared public website
+1. Create or extend `Core_Web` for the shared public website
 2. Create `users` for profile and role persistence
 3. Move role storage out of the auth form and into the profile layer
 4. Create `/dashboard/` redirect logic

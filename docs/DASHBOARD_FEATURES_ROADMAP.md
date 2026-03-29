@@ -1,5 +1,8 @@
 # Dashboard Features Roadmap
 
+This roadmap captures planning direction and future ideas. It should not be
+read as a guarantee that every item is already implemented in the codebase.
+
 This document captures the simplified, hackathon-ready dashboard direction for
 the project.
 

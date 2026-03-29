@@ -60,7 +60,10 @@ DIGITAL FARM/
 |-- TEAM_RULES.md
 |-- ENGINEERING_INSTRUCTIONS.md
 |-- DATABASE_CHANGE_RULES.md
-|-- ROLE_DASHBOARD_BLUEPRINT.md
+|-- docs/
+|   |-- README.md
+|   |-- DASHBOARD_FEATURES_ROADMAP.md
+|   `-- ROLE_DASHBOARD_BLUEPRINT.md
 |
 |-- cow_calving_MAIN/
 |   |-- settings.py
@@ -264,7 +267,7 @@ Implementation in this repository is guided by:
 - `TEAM_RULES.md`
 - `ENGINEERING_INSTRUCTIONS.md`
 - `DATABASE_CHANGE_RULES.md`
-- `ROLE_DASHBOARD_BLUEPRINT.md`
+- `docs/ROLE_DASHBOARD_BLUEPRINT.md`
 
 These files define coding quality, roadmap-first workflow, database change rules, and role-based architecture expectations.
 

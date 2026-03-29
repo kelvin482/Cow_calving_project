@@ -141,7 +141,7 @@ For Django projects, run as applicable:
 - Start with two roles only for now: `farmer` and `veterinary`.
 - Design the persistence layer so more roles can be added later without rewriting redirect logic.
 - Use lowercase Django app package names for dashboards, for example `farmers_dashboard` and `veterinary_dashboard`.
-- Record architecture decisions in [ROLE_DASHBOARD_BLUEPRINT.md](./ROLE_DASHBOARD_BLUEPRINT.md) before implementing new role-sensitive apps or redirects.
+- Record architecture decisions in [docs/ROLE_DASHBOARD_BLUEPRINT.md](./docs/ROLE_DASHBOARD_BLUEPRINT.md) before implementing new role-sensitive apps or redirects.
 
 ## Output Quality Bar
 - Keep output structured and concise.
