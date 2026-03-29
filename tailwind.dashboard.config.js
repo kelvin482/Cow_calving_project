@@ -1,3 +1,5 @@
+const brandGreen = "#1F5D3B";
+
 module.exports = {
   content: [
     "./farmers_dashboard/templates/**/*.html",
@@ -8,9 +10,10 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        green: "#1F5D3B",
+        // Keep both names so older utility usage and newer semantic naming resolve to the same brand color.
+        green: brandGreen,
         "green-dark": "#16422a",
-        forest: "#1F5D3B",
+        forest: brandGreen,
         cream: "#F5F2E8",
         muted: "#6B7280",
         "vet-navy": "#10345b",
