@@ -1,0 +1,83 @@
+{% extends "farmers_dashboard/base_dashboard.html" %}
+
+{% block farmer_dashboard_content %}
+    <section class="rounded-[1.6rem] border border-slate-200 bg-white px-5 py-5 shadow-[0_6px_18px_rgba(15,23,42,0.05)]">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <h2 class="text-[1.35rem] font-semibold tracking-tight text-slate-950">Search results</h2>
+                {% if search_query %}
+                    <p class="mt-1 text-sm text-slate-600">
+                        {{ search_results_total }} result{{ search_results_total|pluralize }} for
+                        <span class="font-semibold text-slate-900">"{{ search_query }}"</span>
+                    </p>
+                {% else %}
+                    <p class="mt-1 text-sm text-slate-600">Type a cow name, alert keyword, or provider term in the search box above.</p>
+                {% endif %}
+            </div>
+            <a href="{% url 'farmers_dashboard:dashboard' %}" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
+                Back to overview
+            </a>
+        </div>
+    </section>
+
+    {% if search_query %}
+        <section class="grid gap-4 xl:grid-cols-3">
+            <div class="rounded-[1.5rem] border border-slate-200 bg-white px-5 py-5 shadow-[0_6px_18px_rgba(15,23,42,0.05)]">
+                <div class="flex items-center justify-between gap-3">
+                    <h3 class="text-lg font-semibold tracking-tight text-slate-950">Cows</h3>
+                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600">{{ matching_cows|length }}</span>
+                </div>
+                {% if matching_cows %}
+                    <div class="mt-4 space-y-3">
+                        {% for cow in matching_cows %}
+                            <a href="{% url 'farmers_dashboard:cow_tracking' cow.pk %}" class="block rounded-[1.1rem] border border-slate-200 bg-slate-50/70 px-4 py-3 transition hover:border-slate-300 hover:bg-slate-50">
+                                <p class="text-sm font-semibold text-slate-950">{{ cow.name }} {{ cow.cow_number }}</p>
+                                <p class="mt-1 text-[12px] text-slate-500">{{ cow.status_label }}</p>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="mt-4 text-sm text-slate-500">No cows matched this search.</p>
+                {% endif %}
+            </div>
+
+            <div class="rounded-[1.5rem] border border-slate-200 bg-white px-5 py-5 shadow-[0_6px_18px_rgba(15,23,42,0.05)]">
+                <div class="flex items-center justify-between gap-3">
+                    <h3 class="text-lg font-semibold tracking-tight text-slate-950">Alerts</h3>
+                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600">{{ matching_alerts|length }}</span>
+                </div>
+                {% if matching_alerts %}
+                    <div class="mt-4 space-y-3">
+                        {% for cow in matching_alerts %}
+                            <a href="{% url 'farmers_dashboard:cow_tracking' cow.pk %}" class="block rounded-[1.1rem] border border-slate-200 bg-slate-50/70 px-4 py-3 transition hover:border-slate-300 hover:bg-slate-50">
+                                <p class="text-sm font-semibold text-slate-950">{{ cow.name }} {{ cow.cow_number }}</p>
+                                <p class="mt-1 text-[12px] text-slate-500">{{ cow.alert_category }}</p>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="mt-4 text-sm text-slate-500">No alerts matched this search.</p>
+                {% endif %}
+            </div>
+
+            <div class="rounded-[1.5rem] border border-slate-200 bg-white px-5 py-5 shadow-[0_6px_18px_rgba(15,23,42,0.05)]">
+                <div class="flex items-center justify-between gap-3">
+                    <h3 class="text-lg font-semibold tracking-tight text-slate-950">Service support</h3>
+                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600">{{ matching_providers|length }}</span>
+                </div>
+                {% if matching_providers %}
+                    <div class="mt-4 space-y-3">
+                        {% for provider in matching_providers %}
+                            <a href="{% url 'farmers_dashboard:service_finder' %}?provider={{ provider.key }}&panel=profile" class="block rounded-[1.1rem] border border-slate-200 bg-slate-50/70 px-4 py-3 transition hover:border-slate-300 hover:bg-slate-50">
+                                <p class="text-sm font-semibold text-slate-950">{{ provider.name }}</p>
+                                <p class="mt-1 text-[12px] text-slate-500">{{ provider.service_type_label }}{% if provider.county_label %} · {{ provider.county_label }}{% endif %}</p>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="mt-4 text-sm text-slate-500">No service providers matched this search.</p>
+                {% endif %}
+            </div>
+        </section>
+    {% endif %}
+{% endblock %}

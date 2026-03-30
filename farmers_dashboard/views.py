@@ -1319,6 +1319,11 @@ def _build_follow_up_schedule_rows(cows):
     return sorted(rows, key=lambda item: item["next_date"])
 
 
+def _matches_farmer_search(text_parts, query):
+    haystack = " ".join(str(part or "").lower() for part in text_parts)
+    return query in haystack
+
+
 def _build_quick_links():
     return [
         {
@@ -1603,6 +1608,7 @@ def _build_farmer_dashboard_context(
         "page_intro": page_intro,
         "page_header_title": page_header_title or page_heading,
         "page_header_context": page_header_context,
+        "dashboard_search_query": request.GET.get("q", "").strip(),
         "navigation_sections": _build_navigation_sections(
             len(cows),
             len(alerts),
@@ -1629,6 +1635,72 @@ def _build_farmer_dashboard_context(
     if extra_context:
         context.update(extra_context)
     return context
+
+
+def _build_farmer_search_results(user, query):
+    normalized_query = query.strip().lower()
+    cows, alerts, _follow_up = _get_cows_for_user(user)
+    providers = _build_service_provider_directory()
+
+    if not normalized_query:
+        return {
+            "matching_cows": [],
+            "matching_alerts": [],
+            "matching_providers": [],
+        }
+
+    matching_cows = [
+        cow
+        for cow in cows
+        if _matches_farmer_search(
+            [
+                cow.name,
+                cow.cow_number,
+                cow.get_breed_display(),
+                cow.status_label,
+                cow.summary_text,
+                cow.next_action_text,
+            ],
+            normalized_query,
+        )
+    ]
+
+    matching_alerts = [
+        cow
+        for cow in alerts
+        if _matches_farmer_search(
+            [
+                cow.name,
+                cow.cow_number,
+                cow.alert_category,
+                cow.summary_text,
+                cow.next_action_text,
+            ],
+            normalized_query,
+        )
+    ]
+
+    matching_providers = [
+        provider
+        for provider in providers
+        if _matches_farmer_search(
+            [
+                provider["name"],
+                provider["provider_title"],
+                provider["service_type_label"],
+                provider["county_label"],
+                provider["summary"],
+                provider["coverage"],
+            ],
+            normalized_query,
+        )
+    ]
+
+    return {
+        "matching_cows": matching_cows[:8],
+        "matching_alerts": matching_alerts[:6],
+        "matching_providers": matching_providers[:6],
+    }
 
 
 def _build_location_initial_state(profile):
@@ -1669,6 +1741,39 @@ def dashboard_view(request):
         context["follow_up_items"]
     )[:3]
     return render(request, "farmers_dashboard/dashboard.html", context)
+
+
+@login_required
+@role_required("farmer")
+def search_view(request):
+    query = request.GET.get("q", "").strip()
+    results = _build_farmer_search_results(request.user, query)
+    total_results = (
+        len(results["matching_cows"])
+        + len(results["matching_alerts"])
+        + len(results["matching_providers"])
+    )
+    return render(
+        request,
+        "farmers_dashboard/search_results.html",
+        _build_farmer_dashboard_context(
+            request,
+            page_title="Farmer Search | CowCalving",
+            page_eyebrow="Search",
+            page_heading="Search results",
+            page_intro="Find cows, alerts, and service support from one search.",
+            page_header_context="Dashboard search",
+            header_primary_action={
+                "label": "Back to overview",
+                "url": reverse("farmers_dashboard:dashboard"),
+            },
+            extra_context={
+                "search_query": query,
+                "search_results_total": total_results,
+                **results,
+            },
+        ),
+    )
 
 
 @login_required

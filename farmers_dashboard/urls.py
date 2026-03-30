@@ -10,6 +10,7 @@ from .views import (
     messages_view,
     notifications_view,
     reports_view,
+    search_view,
     service_finder_view,
 )
 
@@ -17,6 +18,7 @@ app_name = "farmers_dashboard"
 
 urlpatterns = [
     path("", dashboard_view, name="dashboard"),
+    path("search/", search_view, name="search"),
     path("herd/register/", cow_register_view, name="cow_register"),
     path("herd/<int:cow_id>/tracking/", cow_tracking_view, name="cow_tracking"),
     path("herd/", herd_view, name="herd"),

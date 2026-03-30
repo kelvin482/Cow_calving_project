@@ -203,6 +203,35 @@ class FarmersDashboardViewTests(TestCase):
         self.assertContains(service_response, "Find the right field support")
         self.assertContains(service_response, "Artificial insemination")
 
+    def test_search_page_renders_empty_state_without_query(self):
+        self._login_farmer()
+
+        response = self.client.get(reverse("farmers_dashboard:search"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Search results")
+        self.assertContains(response, "Type a cow name, alert keyword, or provider term")
+
+    def test_search_page_finds_matching_cow_and_provider(self):
+        self._login_farmer()
+        cow = self._create_cow(name="Daisy")
+
+        cow_response = self.client.get(
+            reverse("farmers_dashboard:search"),
+            {"q": "Daisy"},
+        )
+        provider_response = self.client.get(
+            reverse("farmers_dashboard:search"),
+            {"q": "James"},
+        )
+
+        self.assertEqual(cow_response.status_code, 200)
+        self.assertContains(cow_response, "Daisy")
+        self.assertContains(cow_response, reverse("farmers_dashboard:cow_tracking", args=[cow.pk]))
+        self.assertEqual(provider_response.status_code, 200)
+        self.assertContains(provider_response, "Dr. James Mwangi")
+        self.assertContains(provider_response, "Service support")
+
     def test_service_finder_filters_to_artificial_insemination_personnel(self):
         self._login_farmer()
 

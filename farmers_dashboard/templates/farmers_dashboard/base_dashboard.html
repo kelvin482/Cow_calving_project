@@ -55,7 +55,7 @@
             </aside>
         </div>
 
-        <div class="min-w-0 flex-1 px-4 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6 xl:px-8">
+        <div class="min-w-0 flex-1 px-4 pb-4 pt-2 sm:px-5 sm:pb-5 sm:pt-3 lg:px-6 lg:pb-6 lg:pt-3.5 xl:px-8">
             <div class="dashboard-shell mx-auto">
                 <header class="relative z-20 mb-4 rounded-[1.05rem] border border-slate-200 bg-white shadow-[0_4px_14px_rgba(15,23,42,0.04)] lg:mb-5">
                     <div class="px-4 py-3 lg:px-5 lg:py-3.5">
@@ -169,12 +169,14 @@
                                 </div>
 
                                 <div class="flex flex-col gap-2">
-                                    <label class="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-sm text-slate-500">
-                                        <svg class="h-3.5 w-3.5 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                            <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 3.473 9.765l3.63 3.63a.75.75 0 1 0 1.06-1.06l-3.629-3.63A5.5 5.5 0 0 0 9 3.5ZM5 9a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" clip-rule="evenodd"></path>
-                                        </svg>
-                                        <input type="search" placeholder="Search cows, services, or alerts..." class="w-full bg-transparent text-[12px] text-slate-700 outline-none placeholder:text-slate-400 sm:text-[13px]">
-                                    </label>
+                                    <form method="get" action="{% url 'farmers_dashboard:search' %}">
+                                        <label class="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-sm text-slate-500">
+                                            <svg class="h-3.5 w-3.5 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 3.473 9.765l3.63 3.63a.75.75 0 1 0 1.06-1.06l-3.629-3.63A5.5 5.5 0 0 0 9 3.5ZM5 9a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            <input type="search" name="q" value="{{ dashboard_search_query }}" placeholder="Search cows, services, or alerts..." class="w-full bg-transparent text-[12px] text-slate-700 outline-none placeholder:text-slate-400 sm:text-[13px]">
+                                        </label>
+                                    </form>
 
                                     {% if header_primary_action %}
                                         <a href="{{ header_primary_action.url }}" class="inline-flex items-center justify-center rounded-xl bg-[#14532d] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#114524] lg:hidden">
