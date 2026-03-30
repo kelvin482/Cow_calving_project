@@ -52,10 +52,10 @@
 
         .register-panel {
             border: 1px solid var(--register-border);
-            border-radius: 1.45rem;
+            border-radius: 1.7rem;
             background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(245, 242, 232, 0.38));
             backdrop-filter: blur(10px);
-            box-shadow: 0 14px 30px rgba(31, 93, 59, 0.05);
+            box-shadow: 0 22px 50px rgba(31, 93, 59, 0.08);
         }
 
         .register-section {
@@ -144,9 +144,9 @@
 {% endblock %}
 
 {% block farmer_dashboard_content %}
-    <section class="register-shell mx-auto max-w-4xl">
+    <section class="register-shell mx-auto max-w-3xl pb-4">
         <div class="register-panel overflow-hidden">
-            <div class="border-b border-[var(--register-border)] px-5 py-5 sm:px-8 sm:py-7">
+            <div class="border-b border-[var(--register-border)] px-5 py-6 sm:px-9 sm:py-8">
                 <div class="flex flex-col items-center text-center">
                     <div class="flex h-12 w-12 flex-none items-center justify-center rounded-[1.1rem] bg-[rgba(242,140,40,0.16)] text-[var(--register-amber)] shadow-sm">
                         <svg class="h-5 w-5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
@@ -163,7 +163,7 @@
                 </div>
             </div>
 
-            <form method="post" enctype="multipart/form-data" class="space-y-8 px-5 py-6 sm:px-8 sm:py-8">
+            <form method="post" enctype="multipart/form-data" class="space-y-6 px-5 py-6 sm:px-9 sm:py-8">
                 {% csrf_token %}
                 {% if form.non_field_errors %}
                     <div class="rounded-[1.2rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
@@ -300,7 +300,7 @@
 
                     <div class="grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
                         <div>
-                            <label for="id_photo" class="register-soft-panel flex h-full min-h-[15rem] cursor-pointer flex-col items-center justify-center gap-4 border border-dashed border-[rgba(31,93,59,0.2)] px-5 py-8 text-center transition hover:border-[var(--register-green)] hover:bg-[rgba(245,242,232,0.44)]">
+                            <label for="id_photo" class="register-soft-panel flex h-full min-h-[13.5rem] cursor-pointer flex-col items-center justify-center gap-4 border border-dashed border-[rgba(31,93,59,0.2)] px-5 py-8 text-center transition hover:border-[var(--register-green)] hover:bg-[rgba(245,242,232,0.44)]">
                                 <div id="photo-preview" class="flex h-20 w-20 items-center justify-center rounded-full bg-[var(--register-cream)] text-4xl shadow-sm">&#128004;</div>
                                 <div>
                                     <p class="text-base font-semibold text-[var(--register-green-dark)]">Upload cow photo</p>
@@ -328,11 +328,11 @@
                     </div>
                 </div>
 
-                <div class="flex flex-col-reverse gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:justify-end">
+                <div class="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-center">
                     <a href="{% url 'farmers_dashboard:dashboard' %}" class="inline-flex items-center justify-center rounded-[1rem] border border-slate-200 bg-white px-6 py-3.5 text-base font-semibold text-slate-900 transition hover:border-slate-300 hover:bg-slate-50">
                         Cancel
                     </a>
-                    <button type="submit" class="inline-flex items-center justify-center rounded-[1rem] bg-[var(--register-green)] px-6 py-3.5 text-base font-semibold text-white shadow-[0_12px_24px_rgba(31,93,59,0.2)] transition hover:bg-[var(--register-green-dark)]">
+                    <button type="submit" class="inline-flex items-center justify-center rounded-[1rem] bg-[var(--register-green)] px-7 py-3.5 text-base font-semibold text-white shadow-[0_12px_24px_rgba(31,93,59,0.2)] transition hover:bg-[var(--register-green-dark)]">
                         Register Cow
                     </button>
                 </div>
