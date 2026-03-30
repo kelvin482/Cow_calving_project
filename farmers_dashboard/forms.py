@@ -16,6 +16,7 @@ class CowRegistrationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["breed"].choices = [("", "Select breed")] + list(Cow.BREED_CHOICES)
         self.fields["insemination_type"].choices = [
             ("", "Choose insemination type")
         ] + list(Cow.INSEMINATION_TYPE_CHOICES)
@@ -40,10 +41,10 @@ class CowRegistrationForm(forms.ModelForm):
         ]
         widgets = {
             "cow_number": forms.TextInput(
-                attrs={"placeholder": "e.g. COW-001", "class": "form-input"}
+                attrs={"placeholder": "e.g. 702", "class": "form-input"}
             ),
             "name": forms.TextInput(
-                attrs={"placeholder": "e.g. Daisy, Bella, Rosie", "class": "form-input"}
+                attrs={"placeholder": "e.g. Bella", "class": "form-input"}
             ),
             "breed": forms.Select(attrs={"class": "form-input"}),
             "date_of_birth": forms.DateInput(
@@ -67,7 +68,7 @@ class CowRegistrationForm(forms.ModelForm):
             "notes": forms.Textarea(
                 attrs={
                     "rows": 4,
-                    "placeholder": "Any notes about this cow...",
+                    "placeholder": "Optional note about this cow",
                     "class": "form-input",
                 }
             ),
@@ -76,7 +77,7 @@ class CowRegistrationForm(forms.ModelForm):
             ),
         }
         labels = {
-            "cow_number": "Cow Number",
+            "cow_number": "Cow Number / Ear Tag",
             "date_of_birth": "Date of Birth",
             "last_heat_date": "Last Heat Date",
             "insemination_type": "Insemination Type",

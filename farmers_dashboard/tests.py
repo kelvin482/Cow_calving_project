@@ -77,6 +77,17 @@ class FarmersDashboardViewTests(TestCase):
         self.assertContains(response, "Total herd")
         self.assertContains(response, "Add Cow")
 
+    def test_register_page_uses_streamlined_sections(self):
+        self._login_farmer()
+
+        response = self.client.get(reverse("farmers_dashboard:cow_register"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Register new cow")
+        self.assertContains(response, "Cow number / ear tag")
+        self.assertContains(response, "Starting status")
+        self.assertContains(response, "Photo and notes")
+
     def test_register_cow_creates_record_and_redirects_to_tracking(self):
         self._login_farmer()
 
