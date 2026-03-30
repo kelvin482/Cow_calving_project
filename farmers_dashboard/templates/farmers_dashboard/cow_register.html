@@ -1,26 +1,32 @@
 {% extends "farmers_dashboard/base_dashboard.html" %}
 
 {% block farmer_dashboard_head %}
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         .register-shell {
+            --register-green: #1F5D3B;
+            --register-green-dark: #16422A;
+            --register-amber: #F28C28;
+            --register-cream: #F5F2E8;
+            --register-border: #E5E7EB;
+            --register-text-muted: #6B7280;
             font-family: "Inter", "Segoe UI", sans-serif;
         }
 
         .register-display {
-            font-family: "Plus Jakarta Sans", "Poppins", "Segoe UI", sans-serif;
+            font-family: "Poppins", "Segoe UI", sans-serif;
         }
 
         .register-shell .form-input {
             width: 100%;
-            border: 1px solid rgb(203 213 225);
+            border: 1px solid var(--register-border);
             border-radius: 1rem;
             background: white;
-            padding: 0.95rem 1rem;
+            padding: 0.9rem 1rem;
             font-size: 0.97rem;
             line-height: 1.5rem;
             color: rgb(15 23 42);
-            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
             transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
         }
 
@@ -30,29 +36,90 @@
 
         .register-shell .form-input:focus {
             outline: none;
-            border-color: rgb(96 165 250);
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+            border-color: rgba(31, 93, 59, 0.45);
+            box-shadow: 0 0 0 4px rgba(31, 93, 59, 0.12);
         }
 
         .register-shell textarea.form-input {
-            min-height: 7rem;
+            min-height: 8rem;
         }
 
         .register-shell input[type="checkbox"] {
             width: 1.2rem;
             height: 1.2rem;
-            accent-color: #14532d;
+            accent-color: var(--register-green);
+        }
+
+        .register-panel {
+            border: 1px solid var(--register-border);
+            border-radius: 1.45rem;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 242, 232, 0.48));
+            box-shadow: 0 14px 30px rgba(31, 93, 59, 0.05);
+        }
+
+        .register-section {
+            border: 1px solid var(--register-border);
+            border-radius: 1.35rem;
+            background: #fff;
+            padding: 1.25rem;
+        }
+
+        .register-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            border-radius: 999px;
+            background: rgba(242, 140, 40, 0.14);
+            color: var(--register-amber);
+            padding: 0.4rem 0.8rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        .register-section-label {
+            color: var(--register-green-dark);
+            font-family: "Poppins", "Segoe UI", sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .register-section-copy {
+            margin-top: 0.35rem;
+            color: var(--register-text-muted);
+            font-size: 0.92rem;
+            line-height: 1.6;
         }
 
         .register-status-option input:checked + .register-status-card {
-            border-color: rgb(147 197 253);
-            background: linear-gradient(180deg, #f8fbff 0%, #eef6ff 100%);
-            box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.18);
+            border-color: rgba(31, 93, 59, 0.25);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 242, 232, 0.92));
+            box-shadow: 0 0 0 1px rgba(31, 93, 59, 0.1);
         }
 
         .register-status-option input:focus-visible + .register-status-card {
-            outline: 3px solid rgba(59, 130, 246, 0.16);
+            outline: 3px solid rgba(31, 93, 59, 0.14);
             outline-offset: 2px;
+        }
+
+        .register-status-card {
+            min-height: 7rem;
+        }
+
+        .register-status-dot {
+            width: 0.75rem;
+            height: 0.75rem;
+            border-radius: 999px;
+            background: rgba(31, 93, 59, 0.16);
+            flex: none;
+            margin-top: 0.3rem;
+        }
+
+        .register-status-option input:checked + .register-status-card .register-status-dot {
+            background: linear-gradient(135deg, var(--register-green), #2f8656);
+            box-shadow: 0 0 0 6px rgba(31, 93, 59, 0.08);
         }
 
         .register-disclosure summary::-webkit-details-marker {
@@ -63,19 +130,19 @@
 
 {% block farmer_dashboard_content %}
     <section class="register-shell mx-auto max-w-4xl">
-        <div class="overflow-hidden rounded-[1.9rem] border border-slate-200 bg-white shadow-[0_22px_55px_rgba(15,23,42,0.08)]">
-            <div class="border-b border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] px-5 py-5 sm:px-8 sm:py-7">
+        <div class="register-panel overflow-hidden">
+            <div class="border-b border-[var(--register-border)] px-5 py-5 sm:px-8 sm:py-7">
                 <div class="flex items-start gap-4">
-                    <div class="flex h-12 w-12 flex-none items-center justify-center rounded-[1.2rem] bg-[#eef6ff] text-[#2f80ed] shadow-sm">
+                    <div class="flex h-12 w-12 flex-none items-center justify-center rounded-[1.1rem] bg-[rgba(242,140,40,0.16)] text-[var(--register-amber)] shadow-sm">
                         <svg class="h-5 w-5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                             <path d="M10 4.5v11M4.5 10h11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
                         </svg>
                     </div>
                     <div class="min-w-0">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#2f80ed]">Herd register</p>
-                        <h2 class="register-display mt-2 text-[1.95rem] font-semibold tracking-[-0.04em] text-slate-950 sm:text-[2.35rem]">Register new cow</h2>
-                        <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600 sm:text-[15px]">
-                            Add the key identity details, choose the current status, and save. Extra details only appear when they matter.
+                        <span class="register-kicker">Herd register</span>
+                        <h2 class="register-display mt-3 text-[1.95rem] font-semibold tracking-[-0.04em] text-[var(--register-green-dark)] sm:text-[2.35rem]">Register new cow</h2>
+                        <p class="mt-2 max-w-xl text-sm leading-6 text-[var(--register-text-muted)] sm:text-[15px]">
+                            Record the main details first, then choose the current status so the form stays short and well arranged.
                         </p>
                     </div>
                 </div>
@@ -89,13 +156,10 @@
                     </div>
                 {% endif %}
 
-                <div class="space-y-5 border-b border-slate-100 pb-8">
-                    <div class="flex flex-wrap items-center justify-between gap-3">
-                        <div>
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Step 1</p>
-                            <h3 class="register-display mt-2 text-2xl font-semibold tracking-[-0.03em] text-slate-950">Identity</h3>
-                        </div>
-                        <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">Required details</span>
+                <div class="register-section space-y-5">
+                    <div>
+                        <h3 class="register-section-label">Basic details</h3>
+                        <p class="register-section-copy">Keep the first card focused on identification only.</p>
                     </div>
 
                     <div class="grid gap-4 sm:grid-cols-2">
@@ -109,7 +173,7 @@
                             {{ form.name }}
                             {% if form.name.errors %}<p class="mt-2 text-sm text-rose-600">{{ form.name.errors.0 }}</p>{% endif %}
                         </div>
-                        <div class="sm:col-span-2">
+                        <div>
                             <label for="{{ form.breed.id_for_label }}" class="mb-2 block text-sm font-semibold text-slate-900">Breed</label>
                             {{ form.breed }}
                             {% if form.breed.errors %}<p class="mt-2 text-sm text-rose-600">{{ form.breed.errors.0 }}</p>{% endif %}
@@ -122,36 +186,33 @@
                     </div>
                 </div>
 
-                <div class="space-y-5 border-b border-slate-100 pb-8">
-                    <div class="flex flex-wrap items-center justify-between gap-3">
-                        <div>
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Step 2</p>
-                            <h3 class="register-display mt-2 text-2xl font-semibold tracking-[-0.03em] text-slate-950">Starting status</h3>
-                        </div>
-                        <span class="rounded-full bg-[#eef6ff] px-3 py-1 text-xs font-semibold text-[#2f80ed]">Choose one</span>
+                <div class="register-section space-y-5">
+                    <div>
+                        <h3 class="register-section-label">Starting status</h3>
+                        <p class="register-section-copy">Pick one current stage so the next card reveals only the needed fields.</p>
                     </div>
 
                     <div class="grid gap-3 sm:grid-cols-2">
                         {% for option in form.reproductive_status %}
                             <label for="{{ option.id_for_label }}" class="register-status-option block cursor-pointer">
                                 {{ option.tag }}
-                                <div class="register-status-card rounded-[1.35rem] border border-slate-200 bg-white px-4 py-4 transition duration-150 hover:border-slate-300 hover:bg-slate-50">
-                                    <div class="flex items-start justify-between gap-3">
+                                <div class="register-status-card rounded-[1.2rem] border border-[var(--register-border)] bg-white px-4 py-4 transition duration-150 hover:border-[rgba(31,93,59,0.22)] hover:bg-[rgba(245,242,232,0.35)]">
+                                    <div class="flex items-start gap-3">
+                                        <span class="register-status-dot"></span>
                                         <div>
-                                            <p class="text-sm font-semibold text-slate-950" data-status-label>{{ option.choice_label }}</p>
-                                            <p class="mt-1.5 text-sm leading-6 text-slate-600">
+                                            <p class="text-sm font-semibold text-[var(--register-green-dark)]" data-status-label>{{ option.choice_label }}</p>
+                                            <p class="mt-1.5 text-sm leading-6 text-[var(--register-text-muted)]">
                                                 {% if option.choice_label == "Not inseminated yet" %}
-                                                    Capture the latest heat and service type.
+                                                    Add heat date and service type.
                                                 {% elif option.choice_label == "Already inseminated" %}
-                                                    Start follow-up from the insemination date.
+                                                    Continue from the insemination date.
                                                 {% elif option.choice_label == "Pregnancy confirmed" %}
-                                                    Keep pregnancy and calving dates visible.
+                                                    Save pregnancy and calving timing.
                                                 {% else %}
-                                                    Move directly into calving watch.
+                                                    Open the near-calving watch path.
                                                 {% endif %}
                                             </p>
                                         </div>
-                                        <span class="mt-0.5 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-500">Now</span>
                                     </div>
                                 </div>
                             </label>
@@ -160,18 +221,18 @@
                     {% if form.reproductive_status.errors %}<p class="text-sm text-rose-600">{{ form.reproductive_status.errors.0 }}</p>{% endif %}
                 </div>
 
-                <div class="space-y-5 border-b border-slate-100 pb-8">
+                <div class="register-section space-y-5">
                     <div class="flex flex-wrap items-center justify-between gap-3">
                         <div>
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Step 3</p>
-                            <h3 class="register-display mt-2 text-2xl font-semibold tracking-[-0.03em] text-slate-950">Status details</h3>
+                            <h3 class="register-section-label">Status details</h3>
+                            <p class="register-section-copy">The extra fields stay hidden until a status is selected.</p>
                         </div>
-                        <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600" data-selected-status-label>No status selected</span>
+                        <span class="rounded-full bg-[var(--register-cream)] px-3 py-1 text-xs font-semibold text-[var(--register-green-dark)]" data-selected-status-label>No status selected</span>
                     </div>
 
-                    <div class="rounded-[1.5rem] border border-slate-200 bg-slate-50/80 p-4 sm:p-5">
-                        <p class="rounded-[1rem] border border-dashed border-slate-300 bg-white px-4 py-3 text-sm text-slate-500" data-status-empty>
-                            Choose a starting status above to reveal only the fields needed for that path.
+                    <div class="rounded-[1.2rem] border border-[var(--register-border)] bg-[rgba(245,242,232,0.52)] p-4 sm:p-5">
+                        <p class="rounded-[1rem] border border-dashed border-[rgba(31,93,59,0.18)] bg-white px-4 py-3 text-sm text-[var(--register-text-muted)]" data-status-empty>
+                            Select a status first.
                         </p>
 
                         <div class="grid gap-4 sm:grid-cols-2">
@@ -206,58 +267,57 @@
                             </div>
                         </div>
 
-                        <label class="mt-4 flex items-center justify-between gap-4 rounded-[1.2rem] border border-slate-200 bg-white px-4 py-3.5">
+                        <label class="mt-4 flex items-center justify-between gap-4 rounded-[1rem] border border-[var(--register-border)] bg-white px-4 py-3.5">
                             <div>
-                                <p class="text-sm font-semibold text-slate-900">Currently lactating</p>
-                                <p class="mt-1 text-sm text-slate-500">Switch on if the cow is producing milk right now.</p>
+                                <p class="text-sm font-semibold text-[var(--register-green-dark)]">Currently lactating</p>
+                                <p class="mt-1 text-sm text-[var(--register-text-muted)]">Turn on only if the cow is producing milk now.</p>
                             </div>
                             {{ form.is_lactating }}
                         </label>
                     </div>
                 </div>
 
-                <div class="space-y-5">
-                    <div class="flex flex-wrap items-center justify-between gap-3">
-                        <div>
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Step 4</p>
-                            <h3 class="register-display mt-2 text-2xl font-semibold tracking-[-0.03em] text-slate-950">Photo and notes</h3>
-                        </div>
-                        <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">Optional</span>
-                    </div>
-
+                <div class="register-section space-y-5">
                     <div>
-                        <label for="id_photo" class="flex cursor-pointer flex-col items-center justify-center gap-4 rounded-[1.45rem] border border-dashed border-slate-300 bg-slate-50/70 px-5 py-8 text-center transition hover:border-[#2f80ed] hover:bg-[#f8fbff]">
-                            <div id="photo-preview" class="flex h-20 w-20 items-center justify-center rounded-full bg-white text-4xl shadow-sm">&#128004;</div>
-                            <div>
-                                <p class="text-base font-semibold text-slate-900">Click to upload cow photo</p>
-                                <p id="photo-caption" class="mt-1 text-sm text-slate-500">PNG, JPG, WEBP or GIF up to 5 MB</p>
-                            </div>
-                        </label>
-                        {{ form.photo }}
-                        {% if form.photo.errors %}<p class="mt-2 text-sm text-rose-600">{{ form.photo.errors.0 }}</p>{% endif %}
+                        <h3 class="register-section-label">Photo and notes</h3>
+                        <p class="register-section-copy">Keep extra context light and optional.</p>
                     </div>
 
-                    <details class="register-disclosure rounded-[1.35rem] border border-slate-200 bg-slate-50/70 p-4" {% if form.notes.errors or form.notes.value %}open{% endif %}>
-                        <summary class="flex cursor-pointer list-none items-center justify-between gap-3">
-                            <span>
-                                <span class="block text-sm font-semibold text-slate-900">Add note</span>
-                                <span class="mt-1 block text-sm text-slate-500">Use this only if there is something worth remembering.</span>
-                            </span>
-                            <span class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500 shadow-sm">Optional</span>
-                        </summary>
-                        <div class="mt-4">
-                            <label for="{{ form.notes.id_for_label }}" class="mb-2 block text-sm font-semibold text-slate-900">Note</label>
-                            {{ form.notes }}
-                            {% if form.notes.errors %}<p class="mt-2 text-sm text-rose-600">{{ form.notes.errors.0 }}</p>{% endif %}
+                    <div class="grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+                        <div>
+                            <label for="id_photo" class="flex h-full min-h-[15rem] cursor-pointer flex-col items-center justify-center gap-4 rounded-[1.2rem] border border-dashed border-[rgba(31,93,59,0.2)] bg-[rgba(255,255,255,0.78)] px-5 py-8 text-center transition hover:border-[var(--register-green)] hover:bg-[rgba(245,242,232,0.44)]">
+                                <div id="photo-preview" class="flex h-20 w-20 items-center justify-center rounded-full bg-[var(--register-cream)] text-4xl shadow-sm">&#128004;</div>
+                                <div>
+                                    <p class="text-base font-semibold text-[var(--register-green-dark)]">Upload cow photo</p>
+                                    <p id="photo-caption" class="mt-1 text-sm text-[var(--register-text-muted)]">PNG, JPG, WEBP or GIF up to 5 MB</p>
+                                </div>
+                            </label>
+                            {{ form.photo }}
+                            {% if form.photo.errors %}<p class="mt-2 text-sm text-rose-600">{{ form.photo.errors.0 }}</p>{% endif %}
                         </div>
-                    </details>
+
+                        <details class="register-disclosure rounded-[1.2rem] border border-[var(--register-border)] bg-white p-4" {% if form.notes.errors or form.notes.value %}open{% endif %}>
+                            <summary class="flex cursor-pointer list-none items-center justify-between gap-3">
+                                <span>
+                                    <span class="block text-sm font-semibold text-[var(--register-green-dark)]">Add note</span>
+                                    <span class="mt-1 block text-sm text-[var(--register-text-muted)]">Only include something useful for later.</span>
+                                </span>
+                                <span class="rounded-full bg-[var(--register-cream)] px-3 py-1 text-xs font-semibold text-[var(--register-green-dark)] shadow-sm">Optional</span>
+                            </summary>
+                            <div class="mt-4">
+                                <label for="{{ form.notes.id_for_label }}" class="mb-2 block text-sm font-semibold text-slate-900">Note</label>
+                                {{ form.notes }}
+                                {% if form.notes.errors %}<p class="mt-2 text-sm text-rose-600">{{ form.notes.errors.0 }}</p>{% endif %}
+                            </div>
+                        </details>
+                    </div>
                 </div>
 
                 <div class="flex flex-col-reverse gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:justify-end">
                     <a href="{% url 'farmers_dashboard:dashboard' %}" class="inline-flex items-center justify-center rounded-[1rem] border border-slate-200 bg-white px-6 py-3.5 text-base font-semibold text-slate-900 transition hover:border-slate-300 hover:bg-slate-50">
                         Cancel
                     </a>
-                    <button type="submit" class="inline-flex items-center justify-center rounded-[1rem] bg-[#2f80ed] px-6 py-3.5 text-base font-semibold text-white shadow-[0_12px_24px_rgba(47,128,237,0.24)] transition hover:bg-[#226dce]">
+                    <button type="submit" class="inline-flex items-center justify-center rounded-[1rem] bg-[var(--register-green)] px-6 py-3.5 text-base font-semibold text-white shadow-[0_12px_24px_rgba(31,93,59,0.2)] transition hover:bg-[var(--register-green-dark)]">
                         Register Cow
                     </button>
                 </div>
