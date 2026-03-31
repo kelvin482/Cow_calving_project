@@ -3,6 +3,8 @@ import re
 from pathlib import Path
 
 
+# Cache the trimmed policy text so repeat AI calls do not reread the file unless
+# the source path or modified time changes.
 _POLICY_CACHE: dict[str, object] = {"path": None, "mtime": None, "text": None}
 
 
@@ -72,13 +74,16 @@ def _load_policy_text() -> str:
 
     cache_path = _POLICY_CACHE.get("path")
     cache_mtime = _POLICY_CACHE.get("mtime")
+    # Reuse the cached policy when the file has not changed to keep prompt
+    # construction cheap during chat-heavy sessions.
     if cache_path == policy_path and cache_mtime == mtime:
         cached = _POLICY_CACHE.get("text")
         if isinstance(cached, str):
             return cached
 
     text = policy_path.read_text(encoding="utf-8", errors="ignore")
-    # Normalize whitespace to reduce tokens while preserving meaning.
+    # Normalize whitespace to reduce token usage while keeping the guidance
+    # readable when injected into the system prompt.
     text = "\n".join(line.rstrip() for line in text.splitlines())
     text = "\n".join([line for line in text.split("\n") if line.strip() != ""])
     max_chars = _get_policy_max_chars()
@@ -104,6 +109,8 @@ def _build_system_message() -> str:
 
 def _extract_affordable_token_limit(error: Exception) -> int | None:
     message = str(error)
+    # Some providers return a credit error that includes the token budget we can
+    # still afford; parsing it lets us retry instead of failing immediately.
     match = re.search(r"can only afford\s+(\d+)", message, re.IGNORECASE)
     if not match:
         return None
@@ -132,6 +139,8 @@ def _create_chat_completion_with_credit_fallback(client, *, messages, model):
         if affordable_limit is None or affordable_limit >= max_tokens:
             raise
 
+        # Retry once with the provider-reported affordable limit so low-credit
+        # accounts still get an answer instead of a hard failure.
         request_kwargs["max_tokens"] = affordable_limit
         return client.chat.completions.create(**request_kwargs)
 
@@ -191,6 +200,8 @@ def _openrouter_advice(prompt: str) -> str:
         raise RuntimeError("Install the OpenAI SDK: pip install openai") from exc
 
     headers = {}
+    # Optional attribution headers help OpenRouter identify traffic from this
+    # project without forcing every deployment to set them.
     if site_url:
         headers["HTTP-Referer"] = site_url
     if site_name:
