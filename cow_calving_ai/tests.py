@@ -119,6 +119,14 @@ class AIServiceTests(TestCase):
         with patch.dict(os.environ, {"AI_MAX_TOKENS": "50"}, clear=False):
             self.assertEqual(get_ai_max_tokens(), 200)
 
+    def test_get_ai_max_tokens_clamps_high_values(self):
+        with patch.dict(os.environ, {"AI_MAX_TOKENS": "9000"}, clear=False):
+            self.assertEqual(get_ai_max_tokens(), 4000)
+
+    def test_get_ai_max_tokens_falls_back_for_invalid_values(self):
+        with patch.dict(os.environ, {"AI_MAX_TOKENS": "invalid"}, clear=False):
+            self.assertEqual(get_ai_max_tokens(), 650)
+
     def test_get_ai_max_tokens_reads_valid_env_value(self):
         with patch.dict(os.environ, {"AI_MAX_TOKENS": "1200"}, clear=False):
             self.assertEqual(get_ai_max_tokens(), 1200)
@@ -129,6 +137,11 @@ class AIServiceTests(TestCase):
             "but can only afford 766."
         )
         self.assertEqual(_extract_affordable_token_limit(error), 766)
+
+    def test_get_ai_advice_rejects_unknown_provider(self):
+        with patch.dict(os.environ, {"AI_PROVIDER": "unknown"}, clear=False):
+            with self.assertRaises(RuntimeError):
+                get_ai_advice("Unknown provider question")
 
 
 class AIViewTests(TestCase):
@@ -190,4 +203,15 @@ class AIViewTests(TestCase):
         self.assertEqual(payload["cow_id"], "COW-009")
         self.assertEqual(payload["advice"], "Mocked AI advice")
         self.assertIn("provider", payload)
+
+    @patch("cow_calving_ai.views.get_ai_advice")
+    def test_ai_test_returns_server_error_when_service_fails(self, mocked_get_ai_advice):
+        self.client.force_login(self.user)
+        mocked_get_ai_advice.side_effect = RuntimeError("Provider is down")
+
+        response = self.client.get("/app/ai/test/?q=Check+cow")
+
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.json()["ok"], False)
+        self.assertEqual(response.json()["error"], "Provider is down")
 
