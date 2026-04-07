@@ -1385,18 +1385,31 @@ nav {
 }
 
 .home-story-band {
+  position: relative;
   display: grid;
-  grid-template-columns: minmax(320px, 0.86fr) minmax(0, 1.14fr);
-  gap: 48px;
+  grid-template-columns: minmax(320px, 0.88fr) minmax(0, 1.12fr);
+  gap: 54px;
   align-items: center;
-  padding: 76px 0;
-  border-bottom: 1px solid var(--border);
+  margin: 20px 0 8px;
+  padding: 38px;
+  border-radius: 38px;
+  border: 1px solid rgba(31, 93, 59, 0.1);
+  background:
+    radial-gradient(circle at top left, rgba(255, 250, 236, 0.9), rgba(255, 250, 236, 0) 32%),
+    linear-gradient(135deg, rgba(247, 249, 244, 0.96), rgba(255, 255, 255, 0.98));
+  box-shadow: 0 26px 54px rgba(18, 43, 31, 0.08);
+}
+
+.home-story-media-panel {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
 }
 
 .home-story-media-grid {
   /* Keep the image block calm and singular so it balances the denser copy column. */
   position: relative;
-  width: min(100%, 520px);
+  width: min(100%, 500px);
   justify-self: start;
   padding: 16px;
   border-radius: 36px;
@@ -1405,6 +1418,44 @@ nav {
     linear-gradient(180deg, rgba(244, 238, 223, 0.7), rgba(239, 246, 241, 0.95));
   border: 1px solid rgba(31, 93, 59, 0.1);
   box-shadow: 0 24px 48px rgba(17, 45, 32, 0.08);
+}
+
+.home-story-journey-strip {
+  width: min(100%, 500px);
+  display: grid;
+  gap: 12px;
+  padding: 18px 20px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(31, 93, 59, 0.1);
+  box-shadow: 0 12px 26px rgba(17, 45, 32, 0.06);
+}
+
+.home-story-journey-kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--green-dark);
+}
+
+.home-story-journey-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.home-story-journey-items span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(242, 247, 244, 0.98), rgba(232, 241, 236, 0.98));
+  color: var(--green-dark);
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid rgba(31, 93, 59, 0.1);
 }
 
 .home-story-media-grid::after {
@@ -1486,52 +1537,93 @@ nav {
 }
 
 .home-story-copy {
-  padding: 12px 0;
+  max-width: 700px;
+  padding: 8px 0;
 }
 
 .home-story-copy h3 {
   font-family: 'Poppins', sans-serif;
-  font-size: 34px;
-  line-height: 1.2;
+  max-width: 14ch;
+  font-size: clamp(2.2rem, 2vw + 1.55rem, 3.65rem);
+  line-height: 1.08;
   color: var(--green-dark);
-  margin: 16px 0 16px;
+  margin: 18px 0 18px;
 }
 
 .home-story-copy p {
   color: #444;
-  font-size: 16px;
-  line-height: 1.72;
-  margin-bottom: 18px;
+  max-width: 58ch;
+  font-size: 17px;
+  line-height: 1.76;
+  margin-bottom: 0;
 }
 
 .home-story-list {
   display: grid;
-  gap: 16px;
-  margin-top: 28px;
+  gap: 14px;
+  margin-top: 30px;
+  counter-reset: home-story-steps;
 }
 
 .home-story-point {
-  display: grid;
-  gap: 6px;
-  padding: 18px 20px;
-  border-radius: 18px;
-  background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(247,249,247,.98));
+  position: relative;
+  counter-increment: home-story-steps;
+  padding: 20px 24px 20px 96px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.86);
   border: 1px solid rgba(31, 93, 59, 0.12);
+  box-shadow: 0 14px 30px rgba(17, 45, 32, 0.05);
+}
+
+.home-story-point::before {
+  content: counter(home-story-steps, decimal-leading-zero);
+  position: absolute;
+  left: 24px;
+  top: 22px;
+  width: 46px;
+  height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(31, 93, 59, 0.12), rgba(31, 93, 59, 0.04));
+  color: var(--green-dark);
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.home-story-point::after {
+  content: '';
+  position: absolute;
+  left: 46px;
+  top: 74px;
+  bottom: -14px;
+  width: 2px;
+  background: linear-gradient(180deg, rgba(31, 93, 59, 0.22), rgba(31, 93, 59, 0));
+}
+
+.home-story-point:last-child::after {
+  display: none;
 }
 
 .home-story-point strong {
+  display: block;
   color: var(--green-dark);
-  font-size: 15px;
+  font-size: 22px;
+  line-height: 1.2;
+  margin-bottom: 8px;
 }
 
 .home-story-point span {
+  display: block;
   color: var(--text-muted);
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.6;
 }
 
 .home-story-actions {
-  margin-top: 28px;
+  margin-top: 26px;
   display: flex;
   flex-wrap: wrap;
   gap: 14px;
@@ -3666,12 +3758,29 @@ footer {
   .steps-container { flex-direction: column; gap: 48px; }
   .two-col-teasers { grid-template-columns: 1fr; }
   .section-work-layout { grid-template-columns: 1fr; }
-  .home-story-band { grid-template-columns: 1fr; }
+  .home-story-band {
+    grid-template-columns: 1fr;
+    gap: 34px;
+    padding: 32px;
+  }
   .home-story-media-grid {
     width: min(100%, 560px);
     justify-self: center;
   }
+  .home-story-media-panel {
+    justify-items: center;
+  }
+  .home-story-journey-strip {
+    width: min(100%, 560px);
+  }
   .home-story-media--main img { aspect-ratio: 1.02; }
+  .home-story-copy {
+    max-width: none;
+  }
+  .home-story-copy h3,
+  .home-story-copy p {
+    max-width: none;
+  }
   .home-value-list { grid-template-columns: 1fr; }
   .next-grid--two { grid-template-columns: 1fr; }
   .next-grid--three { grid-template-columns: 1fr; }
@@ -3712,13 +3821,22 @@ footer {
   }
 
   .home-story-band {
-    padding: 58px 0;
-    gap: 30px;
+    margin-top: 14px;
+    padding: 22px;
+    gap: 26px;
+    border-radius: 28px;
   }
 
   .home-story-media-grid {
+    width: 100%;
     padding: 14px;
     border-radius: 28px;
+  }
+
+  .home-story-journey-strip {
+    width: 100%;
+    padding: 16px;
+    border-radius: 20px;
   }
 
   .home-story-media {
@@ -3728,6 +3846,32 @@ footer {
   .home-story-media-caption strong {
     max-width: 220px;
     font-size: 15px;
+  }
+
+  .home-story-point {
+    padding: 18px 18px 18px 78px;
+  }
+
+  .home-story-point::before {
+    left: 18px;
+    top: 18px;
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
+    font-size: 13px;
+  }
+
+  .home-story-point::after {
+    left: 37px;
+    top: 62px;
+  }
+
+  .home-story-point strong {
+    font-size: 18px;
+  }
+
+  .home-story-copy p {
+    font-size: 16px;
   }
 
   .home-story-copy h3,
