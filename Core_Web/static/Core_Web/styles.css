@@ -1386,22 +1386,20 @@ nav {
 
 .home-story-band {
   display: grid;
-  grid-template-columns: 0.95fr 1.05fr;
-  gap: 36px;
-  align-items: stretch;
+  grid-template-columns: minmax(320px, 0.86fr) minmax(0, 1.14fr);
+  gap: 48px;
+  align-items: center;
   padding: 76px 0;
   border-bottom: 1px solid var(--border);
 }
 
 .home-story-media-grid {
-  /* Build a framed collage so the three photos read as one story instead of two narrow strips. */
+  /* Keep the image block calm and singular so it balances the denser copy column. */
   position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1.18fr) minmax(220px, 0.82fr);
-  gap: 18px;
-  align-items: stretch;
-  padding: 18px;
-  border-radius: 34px;
+  width: min(100%, 520px);
+  justify-self: start;
+  padding: 16px;
+  border-radius: 36px;
   background:
     radial-gradient(circle at top left, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0) 45%),
     linear-gradient(180deg, rgba(244, 238, 223, 0.7), rgba(239, 246, 241, 0.95));
@@ -1412,23 +1410,16 @@ nav {
 .home-story-media-grid::after {
   content: '';
   position: absolute;
-  inset: 22px;
-  border-radius: 28px;
+  inset: 20px;
+  border-radius: 30px;
   border: 1px solid rgba(255, 255, 255, 0.62);
   pointer-events: none;
 }
 
-.home-story-media-stack {
-  display: grid;
-  grid-template-rows: 1.08fr 0.92fr;
-  gap: 18px;
-}
-
 .home-story-media {
   position: relative;
-  min-height: 100%;
   margin: 0;
-  border-radius: 28px;
+  border-radius: 30px;
   overflow: hidden;
   border: 1px solid rgba(31, 93, 59, 0.08);
   box-shadow: 0 20px 36px rgba(17, 45, 32, 0.12);
@@ -1457,46 +1448,24 @@ nav {
 }
 
 .home-story-media--main img {
-  aspect-ratio: 0.92;
-  object-position: center 42%;
-}
-
-.home-story-media--support {
-  border-radius: 22px;
-}
-
-.home-story-media--support img {
-  aspect-ratio: 1.08;
-}
-
-.home-story-media--support-top img {
-  object-position: center 44%;
-}
-
-.home-story-media--support-bottom img {
-  object-position: center 30%;
+  aspect-ratio: 0.88;
+  object-position: center 40%;
 }
 
 .home-story-media-caption {
   position: absolute;
-  left: 18px;
-  right: 18px;
-  bottom: 18px;
+  left: 22px;
+  right: 22px;
+  bottom: 22px;
   z-index: 1;
   display: grid;
   gap: 10px;
 }
 
-.home-story-media-caption--compact {
-  left: 14px;
-  right: 14px;
-  bottom: 14px;
-}
-
 .home-story-media-caption strong {
-  max-width: 250px;
+  max-width: 280px;
   color: var(--white);
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.45;
   text-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
 }
@@ -3699,12 +3668,10 @@ footer {
   .section-work-layout { grid-template-columns: 1fr; }
   .home-story-band { grid-template-columns: 1fr; }
   .home-story-media-grid {
-    grid-template-columns: minmax(0, 1.08fr) minmax(200px, 0.92fr);
+    width: min(100%, 560px);
+    justify-self: center;
   }
-  .home-story-media-stack { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .home-story-media-stack { grid-template-rows: none; }
-  .home-story-media--main img { aspect-ratio: 0.95; }
-  .home-story-media--support img { aspect-ratio: 0.98; }
+  .home-story-media--main img { aspect-ratio: 1.02; }
   .home-value-list { grid-template-columns: 1fr; }
   .next-grid--two { grid-template-columns: 1fr; }
   .next-grid--three { grid-template-columns: 1fr; }
@@ -3746,16 +3713,16 @@ footer {
 
   .home-story-band {
     padding: 58px 0;
+    gap: 30px;
   }
 
   .home-story-media-grid {
-    grid-template-columns: 1fr;
     padding: 14px;
     border-radius: 28px;
   }
 
-  .home-story-media-stack {
-    grid-template-columns: 1fr;
+  .home-story-media {
+    border-radius: 24px;
   }
 
   .home-story-media-caption strong {
