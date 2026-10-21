@@ -11,7 +11,13 @@ from django.utils import timezone
 from communications.models import ConversationThread, Notification
 from users.models import Profile, Role
 
-from .models import Cow, InseminationRequest, ReproductiveEvent, ServiceProviderMessage
+from .models import (
+    Cow,
+    InseminationRequest,
+    MilkRecord,
+    ReproductiveEvent,
+    ServiceProviderMessage,
+)
 
 
 class FarmersDashboardViewTests(TestCase):
@@ -701,6 +707,167 @@ class FarmersDashboardViewTests(TestCase):
         cow.refresh_from_db()
         self.assertTrue(cow.needs_attention)
         self.assertContains(attention_response, "marked as needing attention")
+
+    def test_farmer_can_create_daily_milk_record(self):
+        self._login_farmer()
+        cow = self._create_cow()
+
+        response = self.client.post(
+            reverse("farmers_dashboard:milk_records"),
+            {
+                "cow": cow.pk,
+                "record_date": timezone.localdate().isoformat(),
+                "daily_yield_liters": "12.50",
+            },
+            follow=True,
+        )
+
+        record = MilkRecord.objects.get()
+        self.assertEqual(record.cow, cow)
+        self.assertEqual(str(record.daily_yield_liters), "12.50")
+        self.assertContains(response, "Milk record for Daisy")
+        self.assertContains(response, "12.50 L")
+
+    def test_explicit_zero_yield_is_saved_as_a_measurement(self):
+        self._login_farmer()
+        cow = self._create_cow()
+
+        response = self.client.post(
+            reverse("farmers_dashboard:milk_records"),
+            {
+                "cow": cow.pk,
+                "record_date": timezone.localdate().isoformat(),
+                "daily_yield_liters": "0.00",
+            },
+            follow=True,
+        )
+
+        record = MilkRecord.objects.get()
+        self.assertEqual(str(record.daily_yield_liters), "0.00")
+        self.assertContains(response, "0.00 L")
+
+    def test_farmer_can_correct_daily_milk_record(self):
+        self._login_farmer()
+        cow = self._create_cow()
+        record = MilkRecord.objects.create(
+            cow=cow,
+            record_date=timezone.localdate() - timedelta(days=1),
+            daily_yield_liters="10.00",
+        )
+
+        response = self.client.post(
+            reverse("farmers_dashboard:milk_record_edit", args=[record.pk]),
+            {
+                "cow": cow.pk,
+                "record_date": record.record_date.isoformat(),
+                "daily_yield_liters": "11.25",
+            },
+            follow=True,
+        )
+
+        record.refresh_from_db()
+        self.assertEqual(str(record.daily_yield_liters), "11.25")
+        self.assertContains(response, "Milk record for Daisy")
+
+    def test_milk_record_rejects_negative_future_and_duplicate_values(self):
+        self._login_farmer()
+        cow = self._create_cow()
+        url = reverse("farmers_dashboard:milk_records")
+        today = timezone.localdate()
+
+        negative_response = self.client.post(
+            url,
+            {
+                "cow": cow.pk,
+                "record_date": today.isoformat(),
+                "daily_yield_liters": "-1.00",
+            },
+        )
+        self.assertEqual(negative_response.status_code, 200)
+        self.assertEqual(MilkRecord.objects.count(), 0)
+
+        future_response = self.client.post(
+            url,
+            {
+                "cow": cow.pk,
+                "record_date": (today + timedelta(days=1)).isoformat(),
+                "daily_yield_liters": "1.00",
+            },
+        )
+        self.assertEqual(future_response.status_code, 200)
+        self.assertContains(future_response, "cannot be dated in the future")
+        self.assertEqual(MilkRecord.objects.count(), 0)
+
+        MilkRecord.objects.create(
+            cow=cow,
+            record_date=today,
+            daily_yield_liters="4.00",
+        )
+        duplicate_response = self.client.post(
+            url,
+            {
+                "cow": cow.pk,
+                "record_date": today.isoformat(),
+                "daily_yield_liters": "5.00",
+            },
+        )
+        self.assertEqual(duplicate_response.status_code, 200)
+        self.assertEqual(MilkRecord.objects.count(), 1)
+
+    def test_farmer_cannot_view_or_assign_another_farmers_milk_record(self):
+        self._login_farmer()
+        own_cow = self._create_cow()
+        other_user = User.objects.create_user(
+            username="other-farmer",
+            email="other@example.com",
+            password="StrongPass123!",
+        )
+        other_cow = Cow.objects.create(
+            owner=other_user,
+            cow_number="COW-OTHER",
+            name="Other cow",
+            breed=Cow.BREED_FRIESIAN,
+        )
+        other_record = MilkRecord.objects.create(
+            cow=other_cow,
+            record_date=timezone.localdate(),
+            daily_yield_liters="8.00",
+        )
+
+        list_response = self.client.get(reverse("farmers_dashboard:milk_records"))
+        edit_response = self.client.get(
+            reverse("farmers_dashboard:milk_record_edit", args=[other_record.pk])
+        )
+        tampered_post = self.client.post(
+            reverse("farmers_dashboard:milk_records"),
+            {
+                "cow": other_cow.pk,
+                "record_date": timezone.localdate().isoformat(),
+                "daily_yield_liters": "9.00",
+            },
+        )
+
+        self.assertEqual(edit_response.status_code, 404)
+        self.assertContains(list_response, own_cow.name)
+        self.assertNotContains(list_response, other_cow.name)
+        self.assertEqual(MilkRecord.objects.count(), 1)
+        self.assertEqual(tampered_post.status_code, 200)
+
+    def test_milk_records_page_requires_farmer_role(self):
+        veterinary_role, _ = Role.objects.get_or_create(
+            slug="veterinary",
+            defaults={
+                "name": "Veterinary",
+                "dashboard_namespace": "veterinary_dashboard",
+                "default_path": "/veterinary/",
+            },
+        )
+        Profile.objects.create(user=self.user, role=veterinary_role)
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse("farmers_dashboard:milk_records"))
+
+        self.assertRedirects(response, "/veterinary/", fetch_redirect_response=False)
 
     def test_farmer_dashboard_redirects_other_roles(self):
         other_role, _ = Role.objects.get_or_create(

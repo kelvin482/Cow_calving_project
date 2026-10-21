@@ -1,8 +1,9 @@
 from django import forms
+from django.utils import timezone
 
 from communications.upload_validation import validate_uploaded_image
 
-from .models import Cow, ReproductiveEvent
+from .models import Cow, MilkRecord, ReproductiveEvent
 
 
 class CowRegistrationForm(forms.ModelForm):
@@ -168,6 +169,44 @@ class CowRegistrationForm(forms.ModelForm):
             photo,
             allowed_extensions=("jpg", "jpeg", "png", "webp", "gif"),
         )
+
+
+class MilkRecordForm(forms.ModelForm):
+    class Meta:
+        model = MilkRecord
+        fields = ["cow", "record_date", "daily_yield_liters"]
+        widgets = {
+            "cow": forms.Select(attrs={"class": "form-input w-full max-w-full"}),
+            "record_date": forms.DateInput(
+                attrs={"type": "date", "class": "form-input w-full max-w-full"}
+            ),
+            "daily_yield_liters": forms.NumberInput(
+                attrs={
+                    "class": "form-input w-full max-w-full",
+                    "min": "0",
+                    "step": "0.01",
+                }
+            ),
+        }
+        labels = {
+            "cow": "Cow",
+            "record_date": "Production date",
+            "daily_yield_liters": "Total milk for the day (litres)",
+        }
+
+    def __init__(self, *args, farmer, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["cow"].queryset = Cow.objects.filter(owner=farmer).order_by(
+            "name", "cow_number"
+        )
+        if self.instance.pk:
+            self.fields["cow"].disabled = True
+
+    def clean_record_date(self):
+        record_date = self.cleaned_data["record_date"]
+        if record_date > timezone.localdate():
+            raise forms.ValidationError("Milk records cannot be dated in the future.")
+        return record_date
 
 
 class ReproductiveEventForm(forms.Form):

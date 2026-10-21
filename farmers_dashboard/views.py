@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Prefetch
 from django.http import Http404
@@ -31,10 +32,17 @@ from users.services import get_profile
 from .forms import (
     CowRegistrationForm,
     FarmLocationForm,
+    MilkRecordForm,
     ReproductiveEventForm,
     ServiceProviderMessageForm,
 )
-from .models import Cow, InseminationRequest, ReproductiveEvent, ServiceProviderMessage
+from .models import (
+    Cow,
+    InseminationRequest,
+    MilkRecord,
+    ReproductiveEvent,
+    ServiceProviderMessage,
+)
 
 
 KENYA_COUNTY_OPTIONS = [
@@ -1125,6 +1133,12 @@ def _build_navigation_sections(
                     "badge": str(total_cows) if total_cows else None,
                 },
                 {
+                    "label": "Milk records",
+                    "url": reverse("farmers_dashboard:milk_records"),
+                    "view_name": "farmers_dashboard:milk_records",
+                    "icon": "reports",
+                },
+                {
                     "label": "Alerts",
                     "url": reverse("farmers_dashboard:alerts"),
                     "view_name": "farmers_dashboard:alerts",
@@ -1791,6 +1805,63 @@ def herd_view(request):
             header_primary_action={
                 "label": "Add cow",
                 "url": reverse("farmers_dashboard:cow_register"),
+            },
+        ),
+    )
+
+
+@login_required
+@role_required("farmer")
+def milk_records_view(request, record_id=None):
+    editing_record = None
+    if record_id is not None:
+        editing_record = get_object_or_404(
+            MilkRecord.objects.select_related("cow"),
+            pk=record_id,
+            cow__owner=request.user,
+        )
+
+    if request.method == "POST":
+        form = MilkRecordForm(
+            request.POST,
+            instance=editing_record,
+            farmer=request.user,
+        )
+        if form.is_valid():
+            record = form.save()
+            action = "updated" if editing_record else "saved"
+            messages.success(
+                request,
+                f"Milk record for {record.cow.name} on {record.record_date:%d %b %Y} {action}.",
+            )
+            return redirect("farmers_dashboard:milk_records")
+    else:
+        initial = {"record_date": timezone.localdate()} if editing_record is None else None
+        form = MilkRecordForm(
+            instance=editing_record,
+            initial=initial,
+            farmer=request.user,
+        )
+
+    records = MilkRecord.objects.filter(cow__owner=request.user).select_related("cow")
+    records_page = Paginator(records, 20).get_page(request.GET.get("page"))
+    return render(
+        request,
+        "farmers_dashboard/milk_records.html",
+        _build_farmer_dashboard_context(
+            request,
+            page_title="Milk records | CowCalving",
+            page_eyebrow="Milk production",
+            page_heading="Milk records",
+            page_intro="Record one total for each cow and date, then review or correct recent entries.",
+            header_primary_action={
+                "label": "My herd",
+                "url": reverse("farmers_dashboard:herd"),
+            },
+            extra_context={
+                "milk_form": form,
+                "milk_records_page": records_page,
+                "editing_record": editing_record,
             },
         ),
     )

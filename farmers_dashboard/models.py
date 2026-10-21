@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.utils import timezone
@@ -420,3 +421,40 @@ class Cow(models.Model):
         if self.reproductive_status == self.REPRODUCTIVE_STATUS_NOT_INSEMINATED:
             return "Keep heat dates visible and prepare the next insemination step."
         return "Complete registration details and start tracking when ready."
+
+
+class MilkRecord(models.Model):
+    """One farmer-entered daily milk total for a cow, measured in litres."""
+
+    cow = models.ForeignKey(
+        Cow,
+        on_delete=models.CASCADE,
+        related_name="milk_records",
+    )
+    record_date = models.DateField()
+    daily_yield_liters = models.DecimalField(max_digits=8, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-record_date", "cow__name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["cow", "record_date"],
+                name="unique_milk_record_per_cow_day",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(daily_yield_liters__gte=0),
+                name="milk_record_non_negative_yield",
+            ),
+        ]
+
+    def clean(self):
+        super().clean()
+        if self.record_date and self.record_date > timezone.localdate():
+            raise ValidationError(
+                {"record_date": "Milk records cannot be dated in the future."}
+            )
+
+    def __str__(self):
+        return f"{self.cow} — {self.record_date}: {self.daily_yield_liters} L"
