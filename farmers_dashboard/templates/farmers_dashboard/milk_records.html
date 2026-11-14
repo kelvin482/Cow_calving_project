@@ -1,97 +1,222 @@
 {% extends "farmers_dashboard/base_dashboard.html" %}
 
 {% block farmer_dashboard_content %}
-    <section class="farmer-panel min-w-0 px-5 py-5 sm:px-7 sm:py-7">
-        <div class="grid min-w-0 gap-8 lg:grid-cols-[minmax(17rem,0.85fr)_minmax(0,1.15fr)] lg:items-start">
-            <div class="min-w-0 rounded-2xl border border-slate-200 bg-slate-50/70 p-5 sm:p-6">
+    <div class="space-y-4">
+        <section class="farmer-panel px-5 py-5 sm:px-7 sm:py-6" aria-labelledby="milk-entry-heading">
+            <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-200 pb-4">
                 <div>
-                    <p class="farmer-eyebrow">Daily production</p>
-                    <h2 class="farmer-title">{% if editing_record %}Correct a record{% else %}Record milk{% endif %}</h2>
-                    <p class="farmer-copy break-words">Save one total for one cow and one date. Use litres.</p>
+                    <h2 id="milk-entry-heading" class="text-2xl font-semibold tracking-tight text-slate-950 font-display">{% if editing_record %}Edit milk record{% else %}Record milk{% endif %}</h2>
+                    <p class="mt-1 max-w-2xl text-sm leading-6 text-slate-600">Choose the cow and date, then enter both milking amounts. The total is calculated when saved.</p>
                 </div>
-
-                {% if cow_records %}
-                    <form method="post" class="mt-6 space-y-5">
-                        {% csrf_token %}
-                        {% if milk_form.non_field_errors %}
-                            <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800" role="alert">
-                                {{ milk_form.non_field_errors }}
-                            </div>
-                        {% endif %}
-
-                        <div>
-                            <label for="{{ milk_form.cow.id_for_label }}" class="mb-2 block text-sm font-semibold text-slate-800">{{ milk_form.cow.label }}</label>
-                            {{ milk_form.cow }}
-                            {% for error in milk_form.cow.errors %}<p class="mt-2 text-sm text-rose-700">{{ error }}</p>{% endfor %}
-                        </div>
-
-                        <div>
-                            <label for="{{ milk_form.record_date.id_for_label }}" class="mb-2 block text-sm font-semibold text-slate-800">{{ milk_form.record_date.label }}</label>
-                            {{ milk_form.record_date }}
-                            {% for error in milk_form.record_date.errors %}<p class="mt-2 text-sm text-rose-700">{{ error }}</p>{% endfor %}
-                        </div>
-
-                        <div>
-                            <label for="{{ milk_form.daily_yield_liters.id_for_label }}" class="mb-2 block text-sm font-semibold text-slate-800">{{ milk_form.daily_yield_liters.label }}</label>
-                            {{ milk_form.daily_yield_liters }}
-                            <p class="mt-2 text-xs leading-5 text-slate-500">Enter 0 only when the cow produced no milk. Leave a date unrecorded if you do not have a measurement.</p>
-                            {% for error in milk_form.daily_yield_liters.errors %}<p class="mt-2 text-sm text-rose-700">{{ error }}</p>{% endfor %}
-                        </div>
-
-                        <div class="flex flex-wrap items-center gap-3 pt-1">
-                            <button type="submit" class="farmer-button-primary">{% if editing_record %}Save correction{% else %}Save daily total{% endif %}</button>
-                            {% if editing_record %}<a href="{% url 'farmers_dashboard:milk_records' %}" class="text-sm font-semibold text-slate-600 hover:text-slate-900">Cancel</a>{% endif %}
-                        </div>
-                    </form>
-                {% else %}
-                    <div class="mt-6 rounded-xl border border-slate-200 bg-white p-4">
-                        <p class="text-sm leading-6 text-slate-700">Register a cow before recording milk production.</p>
-                        <a href="{% url 'farmers_dashboard:cow_register' %}" class="farmer-button-primary mt-4 inline-flex">Register a cow</a>
-                    </div>
+                {% if editing_record %}
+                    <a href="{% url 'farmers_dashboard:milk_records' %}" class="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Cancel correction</a>
                 {% endif %}
             </div>
 
-            <div class="min-w-0">
-                <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                    <div>
-                        <p class="farmer-eyebrow">Saved history</p>
-                        <h2 class="farmer-title">Recent records</h2>
+            {% if cow_records %}
+                <form method="post" class="mt-5">
+                    {% csrf_token %}
+                    {% if milk_form.non_field_errors %}
+                        <div class="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800" role="alert">{{ milk_form.non_field_errors }}</div>
+                    {% endif %}
+
+                    {% if editing_record and editing_record.morning_yield_liters == None %}
+                        <p class="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">This older record has only a daily total. Add the measured morning and evening amounts to correct it.</p>
+                    {% endif %}
+
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div>
+                            <label for="{{ milk_form.cow.id_for_label }}" class="mb-1.5 block text-sm font-semibold text-slate-800">{{ milk_form.cow.label }}</label>
+                            {{ milk_form.cow }}
+                            {% for error in milk_form.cow.errors %}<p class="mt-1.5 text-sm text-rose-700">{{ error }}</p>{% endfor %}
+                        </div>
+                        <div>
+                            <label for="{{ milk_form.record_date.id_for_label }}" class="mb-1.5 block text-sm font-semibold text-slate-800">{{ milk_form.record_date.label }}</label>
+                            {{ milk_form.record_date }}
+                            {% for error in milk_form.record_date.errors %}<p class="mt-1.5 text-sm text-rose-700">{{ error }}</p>{% endfor %}
+                        </div>
                     </div>
-                    <p class="text-sm text-slate-500">Newest dates first</p>
+
+                    <fieldset class="mt-5">
+                        <legend class="text-sm font-semibold text-slate-800">Milk amounts</legend>
+                        <p class="mt-1 text-sm text-slate-600">Use 0 if a session produced no milk.</p>
+                        <div class="mt-3 grid gap-4 sm:grid-cols-2">
+                            <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+                                <label for="{{ milk_form.morning_yield_liters.id_for_label }}" class="mb-1.5 block text-sm font-semibold text-slate-800">Morning (L)</label>
+                                {{ milk_form.morning_yield_liters }}
+                                {% for error in milk_form.morning_yield_liters.errors %}<p class="mt-1.5 text-sm text-rose-700">{{ error }}</p>{% endfor %}
+                            </div>
+                            <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+                                <label for="{{ milk_form.evening_yield_liters.id_for_label }}" class="mb-1.5 block text-sm font-semibold text-slate-800">Evening (L)</label>
+                                {{ milk_form.evening_yield_liters }}
+                                {% for error in milk_form.evening_yield_liters.errors %}<p class="mt-1.5 text-sm text-rose-700">{{ error }}</p>{% endfor %}
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <div class="mt-5 flex flex-wrap items-center gap-3">
+                        <button type="submit" class="farmer-button-primary">{% if editing_record %}Save correction{% else %}Save milk record{% endif %}</button>
+                        {% if editing_record %}<span class="text-sm text-slate-500">Daily total updates from the two session amounts.</span>{% endif %}
+                    </div>
+                </form>
+            {% else %}
+                <div class="mt-5 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-5">
+                    <p class="text-sm leading-6 text-slate-700">Add a cow to your herd before recording milk production.</p>
+                    <a href="{% url 'farmers_dashboard:cow_register' %}" class="farmer-button-primary mt-3 inline-flex">Register a cow</a>
+                </div>
+            {% endif %}
+        </section>
+
+        <section class="farmer-panel min-w-0 px-5 py-5 sm:px-7 sm:py-6" aria-labelledby="recent-records-heading">
+            <div class="flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 pb-4">
+                <div>
+                    <h2 id="recent-records-heading" class="text-xl font-semibold tracking-tight text-slate-950 font-display">{% if selected_cow %}{{ selected_cow.name }}'s milk history{% else %}Milk history by cow{% endif %}</h2>
+                    {% if selected_cow %}
+                        <p class="mt-1 text-sm text-slate-500">{{ milk_records_page.paginator.count }} record{{ milk_records_page.paginator.count|pluralize }}</p>
+                    {% else %}
+                        <p class="mt-1 text-sm text-slate-500">Choose a cow to see her milk records.</p>
+                    {% endif %}
+                </div>
+                {% if selected_cow %}
+                    <a href="{% url 'farmers_dashboard:milk_records' %}" class="text-sm font-semibold text-emerald-800 underline underline-offset-4 hover:text-emerald-950">All cows</a>
+                {% endif %}
+            </div>
+
+            {% if selected_cow %}
+                <aside class="mt-4 flex flex-col gap-2 rounded-xl border border-emerald-100 bg-emerald-50/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between" aria-label="Usual milk guide for next record">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-emerald-900">Usual milk guide · next record</p>
+                        {% if milk_guide_average != None %}
+                            <p class="mt-1 text-xl font-semibold tabular-nums text-slate-950">{{ milk_guide_average|floatformat:1 }} L per day</p>
+                        {% else %}
+                            <p class="mt-1 text-sm font-medium text-slate-800">More records needed</p>
+                        {% endif %}
+                    </div>
+                    {% if milk_guide_average != None %}
+                        <p class="max-w-md text-sm leading-5 text-slate-600">Average of her 7 latest recorded days. Use it as a guide, not a guaranteed prediction.</p>
+                    {% else %}
+                        <p class="max-w-md text-sm leading-5 text-slate-600">Record {{ milk_guide_missing_records }} more day{{ milk_guide_missing_records|pluralize }} to see her usual level.</p>
+                    {% endif %}
+                </aside>
+            {% endif %}
+
+            {% if selected_cow and milk_records_page.object_list %}
+                <div class="mt-4 hidden overflow-x-auto sm:block">
+                    <table class="w-full min-w-[680px] border-collapse text-left">
+                        <caption class="sr-only">Recent milk records, newest first</caption>
+                        <thead>
+                            <tr class="border-b border-slate-200 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                <th scope="col" class="px-3 py-3">Date</th>
+                                <th scope="col" class="px-3 py-3">Cow</th>
+                                <th scope="col" class="px-3 py-3 text-right">Morning</th>
+                                <th scope="col" class="px-3 py-3 text-right">Evening</th>
+                                <th scope="col" class="px-3 py-3 text-right">Daily total</th>
+                                <th scope="col" class="px-3 py-3"><span class="sr-only">Actions</span></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            {% for record in milk_records_page %}
+                                <tr class="text-sm text-slate-700">
+                                    <td class="whitespace-nowrap px-3 py-4">{{ record.record_date|date:"d M Y" }}</td>
+                                    <th scope="row" class="px-3 py-4 font-semibold text-slate-900">{{ record.cow.name }} <span class="font-normal text-slate-500">({{ record.cow.cow_number }})</span></th>
+                                    {% if record.morning_yield_liters != None and record.evening_yield_liters != None %}
+                                        <td class="px-3 py-4 text-right tabular-nums">{{ record.morning_yield_liters|floatformat:2 }} L</td>
+                                        <td class="px-3 py-4 text-right tabular-nums">{{ record.evening_yield_liters|floatformat:2 }} L</td>
+                                    {% else %}
+                                        <td colspan="2" class="px-3 py-4 text-right text-xs text-slate-500">Session details unavailable</td>
+                                    {% endif %}
+                                    <td class="whitespace-nowrap px-3 py-4 text-right font-semibold tabular-nums text-slate-900">{{ record.daily_yield_liters|floatformat:2 }} L</td>
+                                    <td class="whitespace-nowrap px-3 py-4 text-right"><a href="{% url 'farmers_dashboard:milk_record_edit' record.pk %}" class="font-semibold text-emerald-800 underline underline-offset-4 hover:text-emerald-950">Edit</a></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
 
-                {% if milk_records_page.object_list %}
-                    <div class="mt-5 divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-white px-4 sm:px-5">
-                        {% for record in milk_records_page %}
-                            <div class="grid gap-3 py-4 sm:grid-cols-[minmax(0,1fr)_minmax(7rem,auto)_auto] sm:items-center">
+                <ul class="mt-4 divide-y divide-slate-200 sm:hidden">
+                    {% for record in milk_records_page %}
+                        <li class="py-4 first:pt-1">
+                            <div class="flex items-start justify-between gap-3">
                                 <div class="min-w-0">
                                     <p class="truncate font-semibold text-slate-900">{{ record.cow.name }} <span class="font-normal text-slate-500">({{ record.cow.cow_number }})</span></p>
                                     <p class="mt-1 text-sm text-slate-500">{{ record.record_date|date:"d M Y" }}</p>
                                 </div>
-                                <p class="text-sm font-semibold tabular-nums text-slate-800">{{ record.daily_yield_liters|floatformat:2 }} L</p>
-                                <a href="{% url 'farmers_dashboard:milk_record_edit' record.pk %}" class="text-sm font-semibold text-emerald-800 underline decoration-emerald-300 underline-offset-4 hover:text-emerald-950">Edit</a>
+                                <a href="{% url 'farmers_dashboard:milk_record_edit' record.pk %}" class="shrink-0 text-sm font-semibold text-emerald-800 underline underline-offset-4">Edit</a>
                             </div>
-                        {% endfor %}
-                    </div>
+                            <div class="mt-3 grid grid-cols-3 gap-2 rounded-xl bg-slate-50 p-3 text-sm">
+                                {% if record.morning_yield_liters != None and record.evening_yield_liters != None %}
+                                    <p><span class="block text-xs text-slate-500">Morning</span><span class="font-medium tabular-nums">{{ record.morning_yield_liters|floatformat:2 }} L</span></p>
+                                    <p><span class="block text-xs text-slate-500">Evening</span><span class="font-medium tabular-nums">{{ record.evening_yield_liters|floatformat:2 }} L</span></p>
+                                {% else %}
+                                    <p class="col-span-2 text-xs leading-5 text-slate-500">Session details unavailable</p>
+                                {% endif %}
+                                <p class="text-right"><span class="block text-xs text-slate-500">Total</span><span class="font-semibold tabular-nums text-slate-900">{{ record.daily_yield_liters|floatformat:2 }} L</span></p>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
 
-                    {% if milk_records_page.has_other_pages %}
-                        <nav class="mt-4 flex items-center justify-between gap-3" aria-label="Milk record pages">
-                            {% if milk_records_page.has_previous %}
-                                <a href="?page={{ milk_records_page.previous_page_number }}" class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Previous</a>
-                            {% else %}<span></span>{% endif %}
-                            <span class="text-xs text-slate-500">Page {{ milk_records_page.number }} of {{ milk_records_page.paginator.num_pages }}</span>
-                            {% if milk_records_page.has_next %}
-                                <a href="?page={{ milk_records_page.next_page_number }}" class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Next</a>
-                            {% else %}<span></span>{% endif %}
-                        </nav>
-                    {% endif %}
-                {% else %}
-                    <div class="farmer-empty-state mt-5 px-5 py-10">
-                        <h3 class="text-xl font-semibold text-slate-900">No milk records yet</h3>
-                        <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600">Your saved daily totals will appear here. Missing dates stay unrecorded.</p>
-                    </div>
+                {% if milk_records_page.has_other_pages %}
+                    <nav class="mt-4 flex items-center justify-between gap-3 border-t border-slate-200 pt-4" aria-label="Milk record pages">
+                        {% if milk_records_page.has_previous %}<a href="?cow={{ selected_cow.pk }}&amp;page={{ milk_records_page.previous_page_number }}" class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Previous</a>{% else %}<span></span>{% endif %}
+                        <span class="text-xs text-slate-500">Page {{ milk_records_page.number }} of {{ milk_records_page.paginator.num_pages }}</span>
+                        {% if milk_records_page.has_next %}<a href="?cow={{ selected_cow.pk }}&amp;page={{ milk_records_page.next_page_number }}" class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Next</a>{% else %}<span></span>{% endif %}
+                    </nav>
                 {% endif %}
-            </div>
-        </div>
-    </section>
+            {% elif selected_cow %}
+                <div class="mt-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center">
+                    <h3 class="font-semibold text-slate-900">No milk records yet</h3>
+                    <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600">Milk saved for {{ selected_cow.name }} will appear here.</p>
+                    <a href="#milk-entry-heading" class="mt-4 inline-flex text-sm font-semibold text-emerald-800 underline underline-offset-4">Record milk for {{ selected_cow.name }}</a>
+                </div>
+            {% elif milk_history_cows %}
+                <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    {% for cow in milk_history_cows %}
+                        <article class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:border-emerald-200">
+                        <details class="group">
+                            <summary class="flex min-h-28 cursor-pointer list-none flex-col justify-between p-4 outline-none transition hover:bg-emerald-50/40 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-700">
+                                <span class="flex w-full items-start justify-between gap-3">
+                                <span class="min-w-0">
+                                    <span class="block truncate font-semibold text-slate-900">{{ cow.name }}</span>
+                                    <span class="mt-0.5 block text-sm text-slate-500">{{ cow.cow_number }}{% if cow.milk_record_count %} · {{ cow.milk_record_count }} record{{ cow.milk_record_count|pluralize }}{% else %} · No records yet{% endif %}</span>
+                                </span>
+                                <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold {% if cow.status_tone == 'rose' %}bg-rose-100 text-rose-800{% elif cow.status_tone == 'amber' %}bg-amber-100 text-amber-900{% elif cow.status_tone == 'violet' %}bg-violet-100 text-violet-800{% elif cow.status_tone == 'sky' %}bg-sky-100 text-sky-800{% else %}bg-emerald-100 text-emerald-800{% endif %}">{{ cow.status_label }}</span>
+                                </span>
+                                {% if cow.recent_milk_entries %}<span class="shrink-0 text-sm font-semibold tabular-nums text-slate-700">{{ cow.recent_milk_entries.0.daily_yield_liters|floatformat:1 }} L latest</span>{% endif %}
+                                <span aria-hidden="true" class="shrink-0 text-slate-500 transition-transform group-open:rotate-180">⌄</span>
+                            </summary>
+                            <div class="border-t border-slate-100 px-4 py-3">
+                                {% if cow.recent_milk_entries %}
+                                    <ul class="divide-y divide-slate-100 rounded-lg bg-slate-50 px-3 sm:px-4">
+                                        {% for record in cow.recent_milk_entries %}
+                                            <li class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-3 text-sm">
+                                                <span class="text-slate-600">{{ record.record_date|date:"d M Y" }}</span>
+                                                <span class="font-semibold tabular-nums text-slate-900">{{ record.daily_yield_liters|floatformat:1 }} L</span>
+                                                <a href="{% url 'farmers_dashboard:milk_record_edit' record.pk %}" class="font-semibold text-emerald-800 underline underline-offset-4 hover:text-emerald-950">Edit</a>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% if cow.milk_record_count > 5 %}<a href="?cow={{ cow.pk }}" class="mt-3 inline-flex text-sm font-semibold text-emerald-800 underline underline-offset-4 hover:text-emerald-950">View all {{ cow.milk_record_count }} records</a>{% endif %}
+                                {% else %}
+                                    <p class="py-2 text-sm text-slate-600">No milk records for this cow yet.</p>
+                                    <a href="?cow={{ cow.pk }}#milk-entry-heading" class="text-sm font-semibold text-emerald-800 underline underline-offset-4">Record milk</a>
+                                {% endif %}
+                            </div>
+                        </details>
+                        <div class="flex flex-wrap gap-2 border-t border-slate-100 p-3">
+                            <a href="?cow={{ cow.pk }}#milk-entry-heading" class="inline-flex min-h-10 flex-1 items-center justify-center rounded-xl bg-[#14532d] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#114524]">Record milk</a>
+                            {% if cow.milk_record_count %}<a href="?cow={{ cow.pk }}#recent-records-heading" class="inline-flex min-h-10 flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 transition hover:border-emerald-300 hover:bg-emerald-50/40">View records</a>{% endif %}
+                        </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="mt-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center">
+                    <h3 class="font-semibold text-slate-900">No cows in your herd yet</h3>
+                    <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600">Register a cow to start keeping her milk history.</p>
+                    <a href="{% url 'farmers_dashboard:cow_register' %}" class="farmer-button-primary mt-4 inline-flex">Register a cow</a>
+                </div>
+            {% endif %}
+        </section>
+    </div>
 {% endblock %}
