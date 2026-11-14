@@ -1,394 +1,235 @@
 {% extends "farmers_dashboard/base_dashboard.html" %}
 
 {% block farmer_dashboard_content %}
-    <section class="grid gap-6 xl:grid-cols-[minmax(0,1.18fr)_21rem]">
-        <article class="farmer-panel overflow-hidden">
-            <div class="border-b border-slate-200 px-5 py-5 sm:px-7 sm:py-6">
-                <div class="flex flex-wrap items-start justify-between gap-4">
-                    <div class="flex min-w-0 items-start gap-4">
-                        {% if cow.photo_url %}
-                            <img src="{{ cow.photo_url }}" alt="{{ cow.name }}" class="h-20 w-20 rounded-[1.35rem] object-cover">
-                        {% else %}
-                            <div class="flex h-20 w-20 items-center justify-center rounded-[1.35rem] border border-emerald-100 bg-emerald-50 text-4xl">&#128004;</div>
-                        {% endif %}
-                        <div class="min-w-0">
-                            <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">{{ cow.cow_number }}</p>
-                            <h2 class="mt-2 text-3xl tracking-tight text-slate-950 font-display">{{ cow.name }}</h2>
-                            <p class="mt-2 text-sm leading-6 text-slate-600">{{ cow.get_breed_display }}</p>
-                            <div class="mt-4 flex flex-wrap gap-2">
-                                <span class="rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] {% if cow.status_tone == 'rose' %}bg-rose-100 text-rose-700{% elif cow.status_tone == 'amber' %}bg-amber-100 text-amber-700{% elif cow.status_tone == 'violet' %}bg-violet-100 text-violet-700{% elif cow.status_tone == 'sky' %}bg-sky-100 text-sky-700{% else %}bg-emerald-100 text-emerald-700{% endif %}">
-                                    {{ cow.status_label }}
-                                </span>
-                                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
-                                    {{ cow.reproductive_status_label }}
-                                </span>
-                                {% if cow.is_lactating %}
-                                    <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">Lactating</span>
-                                {% endif %}
-                            </div>
-                            {% if cow.insemination_type %}
-                                <p class="mt-3 text-sm leading-6 text-slate-600">Service type: {{ cow.get_insemination_type_display }}</p>
-                            {% endif %}
+    <section class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <div class="space-y-5">
+            <article class="farmer-panel overflow-hidden">
+                <div class="flex flex-wrap items-center gap-3 border-b border-slate-200 px-4 py-3 sm:px-6 sm:py-4">
+                    {% if cow.photo_url %}
+                        <img src="{{ cow.photo_url }}" alt="{{ cow.name }}" class="h-12 w-12 rounded-xl object-cover">
+                    {% else %}
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-3xl" aria-hidden="true">&#128004;</div>
+                    {% endif %}
+                    <div class="min-w-0 flex-1">
+                        <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                            <h2 class="text-xl font-semibold tracking-tight text-slate-950 font-display">{{ cow.name }}</h2>
+                            <span class="rounded-full px-2.5 py-1 text-xs font-semibold {% if cow.status_tone == 'rose' %}bg-rose-100 text-rose-800{% elif cow.status_tone == 'amber' %}bg-amber-100 text-amber-800{% elif cow.status_tone == 'violet' %}bg-violet-100 text-violet-800{% elif cow.status_tone == 'sky' %}bg-sky-100 text-sky-800{% else %}bg-emerald-100 text-emerald-800{% endif %}">{{ cow.status_label }}</span>
+                            {% if cow.insemination_type %}<span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">{{ cow.get_insemination_type_display }}</span>{% endif %}
                         </div>
-                    </div>
-
-                    <div class="rounded-[1.2rem] border border-emerald-200 bg-emerald-50/70 px-4 py-3 sm:min-w-[14rem]">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-700">Today</p>
-                        <h3 class="mt-2 text-xl tracking-tight text-slate-950 font-display">{{ cow.status_label }}</h3>
-                        <p class="mt-2 text-sm leading-6 text-slate-700">{{ cow.next_action_text }}</p>
+                        <p class="mt-0.5 text-xs text-slate-500">Tag {{ cow.cow_number }} · {{ cow.get_breed_display }}</p>
+                        <p class="mt-1 text-sm leading-5 text-slate-600"><span class="font-semibold text-slate-700">Next:</span> {{ cow.next_action_text }}</p>
                     </div>
                 </div>
 
-                <div class="mt-5 flex flex-wrap gap-3">
-                    {% for highlight in tracking_highlights|slice:":2" %}
-                        <div class="rounded-[1rem] border border-slate-200 bg-slate-50 px-4 py-3">
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">{{ highlight.label }}</p>
-                            <p class="mt-1 text-sm font-semibold text-slate-900">{{ highlight.value }}</p>
+                <div class="grid gap-4 p-4 sm:p-5">
+                    <section aria-labelledby="milk-history-heading">
+                        <div class="flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 pb-3">
+                            <h3 id="milk-history-heading" class="text-xl font-semibold tracking-tight text-slate-950 font-display">Milk production</h3>
+                            <a href="{{ record_milk_url }}" class="text-sm font-semibold text-emerald-900 underline decoration-emerald-300 underline-offset-4">Milk records</a>
                         </div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <section class="px-5 py-5 sm:px-7 sm:py-6">
-                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Tracking calendar</p>
-                        <h3 class="mt-2 text-2xl tracking-tight text-slate-950 font-display">{{ tracking_calendar.month_label }}</h3>
-                        <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600">{{ tracking_calendar.summary_text }}</p>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-2">
-                        <a href="?month={{ tracking_calendar.previous_month }}" class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600 transition hover:border-slate-300 hover:bg-slate-50">
-                            Previous
-                        </a>
-                        <a href="?month={{ tracking_calendar.next_month }}" class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600 transition hover:border-slate-300 hover:bg-slate-50">
-                            Next
-                        </a>
-                    </div>
-                </div>
-
-                <div class="mt-5 overflow-hidden rounded-[1.3rem] border border-slate-200 bg-white">
-                    <div class="grid grid-cols-7 border-b border-slate-200 bg-slate-50/80">
-                        {% for weekday in tracking_calendar.weekdays %}
-                            <div class="px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400 sm:px-3">{{ weekday }}</div>
-                        {% endfor %}
-                    </div>
-
-                    {% for week in tracking_calendar.weeks %}
-                        <div class="grid grid-cols-7 {% if not forloop.last %}border-b border-slate-200{% endif %}">
-                            {% for cell in week %}
-                                <div class="min-h-[5.1rem] border-r border-slate-200 p-1.5 last:border-r-0 sm:min-h-[6.2rem] sm:p-2 {% if not cell.in_month %}bg-slate-50/50{% elif cell.primary_event and cell.primary_event.tone == 'orange' %}bg-orange-50{% elif cell.primary_event and cell.primary_event.tone == 'sky' %}bg-sky-50{% elif cell.primary_event and cell.primary_event.tone == 'teal' %}bg-teal-50{% elif cell.primary_event and cell.primary_event.tone == 'emerald' %}bg-emerald-50{% elif cell.primary_event and cell.primary_event.tone == 'amber' %}bg-amber-50{% elif cell.primary_event and cell.primary_event.tone == 'rose' %}bg-rose-50{% else %}bg-white{% endif %}">
-                                    {% if cell.in_month %}
-                                        <button
-                                            type="button"
-                                            data-calendar-day-button
-                                            data-day-date="{{ cell.date_label }}"
-                                            data-day-title="{% if cell.is_today %}Today{% else %}{{ cell.date_label }}{% endif %}"
-                                            class="flex h-full min-h-[4.5rem] w-full flex-col rounded-[1rem] px-2 py-2 text-left transition hover:bg-white/70 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1 sm:min-h-[5.6rem] sm:px-2.5 sm:py-2.5"
-                                        >
-                                            <span class="flex items-start justify-between gap-2">
-                                                <span class="text-sm font-semibold text-slate-900">{{ cell.day }}</span>
-                                                {% if cell.is_today %}
-                                                    <span class="rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-white">Today</span>
-                                                {% endif %}
-                                            </span>
-
-                                            {% if cell.primary_event %}
-                                                <span class="mt-3 inline-flex w-fit rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] {% if cell.primary_event.tone == 'orange' %}bg-orange-100 text-orange-700{% elif cell.primary_event.tone == 'sky' %}bg-sky-100 text-sky-700{% elif cell.primary_event.tone == 'teal' %}bg-teal-100 text-teal-700{% elif cell.primary_event.tone == 'emerald' %}bg-emerald-100 text-emerald-700{% elif cell.primary_event.tone == 'amber' %}bg-amber-100 text-amber-700{% else %}bg-rose-100 text-rose-700{% endif %}">
-                                                    {{ cell.primary_event.short_label }}
-                                                </span>
-                                                {% if cell.event_count > 1 %}
-                                                    <span class="mt-2 text-[10px] font-medium uppercase tracking-[0.18em] text-slate-500">+{{ cell.event_count|add:"-1" }}</span>
-                                                {% endif %}
-                                            {% else %}
-                                                <span class="mt-auto pt-5 text-[11px] font-medium text-slate-400">No event</span>
-                                            {% endif %}
-
-                                            <template data-calendar-day-template>
-                                                <div class="space-y-3">
-                                                    <div>
-                                                        <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Selected day</p>
-                                                        <p class="mt-2 text-lg font-semibold text-slate-950">{{ cell.date_label }}</p>
-                                                    </div>
-                                                    {% if cell.event_details %}
-                                                        <div class="space-y-3">
-                                                            {% for event in cell.event_details %}
-                                                                <div class="rounded-[1rem] border border-slate-200 bg-slate-50/80 px-4 py-3">
-                                                                    <div class="flex flex-wrap items-center gap-2">
-                                                                        <span class="inline-flex h-2.5 w-2.5 rounded-full {% if event.tone == 'orange' %}bg-orange-500{% elif event.tone == 'sky' %}bg-sky-500{% elif event.tone == 'teal' %}bg-teal-500{% elif event.tone == 'emerald' %}bg-emerald-500{% elif event.tone == 'amber' %}bg-amber-500{% else %}bg-rose-500{% endif %}"></span>
-                                                                        <p class="text-sm font-semibold text-slate-900">{{ event.label }}</p>
-                                                                    </div>
-                                                                    {% if event.detail %}
-                                                                        <p class="mt-2 text-sm leading-6 text-slate-600">{{ event.detail }}</p>
-                                                                    {% endif %}
-                                                                </div>
-                                                            {% endfor %}
-                                                        </div>
-                                                    {% else %}
-                                                        <div class="rounded-[1rem] border border-dashed border-slate-300 bg-slate-50/70 px-4 py-4">
-                                                            <p class="text-sm leading-6 text-slate-600">No reproductive event is saved or predicted for this day yet.</p>
-                                                        </div>
-                                                    {% endif %}
-                                                </div>
-                                            </template>
-                                        </button>
-                                    {% else %}
-                                        <div class="flex h-full min-h-[4.5rem] flex-col rounded-[1rem] px-2 py-2 sm:min-h-[5.6rem] sm:px-2.5 sm:py-2.5">
-                                            <span class="text-sm font-semibold text-slate-400">{{ cell.day }}</span>
-                                        </div>
+                        {% if milk_trend.summary %}
+                            <p class="mt-4 rounded-xl px-4 py-3 text-sm leading-6 {% if milk_trend.summary.tone == 'critical' %}border border-rose-200 bg-rose-50 text-rose-900{% elif milk_trend.summary.tone == 'warning' %}border border-amber-200 bg-amber-50 text-amber-950{% elif milk_trend.summary.tone == 'normal' %}border border-emerald-200 bg-emerald-50 text-emerald-950{% else %}border border-slate-200 bg-slate-50 text-slate-700{% endif %}">{{ milk_trend.summary.text }}</p>
+                            <figure class="mt-4 rounded-2xl border border-slate-200 bg-white p-3 sm:p-4" aria-labelledby="milk-chart-title">
+                                <figcaption id="milk-chart-title" class="flex flex-wrap items-baseline justify-between gap-2">
+                                    <span class="text-sm font-semibold text-slate-900">Milk per day (L)</span>
+                                    <span class="text-xs text-slate-500">Recorded dates only</span>
+                                </figcaption>
+                                <svg class="mt-3 block w-full" viewBox="0 0 560 205" role="img" aria-label="Daily milk in litres from {{ milk_trend.start_date|date:'d M Y' }} to {{ milk_trend.end_date|date:'d M Y' }}. The dashed reference shows the previous seven recorded days when available. Missing dates are left blank.">
+                                    {% for tick in milk_trend.y_ticks %}
+                                        <line x1="{{ milk_trend.plot_left }}" y1="{{ tick.y }}" x2="{{ milk_trend.plot_right }}" y2="{{ tick.y }}" stroke="#e2e8f0" stroke-width="1" />
+                                        <text x="49" y="{{ tick.y }}" text-anchor="end" dominant-baseline="middle" fill="#64748b" font-size="11">{{ tick.label }}</text>
+                                    {% endfor %}
+                                    {% if milk_trend.baseline_line %}
+                                        <line x1="{{ milk_trend.baseline_line.x1 }}" y1="{{ milk_trend.baseline_line.y }}" x2="{{ milk_trend.baseline_line.x2 }}" y2="{{ milk_trend.baseline_line.y }}" stroke="#b45309" stroke-width="2" stroke-dasharray="6 5" />
                                     {% endif %}
+                                    <line x1="{{ milk_trend.plot_left }}" y1="{{ milk_trend.plot_bottom }}" x2="{{ milk_trend.plot_right }}" y2="{{ milk_trend.plot_bottom }}" stroke="#94a3b8" stroke-width="1" />
+                                    {% for path in milk_trend.paths %}<path d="{{ path }}" fill="none" stroke="#15803d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />{% endfor %}
+                                    {% for point in milk_trend.points %}
+                                        {% if point.is_latest %}
+                                            <circle cx="{{ point.x }}" cy="{{ point.y }}" r="6" fill="{% if milk_trend.summary.tone == 'critical' %}#be123c{% elif milk_trend.summary.tone == 'warning' %}#b45309{% else %}#15803d{% endif %}" stroke="#ffffff" stroke-width="2"><title>Latest: {{ point.date|date:"d M Y" }}, {{ point.yield|floatformat:1 }} L</title></circle>
+                                        {% else %}
+                                            <circle cx="{{ point.x }}" cy="{{ point.y }}" r="3.5" fill="#15803d"><title>{{ point.date|date:"d M Y" }}: {{ point.yield|floatformat:1 }} L</title></circle>
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% for tick in milk_trend.x_ticks %}<text x="{{ tick.x }}" y="188" text-anchor="{{ tick.anchor }}" fill="#64748b" font-size="11">{{ tick.date|date:"d M" }}</text>{% endfor %}
+                                </svg>
+                                <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600" aria-label="Chart key">
+                                    <span class="inline-flex items-center gap-1.5"><span class="h-0.5 w-4 bg-emerald-700" aria-hidden="true"></span>Daily milk</span>
+                                    {% if milk_trend.baseline_line %}<span class="inline-flex items-center gap-1.5"><span class="w-4 border-t-2 border-dashed border-amber-700" aria-hidden="true"></span>Usual: {{ milk_trend.baseline_line.value|floatformat:1 }} L (previous 7 recorded days)</span>{% endif %}
                                 </div>
-                            {% endfor %}
+                                <ul class="sr-only" aria-label="Recorded daily milk amounts">
+                                    {% for record in milk_trend.records %}<li>{{ record.record_date|date:"d M Y" }}: {{ record.daily_yield_liters|floatformat:1 }} litres</li>{% endfor %}
+                                </ul>
+                            </figure>
+                        {% endif %}
+                        {% if recent_milk_records %}
+                            <details class="mt-3 border-t border-slate-200 pt-2">
+                                <summary class="inline-flex min-h-10 cursor-pointer items-center text-sm font-semibold text-slate-800 underline decoration-slate-300 underline-offset-4 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2">Session details ({{ recent_milk_records|length }})</summary>
+                                <ul class="divide-y divide-slate-200">
+                                    {% for record in recent_milk_records %}
+                                        <li class="grid gap-3 py-3 sm:grid-cols-[minmax(0,1fr)_repeat(3,minmax(0,5rem))] sm:items-center">
+                                            <time datetime="{{ record.record_date|date:'Y-m-d' }}" class="text-sm font-semibold text-slate-900">{{ record.record_date|date:"d M Y" }}</time>
+                                            <p class="text-sm text-slate-600"><span class="text-xs text-slate-500 sm:block">Morning</span> {{ record.morning_yield_liters|default_if_none:"—" }}{% if record.morning_yield_liters != None %} L{% endif %}</p>
+                                            <p class="text-sm text-slate-600"><span class="text-xs text-slate-500 sm:block">Evening</span> {{ record.evening_yield_liters|default_if_none:"—" }}{% if record.evening_yield_liters != None %} L{% endif %}</p>
+                                            <p class="text-sm font-semibold text-slate-900"><span class="text-xs font-normal text-slate-500 sm:block">Total</span> {{ record.daily_yield_liters }} L</p>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </details>
+                        {% else %}
+                            <p class="mt-3 text-sm leading-6 text-slate-600">No milk records for this cow yet.</p>
+                        {% endif %}
+                    </section>
+
+                    <section aria-labelledby="next-dates-heading">
+                        <div class="flex flex-wrap items-end justify-between gap-2">
+                            <h3 id="next-dates-heading" class="text-xl font-semibold tracking-tight text-slate-950 font-display">Next important dates</h3>
                         </div>
-                    {% endfor %}
-                </div>
+                        {% if tracking_overview.upcoming_events.items %}
+                            <ol class="mt-3 divide-y divide-slate-200 rounded-2xl border border-slate-200">
+                                {% for item in tracking_overview.upcoming_events.items %}
+                                    <li class="flex gap-4 px-4 py-4 {% if forloop.first %}bg-emerald-50/60{% endif %}">
+                                        <time datetime="{{ item.date|date:'Y-m-d' }}" class="w-24 shrink-0 text-sm font-semibold text-slate-900">{{ item.date|date:"d M Y" }}</time>
+                                        <div class="min-w-0">
+                                            <p class="text-sm font-semibold text-slate-900">{{ item.label }}</p>
+                                            <p class="mt-1 text-sm leading-5 text-slate-600">{{ item.detail }}</p>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ol>
+                            <p class="mt-2 text-xs leading-5 text-slate-500">Dates are estimates based on the records entered for this cow.</p>
+                        {% else %}
+                            <p class="mt-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-4 text-sm leading-6 text-slate-600">No upcoming dates yet. Record a reproductive event to start the follow-up timeline.</p>
+                        {% endif %}
+                    </section>
 
-                <div class="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_15rem]">
-                    <div class="rounded-[1.2rem] border border-slate-200 bg-white px-4 py-4 shadow-sm sm:px-5">
-                        <div class="flex flex-wrap items-start justify-between gap-3">
-                            <div>
-                                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Day details</p>
-                                <h4 id="calendar-day-detail-title" class="mt-2 text-lg tracking-tight text-slate-950 font-display">Tap a day</h4>
-                            </div>
-                        </div>
-                        <div id="calendar-day-detail-body" class="mt-4">
-                            <div class="rounded-[1rem] border border-dashed border-slate-300 bg-slate-50/70 px-4 py-4">
-                                <p class="text-sm leading-6 text-slate-600">Choose a day in the calendar to see saved events and predictions for that date.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="rounded-[1.2rem] border border-slate-200 bg-slate-50/80 px-4 py-4">
-                        <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Legend</p>
-                        <div class="mt-3 space-y-2.5">
-                            {% for item in tracking_calendar.legend %}
-                                <div class="inline-flex w-full items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700">
-                                    <span class="h-2.5 w-2.5 rounded-full {% if item.tone == 'orange' %}bg-orange-500{% elif item.tone == 'sky' %}bg-sky-500{% elif item.tone == 'teal' %}bg-teal-500{% elif item.tone == 'emerald' %}bg-emerald-500{% elif item.tone == 'amber' %}bg-amber-500{% else %}bg-rose-500{% endif %}"></span>
-                                    <span>{{ item.label }}</span>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </article>
-
-        <aside class="space-y-4">
-            <article class="farmer-panel-tight px-5 py-5">
-                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">{{ tracking_calendar.upcoming_events.heading }}</p>
-                <h3 class="mt-2 text-xl tracking-tight text-slate-950 font-display">Upcoming dates</h3>
-                <p class="mt-2 text-sm leading-6 text-slate-600">{{ tracking_calendar.upcoming_events.summary }}</p>
-
-                {% if tracking_calendar.upcoming_events.items %}
-                    <div class="mt-4 space-y-3">
-                        {% for item in tracking_calendar.upcoming_events.items|slice:":3" %}
-                            <div class="rounded-[1rem] border border-slate-200 bg-slate-50/80 px-4 py-4">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <span class="inline-flex h-2.5 w-2.5 rounded-full {% if item.tone == 'orange' %}bg-orange-500{% elif item.tone == 'sky' %}bg-sky-500{% elif item.tone == 'teal' %}bg-teal-500{% elif item.tone == 'emerald' %}bg-emerald-500{% elif item.tone == 'amber' %}bg-amber-500{% else %}bg-rose-500{% endif %}"></span>
-                                    <p class="text-sm font-semibold text-slate-900">{{ item.label }}</p>
-                                </div>
-                                <p class="mt-2 text-sm font-medium text-slate-800">{{ item.date|date:"d M Y" }}</p>
-                                <p class="mt-1 text-sm leading-6 text-slate-600">{{ item.detail }}</p>
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="mt-4 rounded-[1rem] border border-dashed border-slate-300 bg-slate-50/70 px-4 py-4">
-                        <p class="text-sm leading-6 text-slate-600">No upcoming dates yet. Record heat or insemination to start the forecast.</p>
-                    </div>
-                {% endif %}
-            </article>
-
-            <article class="farmer-panel-tight px-5 py-5">
-                <div class="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Record event</p>
-                        <h3 class="mt-2 text-xl tracking-tight text-slate-950 font-display">Update this cow</h3>
-                    </div>
-                </div>
-
-                <form method="post" action="{{ tracking_form_action }}" class="mt-4 space-y-4">
-                    {% csrf_token %}
-                    <input type="hidden" name="record_event" value="1">
-                    <input type="hidden" name="calendar_month" value="{{ tracking_calendar.month_value }}">
-
-                    {% if event_form.non_field_errors %}
-                        <div class="rounded-[1rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-                            {{ event_form.non_field_errors }}
-                        </div>
+                    {% if tracking_overview.history_items %}
+                        <details class="border-t border-slate-200 pt-4">
+                            <summary class="inline-flex min-h-10 cursor-pointer items-center text-sm font-semibold text-slate-800 underline decoration-slate-300 underline-offset-4 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2">Past reproductive events ({{ tracking_overview.history_items|length }})</summary>
+                            <ol class="mt-2 divide-y divide-slate-200">
+                                {% for item in tracking_overview.history_items %}
+                                    <li class="flex gap-4 py-3">
+                                        <time datetime="{{ item.date|date:'Y-m-d' }}" class="w-24 shrink-0 pt-0.5 text-sm font-medium text-slate-600">{{ item.date|date:"d M Y" }}</time>
+                                        <div class="relative min-w-0 flex-1 border-l-2 pl-4 {% if item.tone == 'rose' %}border-rose-300{% elif item.tone == 'orange' %}border-orange-300{% elif item.tone == 'sky' %}border-sky-300{% elif item.tone == 'emerald' %}border-emerald-300{% else %}border-slate-300{% endif %}">
+                                            <p class="text-sm font-semibold text-slate-900">{{ item.label }}</p>
+                                            <p class="mt-1 text-sm leading-5 text-slate-600">{{ item.detail }}</p>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ol>
+                        </details>
                     {% endif %}
 
-                    <div>
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Event type</p>
-                        <div class="mt-3 grid gap-2">
+                    <details class="border-t border-slate-200 pt-4">
+                        <summary class="inline-flex min-h-10 cursor-pointer items-center text-sm font-semibold text-slate-800 underline decoration-slate-300 underline-offset-4 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2">Cow information</summary>
+                        <dl class="mt-3 grid gap-3 rounded-xl bg-slate-50 p-4 sm:grid-cols-2">
+                            <div><dt class="text-xs font-medium text-slate-500">Date of birth</dt><dd class="mt-1 text-sm font-medium text-slate-900">{{ cow.date_of_birth|date:"d M Y"|default:"Not recorded" }}</dd></div>
+                            <div><dt class="text-xs font-medium text-slate-500">Reproductive status</dt><dd class="mt-1 text-sm font-medium text-slate-900">{{ cow.reproductive_status_label }}</dd></div>
+                            <div><dt class="text-xs font-medium text-slate-500">Milk status</dt><dd class="mt-1 text-sm font-medium text-slate-900">{% if cow.is_lactating %}Lactating{% else %}Not marked as lactating{% endif %}</dd></div>
+                            <div class="sm:col-span-2"><dt class="text-xs font-medium text-slate-500">Farmer notes</dt><dd class="mt-1 text-sm leading-6 text-slate-700">{{ cow.notes|default:"No notes saved." }}</dd></div>
+                        </dl>
+                    </details>
+                </div>
+            </article>
+        </div>
+
+        <aside class="space-y-3">
+            <article class="farmer-panel-tight px-4 py-3">
+                <details {% if event_form.errors %}open{% endif %}>
+                    <summary class="cursor-pointer text-base font-semibold tracking-tight text-slate-950 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2">Record an event</summary>
+                    <form method="post" action="{{ tracking_form_action }}" class="mt-4 space-y-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="record_event" value="1">
+                    {% if event_form.non_field_errors %}<div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{{ event_form.non_field_errors }}</div>{% endif %}
+                    <fieldset>
+                        <legend class="text-sm font-semibold text-slate-800">What happened?</legend>
+                        <div class="mt-2 grid gap-2">
                             {% for choice in event_form.event_type %}
-                                <label class="group cursor-pointer rounded-[1rem] border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-white has-[:checked]:border-emerald-300 has-[:checked]:bg-emerald-50 has-[:checked]:text-emerald-800">
-                                    {{ choice.tag }}
-                                    <span class="block">{{ choice.choice_label }}</span>
+                                <label class="group cursor-pointer rounded-xl border border-slate-200 px-3 py-3 text-sm text-slate-800 transition hover:bg-slate-50 has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50">
+                                    {{ choice.tag }} <span class="ml-2">{{ choice.choice_label }}</span>
                                 </label>
                             {% endfor %}
                         </div>
-                        {% if event_form.event_type.errors %}
-                            <p class="mt-2 text-sm text-rose-600">{{ event_form.event_type.errors|join:", " }}</p>
-                        {% endif %}
+                        {% if event_form.event_type.errors %}<p class="mt-2 text-sm text-rose-700">{{ event_form.event_type.errors|join:", " }}</p>{% endif %}
+                    </fieldset>
+                    <div>
+                        <label for="{{ event_form.event_date.id_for_label }}" class="text-sm font-semibold text-slate-800">Date</label>
+                        <div class="mt-1">{{ event_form.event_date }}</div>
+                        {% if event_form.event_date.errors %}<p class="mt-1 text-sm text-rose-700">{{ event_form.event_date.errors|join:", " }}</p>{% endif %}
                     </div>
-
-                    <div class="grid gap-3">
-                        <div>
-                            <label for="{{ event_form.event_date.id_for_label }}" class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Date</label>
-                            <div class="mt-2">{{ event_form.event_date }}</div>
-                            {% if event_form.event_date.errors %}
-                                <p class="mt-2 text-sm text-rose-600">{{ event_form.event_date.errors|join:", " }}</p>
-                            {% endif %}
-                        </div>
-                        <div>
-                            <label for="{{ event_form.notes.id_for_label }}" class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Note</label>
-                            <div class="mt-2">{{ event_form.notes }}</div>
-                        </div>
+                    <div>
+                        <label for="{{ event_form.notes.id_for_label }}" class="text-sm font-semibold text-slate-800">Note <span class="font-normal text-slate-500">(optional)</span></label>
+                        <div class="mt-1">{{ event_form.notes }}</div>
                     </div>
-
-                    <button type="submit" class="inline-flex w-full items-center justify-center rounded-[1rem] bg-[#14532d] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#114524]">
-                        Save event
-                    </button>
-                </form>
+                    <button type="submit" class="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#14532d] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#114524]">Save event</button>
+                    </form>
+                </details>
             </article>
 
-            <article class="farmer-panel-tight px-5 py-5">
-                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Progress</p>
-                <h3 class="mt-2 text-xl tracking-tight text-slate-950 font-display">Current path</h3>
-
-                <ol class="mt-4 space-y-2.5">
+            <article class="farmer-panel-tight px-4 py-3">
+                <details>
+                    <summary class="cursor-pointer text-base font-semibold tracking-tight text-slate-950 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2">Reproductive stage</summary>
+                    <ol class="mt-3 space-y-2">
                     {% for option in stage_options %}
-                        <li class="rounded-[1rem] border px-3 py-3 {% if option.state == 'current' %}border-emerald-300 bg-emerald-50/70{% elif option.state == 'next' %}border-sky-200 bg-sky-50/60{% else %}border-slate-200 bg-slate-50/70{% endif %}">
-                            <div class="flex items-center justify-between gap-3">
-                                <div class="flex min-w-0 items-center gap-2.5">
-                                    <span class="inline-flex h-7 min-w-7 items-center justify-center rounded-full border border-slate-200 bg-white px-2 text-xs font-semibold text-slate-500">{{ forloop.counter }}</span>
-                                    <p class="truncate text-sm font-semibold text-slate-900">{{ option.label }}</p>
+                        {% if option.is_current or option.is_next %}
+                            <li class="rounded-xl border px-3 py-3 {% if option.is_current %}border-emerald-300 bg-emerald-50/60{% else %}border-slate-200 bg-white{% endif %}">
+                                <div class="flex items-center justify-between gap-2">
+                                    <p class="text-sm font-semibold text-slate-900">{{ option.label }}</p>
+                                    {% if option.is_current %}<span class="text-xs font-semibold text-emerald-800">Current</span>{% else %}<span class="text-xs font-medium text-slate-500">Next</span>{% endif %}
                                 </div>
-                                {% if option.state == "current" %}
-                                    <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-700">Current</span>
-                                {% elif option.state == "completed" %}
-                                    <span class="rounded-full bg-slate-200 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-700">Done</span>
-                                {% elif option.state == "next" %}
-                                    <span class="rounded-full bg-sky-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-sky-700">Next</span>
+                                <p class="mt-1 text-sm leading-5 text-slate-600">{{ option.description }}</p>
+                                {% if option.is_next %}
+                                    <form method="post" action="{{ tracking_form_action }}" class="mt-3">
+                                        {% csrf_token %}<input type="hidden" name="tracking_stage" value="{{ option.value }}">
+                                        <button type="submit" class="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50">Move to this stage</button>
+                                    </form>
                                 {% endif %}
-                            </div>
-
-                            {% if option.is_current or option.is_next %}
-                                <p class="mt-2 text-sm leading-6 text-slate-600">{{ option.description }}</p>
-                            {% endif %}
-
-                            {% if option.is_next %}
-                                <form method="post" action="{{ tracking_form_action }}" class="mt-3">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="tracking_stage" value="{{ option.value }}">
-                                    <input type="hidden" name="calendar_month" value="{{ tracking_calendar.month_value }}">
-                                    <button type="submit" class="inline-flex items-center justify-center rounded-[0.95rem] border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition hover:border-slate-300 hover:bg-slate-50">
-                                        Move here
-                                    </button>
-                                </form>
-                            {% endif %}
-                        </li>
+                            </li>
+                        {% endif %}
                     {% endfor %}
-                </ol>
+                    </ol>
+                </details>
             </article>
 
             {% if cow.reproductive_status == "not_inseminated" %}
-                <article class="rounded-[1.5rem] border border-slate-200 bg-white px-5 py-5 shadow-[0_16px_40px_rgba(15,23,42,0.06)]">
-                    <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Insemination support</p>
-                    <h3 class="mt-2 text-xl tracking-tight text-slate-950 font-display">Request status</h3>
-
+                <article class="farmer-panel-tight px-4 py-3">
+                    <details>
+                        <summary class="cursor-pointer text-base font-semibold tracking-tight text-slate-950 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2">Insemination support{% if active_insemination_request %}<span class="ml-2 text-sm font-medium text-slate-500">{{ active_insemination_request.get_status_display }}</span>{% endif %}</summary>
                     {% if active_insemination_request %}
-                        <div class="mt-4 rounded-[1rem] border border-slate-200 bg-slate-50/80 px-4 py-4">
-                            <div class="flex flex-wrap items-center justify-between gap-3">
-                                <p class="text-sm font-semibold text-slate-900">{{ active_insemination_request.get_status_display }}</p>
-                                <span class="rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] {% if active_insemination_request.status_tone == 'emerald' %}bg-emerald-100 text-emerald-700{% elif active_insemination_request.status_tone == 'sky' %}bg-sky-100 text-sky-700{% elif active_insemination_request.status_tone == 'slate' %}bg-slate-200 text-slate-700{% else %}bg-amber-100 text-amber-700{% endif %}">
-                                    {{ active_insemination_request.get_status_display }}
-                                </span>
-                            </div>
-                            <p class="mt-2 text-sm leading-6 text-slate-600">{{ active_insemination_request.next_step_text }}</p>
-                        </div>
+                        <p class="mt-3 text-sm leading-5 text-slate-600">{{ active_insemination_request.next_step_text }}</p>
                     {% else %}
-                        <div class="mt-4 rounded-[1rem] border border-dashed border-slate-300 bg-slate-50/70 px-4 py-4">
-                            <p class="text-sm leading-6 text-slate-600">No insemination request has been sent for this cow yet.</p>
-                        </div>
+                        <p class="mt-2 text-sm leading-5 text-slate-600">No insemination request has been sent for this cow.</p>
+                        <form method="post" action="{{ tracking_form_action }}" class="mt-3">
+                            {% csrf_token %}<input type="hidden" name="request_insemination" value="1">
+                            <button type="submit" class="w-full rounded-xl bg-[#14532d] px-4 py-3 text-sm font-semibold text-white hover:bg-[#114524]">Request insemination</button>
+                        </form>
                     {% endif %}
-
-                    <div class="mt-4 grid gap-3">
-                        {% if not active_insemination_request %}
-                            <form method="post" action="{{ tracking_form_action }}">
-                                {% csrf_token %}
-                                <input type="hidden" name="request_insemination" value="1">
-                                <input type="hidden" name="calendar_month" value="{{ tracking_calendar.month_value }}">
-                                <button type="submit" class="inline-flex w-full items-center justify-center rounded-[1rem] bg-[#14532d] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#114524]">
-                                    Request insemination
-                                </button>
-                            </form>
-                        {% endif %}
-                        <a href="{% url 'farmers_dashboard:service_finder' %}" class="inline-flex items-center justify-center rounded-[1rem] border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:border-slate-300 hover:bg-slate-50">
-                            Open service finder
-                        </a>
-                    </div>
+                    <a href="{% url 'farmers_dashboard:service_finder' %}" class="mt-3 inline-flex text-sm font-semibold text-emerald-900 underline underline-offset-4">Open service finder</a>
+                    </details>
                 </article>
             {% endif %}
 
-            <article class="rounded-[1.5rem] border border-slate-200 bg-white px-5 py-5 shadow-[0_16px_40px_rgba(15,23,42,0.06)]">
-                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Quick actions</p>
-                <div class="mt-4 grid gap-3">
-                    <form method="post" action="{{ tracking_form_action }}">
-                        {% csrf_token %}
-                        <input type="hidden" name="toggle_attention" value="1">
-                        <input type="hidden" name="calendar_month" value="{{ tracking_calendar.month_value }}">
-                        <button type="submit" class="w-full rounded-[1rem] {% if cow.needs_attention %}border border-rose-200 bg-rose-50 text-rose-700{% else %}bg-[#14532d] text-white{% endif %} px-5 py-3 text-sm font-semibold transition {% if cow.needs_attention %}hover:bg-rose-100{% else %}hover:bg-[#114524]{% endif %}">
-                            {% if cow.needs_attention %}Mark Stable{% else %}Mark Needs Attention{% endif %}
-                        </button>
+            <article class="farmer-panel-tight px-4 py-3">
+                <details {% if cow.needs_attention or attention_form.errors %}open{% endif %}>
+                    <summary class="cursor-pointer text-base font-semibold tracking-tight text-slate-950 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2">Cow check <span class="text-sm font-medium {% if cow.needs_attention %}text-rose-700{% else %}text-slate-500{% endif %}">{% if cow.needs_attention %}Needs attention{% else %}Mark for a check{% endif %}</span></summary>
+                    <form method="post" action="{{ tracking_form_action }}" class="mt-3 space-y-3">
+                    {% csrf_token %}<input type="hidden" name="toggle_attention" value="1">
+                    {% if cow.needs_attention %}
+                        <p class="text-sm leading-6 text-slate-700"><span class="font-semibold">Reason:</span> {{ cow.attention_reason|default:"General check needed." }}</p>
+                        <button type="submit" class="w-full rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-800 hover:bg-rose-100">Mark as stable</button>
+                    {% else %}
+                        <div>
+                            <label for="id_attention_reason" class="mb-1 block text-sm font-medium text-slate-700">What needs attention? <span class="font-normal text-slate-500">(optional)</span></label>
+                            {{ attention_form.attention_reason }}
+                            {% for error in attention_form.attention_reason.errors %}<p class="mt-1 text-sm text-rose-700">{{ error }}</p>{% endfor %}
+                            <p class="mt-1 text-xs leading-5 text-slate-500">This short reason will appear in your alerts.</p>
+                        </div>
+                        <button type="submit" class="w-full rounded-xl bg-[#14532d] px-4 py-3 text-sm font-semibold text-white hover:bg-[#114524]">Mark for a check</button>
+                    {% endif %}
                     </form>
-                    <a href="{% url 'farmers_dashboard:service_finder' %}" class="inline-flex items-center justify-center rounded-[1rem] border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:border-slate-300 hover:bg-slate-50">
-                        Find a vet
-                    </a>
-                </div>
+                {% if cow.reproductive_status != "not_inseminated" %}<a href="{% url 'farmers_dashboard:service_finder' %}" class="mt-3 inline-flex text-sm font-semibold text-emerald-900 underline underline-offset-4">Find a vet</a>{% endif %}
+                </details>
             </article>
         </aside>
     </section>
-{% endblock %}
-
-{% block farmer_dashboard_scripts %}
-    <script>
-        (() => {
-            const dayButtons = Array.from(document.querySelectorAll("[data-calendar-day-button]"));
-            const detailTitle = document.getElementById("calendar-day-detail-title");
-            const detailBody = document.getElementById("calendar-day-detail-body");
-
-            if (!dayButtons.length || !detailTitle || !detailBody) {
-                return;
-            }
-
-            const activeClasses = ["ring-2", "ring-emerald-500", "ring-offset-1", "bg-white"];
-
-            const selectDay = (button) => {
-                dayButtons.forEach((candidate) => {
-                    candidate.classList.remove(...activeClasses);
-                });
-
-                button.classList.add(...activeClasses);
-                detailTitle.textContent = button.dataset.dayTitle || button.dataset.dayDate || "Day details";
-
-                const template = button.querySelector("[data-calendar-day-template]");
-                if (template) {
-                    detailBody.innerHTML = template.innerHTML;
-                }
-            };
-
-            dayButtons.forEach((button) => {
-                button.addEventListener("click", () => selectDay(button));
-            });
-
-            const defaultButton = dayButtons.find((button) => button.dataset.dayTitle === "Today")
-                || dayButtons.find((button) => button.querySelector("[data-calendar-day-template]"))
-                || dayButtons[0];
-
-            if (defaultButton) {
-                selectDay(defaultButton);
-            }
-        })();
-    </script>
 {% endblock %}
