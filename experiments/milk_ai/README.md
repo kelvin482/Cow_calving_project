@@ -19,4 +19,18 @@ This workspace is for testing anomaly-detection and milk-yield forecasting ideas
 - `reports/`: local-only outputs; never commit them.
 - `requirements.txt`: experiment-only, pinned dependencies, added when a specific experiment is selected.
 
+## First experiment: zero-shot milk-yield forecast
+
+`src/forecast_chronos_smoke.py` compares pretrained Chronos-2 with two simple next-day baselines on generated synthetic daily histories. The run checks that inference returns finite one-day forecasts and reports MAE/RMSE for each method. It does not assert that Chronos-2 beats the baselines: synthetic data can check the experiment plumbing, not model quality on real farms.
+
+The experiment uses a separate Python 3.13 virtual environment and keeps Hugging Face model downloads under the ignored `.cache/` directory:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe src\forecast_chronos_smoke.py
+```
+
+The first run downloads the pretrained Chronos-2 checkpoint. Synthetic-only reports are written under `reports/` and are ignored by Git. Do not put real farm data into this experiment until its source and data handling are reviewed.
+
 The repository roadmap remains authoritative. The current next step is collecting and reviewing real daily milk records; creating this folder does not start the anomaly-detection stage.

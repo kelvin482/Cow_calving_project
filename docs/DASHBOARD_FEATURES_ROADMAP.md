@@ -931,38 +931,39 @@ Help farmers record and understand daily milk output for each cow.
 
 ### Data to store
 
-The milk feature will need a simple daily record model later.
+The existing `MilkRecord` stores one cow and date, the measured morning and evening amounts, and their calculated daily total. Older daily-total records remain available without a fabricated session split.
 
 Minimum milk fields:
 - cow
 - date
-- milk amount in liters
-- optional session note
+- morning milk amount in liters
+- evening milk amount in liters
+- calculated daily total in liters
 - created time
 
 ### Suggested first working flow
 
 1. farmer opens `Track Maziwa`
 2. farmer selects a cow
-3. farmer records today's milk amount
-4. system saves the entry
+3. farmer records today's morning and evening milk amounts
+4. system calculates and saves the daily total with both sessions
 5. cow detail page updates the recent history
 6. curve updates automatically
 7. if milk drops sharply, the system can later raise a follow-up alert
 
 ### Hackathon-first design rules
 
-- one cow at a time
-- one daily number at a time
+- one cow and date at a time
+- two session amounts with one calculated daily total
 - one clear curve
 - no heavy dashboard clutter
 - no advanced dairy accounting in the first version
 
 ### Best implementation order for Track Maziwa
 
-1. create a milk record model
-2. add a `Track Maziwa` page to the farmer dashboard
-3. add daily milk entry form
+1. use the existing milk record model and preserve older daily totals
+2. maintain the `Track Maziwa` page in the farmer dashboard
+3. collect morning and evening amounts and calculate the daily total
 4. add a cow milk detail page
 5. show a simple 7-day or 14-day productivity curve
 6. add a basic drop-in-production alert
