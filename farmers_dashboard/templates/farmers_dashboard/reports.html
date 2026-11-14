@@ -1,60 +1,124 @@
 {% extends "farmers_dashboard/base_dashboard.html" %}
 
 {% block farmer_dashboard_content %}
-    <section class="farmer-panel px-5 py-5 sm:px-6">
-        <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <section class="farmer-panel px-5 py-5 sm:px-7 sm:py-6" aria-labelledby="cow-reports-heading">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
             <div>
-                <p class="farmer-eyebrow">Follow-up queue</p>
-                <h2 class="farmer-title">Next meaningful date per cow</h2>
-                <p class="farmer-copy">This page only keeps the next follow-up date that helps the farmer know what to review next.</p>
+                <h2 id="cow-reports-heading" class="text-xl font-semibold tracking-tight text-slate-950 font-display">{% if selected_cow %}Cow report{% else %}Available cows{% endif %}</h2>
             </div>
-            <a href="{% url 'farmers_dashboard:herd' %}" class="farmer-button-secondary">
-                Open herd
-            </a>
-        </div>
-    </section>
-
-    <section class="farmer-panel px-5 py-5 sm:px-7 sm:py-7">
-        <div>
-            <p class="farmer-eyebrow">Follow-up schedule</p>
-            <h2 class="farmer-title">Action list</h2>
+            {% if selected_cow %}<a href="{% url 'farmers_dashboard:reports' %}" class="text-sm font-semibold text-emerald-800 underline underline-offset-4 hover:text-emerald-950">All cows</a>{% endif %}
         </div>
 
-        {% if follow_up_rows %}
-            <div class="mt-6 overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white">
-                {% for row in follow_up_rows %}
-                    <article class="grid gap-4 px-4 py-5 lg:grid-cols-[minmax(0,1fr)_13rem_minmax(0,1fr)_auto] lg:items-center {% if not forloop.last %}border-b border-slate-200{% endif %}">
-                        <div class="min-w-0">
-                            <p class="text-sm font-semibold text-slate-900">{{ row.cow.name }} {{ row.cow.cow_number }}</p>
-                            <p class="mt-1 text-sm leading-6 text-slate-600">{{ row.cow.summary_text }}</p>
-                        </div>
-
-                        <div>
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">{{ row.next_label }}</p>
-                            <p class="mt-2 text-sm font-semibold text-slate-900">{{ row.next_date|date:"d M Y" }}</p>
-                            <p class="mt-1 text-sm text-slate-600">{{ row.next_timing }}</p>
-                        </div>
-
-                        <div class="min-w-0">
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Why it matters</p>
-                            <p class="mt-2 text-sm leading-6 text-slate-700">{{ row.detail }}</p>
-                        </div>
-
-                        <div class="flex flex-col gap-3 lg:min-w-[11rem]">
-                            <a href="{% url 'farmers_dashboard:cow_tracking' row.cow.pk %}" class="inline-flex items-center justify-center rounded-[1rem] bg-[#14532d] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#114524]">
-                                Track cow
+        {% if not selected_cow %}
+            {% if report_cows %}
+                <ul class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3" aria-label="Cows with reports">
+                    {% for cow in report_cows %}
+                        <li>
+                            <a href="?cow={{ cow.pk }}" class="group flex min-h-28 flex-col justify-between rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-emerald-300 hover:bg-emerald-50/40 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2">
+                                <span class="flex items-start justify-between gap-3"><span class="min-w-0">
+                                    <span class="block truncate text-lg font-semibold text-slate-950 group-hover:text-emerald-950">{{ cow.name }}</span>
+                                    <span class="mt-0.5 block truncate text-sm text-slate-500">Tag {{ cow.cow_number }} · {{ cow.get_breed_display }}</span>
+                                    </span>
+                                    <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold {% if cow.status_tone == 'rose' %}bg-rose-100 text-rose-800{% elif cow.status_tone == 'amber' %}bg-amber-100 text-amber-900{% elif cow.status_tone == 'violet' %}bg-violet-100 text-violet-800{% elif cow.status_tone == 'sky' %}bg-sky-100 text-sky-800{% else %}bg-emerald-100 text-emerald-800{% endif %}">{{ cow.status_label }}</span>
+                                </span>
+                                <span class="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-emerald-900">View report <span aria-hidden="true">&#8594;</span></span>
                             </a>
-                        </div>
-                    </article>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="farmer-empty-state mt-6 px-6 py-14">
-                <h3 class="text-2xl tracking-tight text-slate-950 font-display sm:text-3xl">No follow-up scheduled yet</h3>
-                <p class="mx-auto mt-3 max-w-2xl text-base leading-8 text-slate-600">
-                    Add a cow and include pregnancy or calving details to build the follow-up schedule.
-                </p>
-            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="mt-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center">
+                    <h3 class="font-semibold text-slate-900">No cows to report yet</h3>
+                    <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600">Register a cow first, then her report will appear here.</p>
+                    <a href="{% url 'farmers_dashboard:cow_register' %}" class="farmer-button-primary mt-4 inline-flex">Register a cow</a>
+                </div>
+            {% endif %}
         {% endif %}
     </section>
+
+    {% if selected_cow %}
+        <article id="cow-report" class="farmer-panel mt-4 px-5 py-5 sm:px-7 sm:py-6" aria-labelledby="cow-report-title">
+            <div class="report-print-controls mb-4 flex justify-end print:hidden">
+                <button type="button" onclick="window.print()" class="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#14532d] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#114524] focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2">Print / Save as PDF</button>
+            </div>
+            <header class="relative border-b border-slate-200 pb-5 text-center">
+                <span class="absolute right-0 top-0 h-11 w-11 text-emerald-800">{% include "includes/cow_calving_logo_mark.html" %}</span>
+                <p class="text-lg font-bold tracking-tight text-slate-950">{{ profile.farm_name|default:"CowCalving" }}</p>
+                <p class="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">Livestock records</p>
+                <p class="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Individual cow report</p>
+                <h2 id="cow-report-title" class="mt-1 text-2xl font-semibold tracking-tight text-slate-950 font-display">{{ selected_cow.name }}</h2>
+                <p class="mt-1 text-sm text-slate-600">Tag {{ selected_cow.cow_number }} · {{ selected_cow.get_breed_display }}</p>
+                <p class="mt-2 text-xs text-slate-500">Prepared {{ report_generated_date|date:"d M Y" }}</p>
+            </header>
+
+            <section class="pt-5" aria-labelledby="cow-report-details-heading">
+                <h3 id="cow-report-details-heading" class="text-base font-semibold text-slate-950">Cow details</h3>
+                <dl class="mt-3 grid gap-x-8 gap-y-4 rounded-xl bg-slate-50 p-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <div><dt class="text-xs font-medium text-slate-500">Unique tag number</dt><dd class="mt-1 font-semibold text-slate-900">{{ selected_cow.cow_number }}</dd></div>
+                    <div><dt class="text-xs font-medium text-slate-500">Breed</dt><dd class="mt-1 font-semibold text-slate-900">{{ selected_cow.get_breed_display }}</dd></div>
+                    <div><dt class="text-xs font-medium text-slate-500">Date of birth</dt><dd class="mt-1 font-semibold text-slate-900">{% if selected_cow.date_of_birth %}{{ selected_cow.date_of_birth|date:"d M Y" }}{% else %}Not recorded{% endif %}</dd></div>
+                    <div><dt class="text-xs font-medium text-slate-500">Current stage</dt><dd class="mt-1 font-semibold text-slate-900">{{ selected_cow.status_label }}</dd></div>
+                    <div><dt class="text-xs font-medium text-slate-500">Expected calving</dt><dd class="mt-1 font-semibold text-slate-900">{% if selected_cow.expected_calving_date %}{{ selected_cow.expected_calving_date|date:"d M Y" }}{% else %}Not recorded{% endif %}</dd></div>
+                    <div><dt class="text-xs font-medium text-slate-500">Calvings recorded</dt><dd class="mt-1 font-semibold text-slate-900">{{ calvings_recorded }}</dd></div>
+                </dl>
+            </section>
+
+            <section class="mt-6 border-t border-slate-200 pt-5" aria-labelledby="cow-report-milk-heading">
+                <div class="flex flex-wrap items-end justify-between gap-2">
+                    <div>
+                        <h3 id="cow-report-milk-heading" class="text-base font-semibold text-slate-950">Milk production</h3>
+                        {% if milk_report_records %}<p class="mt-1 text-sm text-slate-600">Most recent {{ milk_report_records|length }} recorded day{{ milk_report_records|length|pluralize }}</p>{% endif %}
+                    </div>
+                    {% if milk_report_records %}<p class="text-sm text-slate-700">Latest <strong class="font-semibold text-slate-950">{{ milk_report_records.0.daily_yield_liters|floatformat:1 }} L</strong> · average <strong class="font-semibold text-slate-950">{{ milk_report_average|floatformat:1 }} L/day</strong></p>{% endif %}
+                </div>
+
+                {% if milk_report_records %}
+                    <div class="mt-3 overflow-hidden rounded-xl border border-slate-200">
+                        <table class="w-full text-left text-sm">
+                            <caption class="sr-only">Most recent daily milk records for {{ selected_cow.name }}</caption>
+                            <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                <tr><th scope="col" class="px-4 py-2.5">Date</th><th scope="col" class="px-4 py-2.5 text-right">Daily total</th></tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                {% for record in milk_report_records %}
+                                    <tr><th scope="row" class="px-4 py-2.5 font-medium text-slate-700">{{ record.record_date|date:"d M Y" }}</th><td class="px-4 py-2.5 text-right font-semibold tabular-nums text-slate-900">{{ record.daily_yield_liters|floatformat:1 }} L</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="mt-3 rounded-xl bg-slate-50 px-4 py-4 text-sm text-slate-600">No milk production records have been entered for this cow.</p>
+                {% endif %}
+            </section>
+
+            <footer class="mt-8 border-t border-slate-200 pt-5">
+                <div class="grid gap-8 sm:grid-cols-2">
+                    <div class="pt-7">
+                        <div class="border-b border-slate-500"></div>
+                        <p class="mt-2 text-sm font-semibold text-slate-800">Farm manager signature</p>
+                    </div>
+                    <div class="pt-7">
+                        <div class="border-b border-slate-500"></div>
+                        <p class="mt-2 text-sm font-semibold text-slate-800">Date signed</p>
+                    </div>
+                </div>
+                <p class="mt-5 text-xs leading-5 text-slate-500">Calving totals and milk figures are based on records entered in CowCalving.</p>
+            </footer>
+        </article>
+
+        <style>
+            @media print {
+                @page { size: A4; margin: 0; }
+                /* Print only the report, without the dashboard navigation and controls. */
+                body * { visibility: hidden !important; }
+                #cow-report, #cow-report * { visibility: visible !important; }
+                html, body { margin: 0 !important; padding: 0 !important; }
+                #cow-report { position: absolute !important; inset: 0 auto auto 0 !important; display: flex !important; box-sizing: border-box !important; min-height: 297mm !important; width: 210mm !important; flex-direction: column !important; margin: 0 !important; border: 0 !important; padding: 14mm !important; box-shadow: none !important; }
+                #cow-report .report-print-controls { display: none !important; }
+                #cow-report button { display: none !important; }
+                #cow-report table { break-inside: avoid; }
+                #cow-report footer { margin-top: auto !important; }
+            }
+        </style>
+    {% endif %}
 {% endblock %}
