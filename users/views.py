@@ -17,8 +17,48 @@ def _build_dashboard_page_context(request, profile, **extra):
             profile=profile,
         ),
         "profile": profile,
+        "dashboard_shell_template": "users/dashboard_shell.html",
         **extra,
     }
+
+
+def _build_profile_page_context(
+    request,
+    profile,
+    *,
+    page_title,
+    page_eyebrow,
+    page_heading,
+    page_intro,
+    **extra,
+):
+    if profile.dashboard_slug == "farmer":
+        # Reuse the farmer shell context so these account pages share its navigation.
+        from farmers_dashboard.views import _build_farmer_dashboard_context
+
+        return _build_farmer_dashboard_context(
+            request,
+            page_title=page_title,
+            page_eyebrow=page_eyebrow,
+            page_heading=page_heading,
+            page_intro=page_intro,
+            header_primary_action={
+                "label": "Back to dashboard",
+                "url": get_dashboard_url_for_user(request.user, profile=profile),
+            },
+            extra_context={
+                "dashboard_shell_template": "farmers_dashboard/base_dashboard.html",
+                **extra,
+            },
+        )
+
+    return _build_dashboard_page_context(
+        request,
+        profile,
+        dashboard_shell_template="users/dashboard_shell.html",
+        page_title=page_title,
+        **extra,
+    )
 
 
 @login_required
@@ -41,7 +81,14 @@ def profile_detail_view(request):
     return render(
         request,
         "users/profile_detail.html",
-        _build_dashboard_page_context(request, profile),
+        _build_profile_page_context(
+            request,
+            profile,
+            page_title="My Profile | CowCalving",
+            page_eyebrow="Farm profile",
+            page_heading="Profile details",
+            page_intro="Review your account and farm information.",
+        ),
     )
 
 
@@ -62,9 +109,13 @@ def profile_edit_view(request):
     return render(
         request,
         "users/profile_form.html",
-        _build_dashboard_page_context(
+        _build_profile_page_context(
             request,
             profile,
+            page_title="Update Farm Profile | CowCalving",
+            page_eyebrow="Farm profile",
+            page_heading="Update farm profile",
+            page_intro="Keep your account and farm contact details current.",
             form=form,
         ),
     )
