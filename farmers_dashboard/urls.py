@@ -2,6 +2,7 @@ from django.urls import path
 
 from .views import (
     alerts_view,
+    acknowledge_milk_alert_view,
     cow_register_view,
     cow_tracking_view,
     dashboard_view,
@@ -26,6 +27,7 @@ urlpatterns = [
     path("milk/", milk_records_view, name="milk_records"),
     path("milk/<int:record_id>/edit/", milk_records_view, name="milk_record_edit"),
     path("alerts/", alerts_view, name="alerts"),
+    path("alerts/milk/<int:alert_id>/acknowledge/", acknowledge_milk_alert_view, name="milk_alert_acknowledge"),
     path("location/", location_view, name="location"),
     path("messages/", messages_view, name="messages"),
     path("messages/<int:thread_id>/", messages_view, name="messages_thread"),

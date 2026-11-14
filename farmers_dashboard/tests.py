@@ -3,7 +3,10 @@ from datetime import timedelta
 from pathlib import Path
 
 from django.contrib.auth.models import User
+from django.core.management import call_command
+from django.core.management.base import CommandError
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import IntegrityError, transaction
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -75,13 +78,132 @@ class FarmersDashboardViewTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Farm overview")
-        self.assertContains(response, "Quick actions")
-        self.assertContains(response, "Herd snapshot")
-        self.assertContains(response, "Service support")
+        self.assertContains(response, "What needs your attention?")
+        self.assertContains(response, "Cows to check")
+        self.assertContains(response, "Next follow-up dates")
         self.assertContains(response, "No cows registered yet")
-        self.assertContains(response, "Register First Cow")
+        self.assertContains(response, "Add a cow")
+        self.assertContains(response, "Record milk")
         self.assertContains(response, "Total herd")
-        self.assertContains(response, "Add Cow")
+
+    def test_dashboard_alert_count_includes_each_alert_category(self):
+        self._login_farmer()
+        self._create_cow(name="Daisy", needs_attention=True)
+        self._create_cow(
+            name="Bella",
+            cow_number="COW-002",
+            needs_attention=False,
+            expected_calving_date=timezone.localdate() + timedelta(days=12),
+        )
+
+        response = self.client.get(reverse("farmers_dashboard:dashboard"))
+
+        self.assertEqual(response.status_code, 200)
+        alert_card = next(
+            card for card in response.context["summary_cards"]
+            if card["label"] == "Active alerts"
+        )
+        self.assertEqual(alert_card["value"], "2")
+
+    def test_active_labor_cow_appears_first_as_a_high_priority_alert(self):
+        self._login_farmer()
+        active_cow = self._create_cow(
+            name="Malaika",
+            tracking_stage=Cow.STAGE_ACTIVE_LABOR,
+            needs_attention=False,
+            expected_calving_date=timezone.localdate(),
+        )
+        self._create_cow(
+            name="Amani",
+            cow_number="COW-002",
+            needs_attention=True,
+        )
+
+        response = self.client.get(reverse("farmers_dashboard:alerts"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["cow_alerts"][0], active_cow)
+        self.assertContains(response, "Check now")
+        self.assertContains(response, "Labour is marked as active.")
+        self.assertEqual(response.context["alert_counts"]["all"], 2)
+
+    def test_alert_list_shows_issue_summary_without_cow_profile_details(self):
+        self._login_farmer()
+        cow = self._create_cow(
+            cow_number="TAG-742",
+            needs_attention=True,
+            attention_reason="Eating less than usual.",
+            notes="Long farm history belongs on the cow record.",
+        )
+
+        response = self.client.get(reverse("farmers_dashboard:alerts"))
+
+        self.assertContains(response, cow.name)
+        self.assertContains(response, "Eating less than usual.")
+        self.assertContains(response, "Open cow")
+        self.assertNotContains(response, "TAG-742")
+        self.assertNotContains(response, "Long farm history belongs")
+
+    def test_attention_alert_without_a_reason_uses_plain_fallback(self):
+        self._login_farmer()
+        cow = self._create_cow(needs_attention=True, attention_reason="")
+
+        response = self.client.get(reverse("farmers_dashboard:alerts"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "General check needed.")
+        self.assertContains(response, cow.name)
+
+    def test_alert_demo_command_is_repeatable_and_only_seeds_selected_farmer(self):
+        self._login_farmer()
+        other_farmer = User.objects.create_user(
+            username="other-farmer",
+            email="other@example.com",
+            password="StrongPass123!",
+        )
+        Profile.objects.create(user=other_farmer, role=self.role)
+
+        call_command("seed_alert_demo", username=self.user.username)
+        call_command("seed_alert_demo", username=self.user.username)
+
+        demo_cows = Cow.objects.filter(owner=self.user, cow_number__startswith="DEMO-ALERT-")
+        self.assertEqual(demo_cows.count(), 4)
+        self.assertEqual(
+            Cow.objects.filter(owner=other_farmer, cow_number__startswith="DEMO-ALERT-").count(),
+            0,
+        )
+        self.assertEqual(
+            demo_cows.filter(tracking_stage=Cow.STAGE_ACTIVE_LABOR).count(),
+            1,
+        )
+        self.assertEqual(
+            demo_cows.get(cow_number="DEMO-ALERT-001").attention_reason,
+            "Eating less than usual.",
+        )
+
+        response = self.client.get(reverse("farmers_dashboard:alerts"))
+        self.assertEqual(response.context["alert_counts"]["all"], 3)
+        self.assertContains(response, "Zuri")
+        self.assertContains(response, "Eating less than usual.")
+        self.assertContains(response, "Expected to calve in 7 days.")
+        self.assertNotContains(response, "Malaika")
+
+    def test_alert_demo_command_rejects_non_farmer_accounts(self):
+        veterinary_role, _ = Role.objects.get_or_create(
+            slug="veterinary",
+            defaults={"name": "Veterinary"},
+        )
+        vet = User.objects.create_user(
+            username="vet-user",
+            email="vet@example.com",
+            password="StrongPass123!",
+        )
+        Profile.objects.create(user=vet, role=veterinary_role)
+
+        with self.assertRaises(CommandError):
+            call_command("seed_alert_demo", username=vet.username)
+
+        self.assertFalse(Cow.objects.filter(owner=vet).exists())
 
     def test_register_page_uses_streamlined_sections(self):
         self._login_farmer()
@@ -193,17 +315,19 @@ class FarmersDashboardViewTests(TestCase):
         service_response = self.client.get(reverse("farmers_dashboard:service_finder"))
 
         self.assertContains(dashboard_response, "Farm overview")
-        self.assertContains(dashboard_response, "Quick actions")
-        self.assertContains(dashboard_response, "Herd snapshot")
-        self.assertContains(dashboard_response, "Alerts feed")
-        self.assertContains(dashboard_response, "Follow-up schedule")
+        self.assertContains(dashboard_response, "What needs your attention?")
+        self.assertContains(dashboard_response, "Cows to check")
+        self.assertContains(dashboard_response, "Next follow-up dates")
         self.assertContains(dashboard_response, cow.name)
-        self.assertContains(dashboard_response, "Track cow")
+        self.assertContains(dashboard_response, "Open cow")
         self.assertContains(herd_response, "My cows")
         self.assertContains(herd_response, cow.cow_number)
-        self.assertContains(herd_response, "View details")
-        self.assertContains(herd_response, "Quick details")
-        self.assertContains(herd_response, "Track cow")
+        self.assertContains(herd_response, "Choose a cow to open her information and records.")
+        self.assertContains(herd_response, "Open cow")
+        self.assertContains(
+            herd_response,
+            reverse("farmers_dashboard:cow_tracking", args=[cow.pk]),
+        )
         self.assertContains(alerts_response, "Cow alerts")
         self.assertContains(alerts_response, cow.name)
         self.assertContains(location_response, "Set farm location")
@@ -219,6 +343,40 @@ class FarmersDashboardViewTests(TestCase):
         # The page now shows the service finder headline inside the content card.
         self.assertContains(service_response, "Find the right field support")
         self.assertContains(service_response, "Artificial insemination")
+
+    def test_herd_search_matches_cow_name_and_tag(self):
+        self._login_farmer()
+        self._create_cow(name="Daisy", cow_number="TAG-001")
+        bella = self._create_cow(name="Bella", cow_number="TAG-002")
+
+        response = self.client.get(reverse("farmers_dashboard:herd"), {"q": "tag-002"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["herd_result_count"], 1)
+        self.assertContains(response, "Bella")
+        self.assertNotContains(response, "Daisy")
+        self.assertContains(
+            response,
+            reverse("farmers_dashboard:cow_tracking", args=[bella.pk]),
+        )
+
+    def test_herd_list_paginates_larger_herds(self):
+        self._login_farmer()
+        for index in range(25):
+            self._create_cow(
+                name=f"Cow {index:02d}",
+                cow_number=f"TAG-{index:03d}",
+            )
+
+        first_page = self.client.get(reverse("farmers_dashboard:herd"))
+        second_page = self.client.get(reverse("farmers_dashboard:herd"), {"page": 2})
+
+        self.assertEqual(first_page.context["herd_page"].paginator.count, 25)
+        self.assertEqual(len(first_page.context["herd_page"].object_list), 24)
+        self.assertContains(first_page, "Page 1 of 2")
+        self.assertContains(first_page, "Next")
+        self.assertEqual(len(second_page.context["herd_page"].object_list), 1)
+        self.assertContains(second_page, "Page 2 of 2")
 
     def test_search_page_renders_empty_state_without_query(self):
         self._login_farmer()
@@ -532,14 +690,13 @@ class FarmersDashboardViewTests(TestCase):
 
         self.assertContains(response, "Already inseminated")
         self.assertContains(response, "Artificial insemination")
-        self.assertContains(response, "Tracking calendar")
+        self.assertContains(response, "Next important dates")
+        self.assertContains(response, "Recent history")
         self.assertContains(response, "Since insemination")
         self.assertContains(response, "4 days")
-        self.assertContains(response, "Legend")
         self.assertContains(response, "Pregnancy check window")
-        self.assertContains(response, "Day details")
-        self.assertContains(response, "data-calendar-day-button", html=False)
-        self.assertContains(response, "Tap a day")
+        self.assertContains(response, "Cow registered")
+        self.assertNotContains(response, "Tracking calendar")
 
     def test_tracking_page_shows_active_insemination_request_panel(self):
         self._login_farmer()
@@ -611,7 +768,6 @@ class FarmersDashboardViewTests(TestCase):
             reverse("farmers_dashboard:cow_tracking", args=[cow.pk]),
             {
                 "record_event": "1",
-                "calendar_month": timezone.localdate().strftime("%Y-%m"),
                 "event_type": ReproductiveEvent.EVENT_INSEMINATION_RECORDED,
                 "event_date": timezone.localdate().isoformat(),
                 "notes": "Service completed today.",
@@ -632,7 +788,7 @@ class FarmersDashboardViewTests(TestCase):
             ).exists()
         )
         self.assertContains(response, "Pregnancy check window")
-        self.assertContains(response, "Upcoming dates")
+        self.assertContains(response, "Next important dates")
         self.assertContains(response, "Service completed today.")
 
     def test_tracking_page_records_pregnancy_loss_and_keeps_history(self):
@@ -664,7 +820,6 @@ class FarmersDashboardViewTests(TestCase):
             reverse("farmers_dashboard:cow_tracking", args=[cow.pk]),
             {
                 "record_event": "1",
-                "calendar_month": timezone.localdate().strftime("%Y-%m"),
                 "event_type": ReproductiveEvent.EVENT_PREGNANCY_NOT_KEPT,
                 "event_date": timezone.localdate().isoformat(),
                 "notes": "Pregnancy did not continue.",
@@ -678,6 +833,7 @@ class FarmersDashboardViewTests(TestCase):
         self.assertIsNone(cow.expected_calving_date)
         self.assertEqual(cow.tracking_stage, Cow.STAGE_REGISTERED)
         self.assertTrue(cow.needs_attention)
+        self.assertEqual(cow.attention_reason, "Pregnancy did not continue.")
         self.assertContains(response, "Pregnancy not kept")
         self.assertContains(response, "Insemination recorded")
         self.assertContains(response, "Pregnancy did not continue.")
@@ -701,14 +857,28 @@ class FarmersDashboardViewTests(TestCase):
 
         attention_response = self.client.post(
             reverse("farmers_dashboard:cow_tracking", args=[cow.pk]),
-            {"toggle_attention": "1"},
+            {
+                "toggle_attention": "1",
+                "attention_reason": "Eating less than usual.",
+            },
             follow=True,
         )
         cow.refresh_from_db()
         self.assertTrue(cow.needs_attention)
-        self.assertContains(attention_response, "marked as needing attention")
+        self.assertEqual(cow.attention_reason, "Eating less than usual.")
+        self.assertContains(attention_response, "marked for a check")
 
-    def test_farmer_can_create_daily_milk_record(self):
+        stable_response = self.client.post(
+            reverse("farmers_dashboard:cow_tracking", args=[cow.pk]),
+            {"toggle_attention": "1"},
+            follow=True,
+        )
+        cow.refresh_from_db()
+        self.assertFalse(cow.needs_attention)
+        self.assertEqual(cow.attention_reason, "")
+        self.assertContains(stable_response, "marked as stable")
+
+    def test_farmer_can_create_morning_and_evening_milk_record(self):
         self._login_farmer()
         cow = self._create_cow()
 
@@ -717,16 +887,95 @@ class FarmersDashboardViewTests(TestCase):
             {
                 "cow": cow.pk,
                 "record_date": timezone.localdate().isoformat(),
-                "daily_yield_liters": "12.50",
+                "morning_yield_liters": "5.25",
+                "evening_yield_liters": "7.25",
             },
             follow=True,
         )
 
         record = MilkRecord.objects.get()
         self.assertEqual(record.cow, cow)
+        self.assertEqual(str(record.morning_yield_liters), "5.25")
+        self.assertEqual(str(record.evening_yield_liters), "7.25")
         self.assertEqual(str(record.daily_yield_liters), "12.50")
         self.assertContains(response, "Milk record for Daisy")
         self.assertContains(response, "12.50 L")
+        self.assertContains(response, "5.25 L")
+        self.assertContains(response, "7.25 L")
+
+    def test_cow_page_shows_recent_milk_records_for_that_cow(self):
+        self._login_farmer()
+        cow = self._create_cow()
+        other_cow = self._create_cow(name="Bella", cow_number="COW-002")
+        MilkRecord.objects.create(
+            cow=cow,
+            record_date=timezone.localdate(),
+            daily_yield_liters="12.50",
+            morning_yield_liters="5.25",
+            evening_yield_liters="7.25",
+        )
+        MilkRecord.objects.create(
+            cow=other_cow,
+            record_date=timezone.localdate(),
+            daily_yield_liters="8.00",
+            morning_yield_liters="4.00",
+            evening_yield_liters="4.00",
+        )
+
+        response = self.client.get(
+            reverse("farmers_dashboard:cow_tracking", args=[cow.pk])
+        )
+
+        self.assertContains(response, "Recent milk records")
+        self.assertContains(response, "12.50 L")
+        self.assertNotContains(response, "8.00 L")
+        self.assertContains(response, "Cow information")
+        self.assertContains(response, "Farmer notes")
+        self.assertContains(response, f"?cow={cow.pk}")
+
+    def test_milk_page_can_start_from_one_cows_record(self):
+        self._login_farmer()
+        cow = self._create_cow()
+        other_cow = self._create_cow(name="Bella", cow_number="COW-002")
+        for target_cow, total in ((cow, "12.00"), (other_cow, "8.00")):
+            MilkRecord.objects.create(
+                cow=target_cow,
+                record_date=timezone.localdate(),
+                daily_yield_liters=total,
+                morning_yield_liters=str(float(total) / 2),
+                evening_yield_liters=str(float(total) / 2),
+            )
+
+        response = self.client.get(
+            reverse("farmers_dashboard:milk_records"),
+            {"cow": cow.pk},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["selected_cow"], cow)
+        self.assertEqual(str(response.context["milk_form"]["cow"].value()), str(cow.pk))
+        self.assertEqual(response.context["milk_records_page"].paginator.count, 1)
+        self.assertContains(response, "Milk records for Daisy")
+
+    def test_database_rejects_a_daily_total_that_does_not_match_sessions(self):
+        self._login_farmer()
+        cow = self._create_cow()
+        record = MilkRecord.objects.create(
+            cow=cow,
+            record_date=timezone.localdate(),
+            daily_yield_liters="12.50",
+            morning_yield_liters="5.25",
+            evening_yield_liters="7.25",
+        )
+
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                MilkRecord.objects.filter(pk=record.pk).update(
+                    daily_yield_liters="99.00"
+                )
+
+        record.refresh_from_db()
+        self.assertEqual(str(record.daily_yield_liters), "12.50")
 
     def test_explicit_zero_yield_is_saved_as_a_measurement(self):
         self._login_farmer()
@@ -737,7 +986,8 @@ class FarmersDashboardViewTests(TestCase):
             {
                 "cow": cow.pk,
                 "record_date": timezone.localdate().isoformat(),
-                "daily_yield_liters": "0.00",
+                "morning_yield_liters": "0.00",
+                "evening_yield_liters": "0.00",
             },
             follow=True,
         )
@@ -745,6 +995,42 @@ class FarmersDashboardViewTests(TestCase):
         record = MilkRecord.objects.get()
         self.assertEqual(str(record.daily_yield_liters), "0.00")
         self.assertContains(response, "0.00 L")
+
+    def test_both_milking_sessions_are_required(self):
+        self._login_farmer()
+        cow = self._create_cow()
+
+        response = self.client.post(
+            reverse("farmers_dashboard:milk_records"),
+            {
+                "cow": cow.pk,
+                "record_date": timezone.localdate().isoformat(),
+                "morning_yield_liters": "5.00",
+                "evening_yield_liters": "",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "This field is required")
+        self.assertEqual(MilkRecord.objects.count(), 0)
+
+    def test_combined_session_total_must_fit_the_daily_total_field(self):
+        self._login_farmer()
+        cow = self._create_cow()
+
+        response = self.client.post(
+            reverse("farmers_dashboard:milk_records"),
+            {
+                "cow": cow.pk,
+                "record_date": timezone.localdate().isoformat(),
+                "morning_yield_liters": "700000.00",
+                "evening_yield_liters": "400000.00",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "combined daily total exceeds")
+        self.assertEqual(MilkRecord.objects.count(), 0)
 
     def test_farmer_can_correct_daily_milk_record(self):
         self._login_farmer()
@@ -760,14 +1046,33 @@ class FarmersDashboardViewTests(TestCase):
             {
                 "cow": cow.pk,
                 "record_date": record.record_date.isoformat(),
-                "daily_yield_liters": "11.25",
+                "morning_yield_liters": "5.00",
+                "evening_yield_liters": "6.25",
             },
             follow=True,
         )
 
         record.refresh_from_db()
+        self.assertEqual(str(record.morning_yield_liters), "5.00")
+        self.assertEqual(str(record.evening_yield_liters), "6.25")
         self.assertEqual(str(record.daily_yield_liters), "11.25")
         self.assertContains(response, "Milk record for Daisy")
+
+    def test_legacy_daily_record_is_preserved_and_labeled_when_editing(self):
+        self._login_farmer()
+        cow = self._create_cow()
+        record = MilkRecord.objects.create(
+            cow=cow,
+            record_date=timezone.localdate() - timedelta(days=1),
+            daily_yield_liters="10.00",
+        )
+
+        response = self.client.get(
+            reverse("farmers_dashboard:milk_record_edit", args=[record.pk])
+        )
+
+        self.assertContains(response, "older record has only a daily total")
+        self.assertContains(response, "10.00 L")
 
     def test_milk_record_rejects_negative_future_and_duplicate_values(self):
         self._login_farmer()
@@ -780,7 +1085,8 @@ class FarmersDashboardViewTests(TestCase):
             {
                 "cow": cow.pk,
                 "record_date": today.isoformat(),
-                "daily_yield_liters": "-1.00",
+                "morning_yield_liters": "-1.00",
+                "evening_yield_liters": "2.00",
             },
         )
         self.assertEqual(negative_response.status_code, 200)
@@ -791,7 +1097,8 @@ class FarmersDashboardViewTests(TestCase):
             {
                 "cow": cow.pk,
                 "record_date": (today + timedelta(days=1)).isoformat(),
-                "daily_yield_liters": "1.00",
+                "morning_yield_liters": "1.00",
+                "evening_yield_liters": "1.00",
             },
         )
         self.assertEqual(future_response.status_code, 200)
@@ -808,7 +1115,8 @@ class FarmersDashboardViewTests(TestCase):
             {
                 "cow": cow.pk,
                 "record_date": today.isoformat(),
-                "daily_yield_liters": "5.00",
+                "morning_yield_liters": "2.00",
+                "evening_yield_liters": "3.00",
             },
         )
         self.assertEqual(duplicate_response.status_code, 200)
@@ -843,7 +1151,8 @@ class FarmersDashboardViewTests(TestCase):
             {
                 "cow": other_cow.pk,
                 "record_date": timezone.localdate().isoformat(),
-                "daily_yield_liters": "9.00",
+                "morning_yield_liters": "4.00",
+                "evening_yield_liters": "5.00",
             },
         )
 

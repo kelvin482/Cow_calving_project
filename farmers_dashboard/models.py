@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
@@ -258,6 +260,7 @@ class Cow(models.Model):
     is_pregnant = models.BooleanField(default=False)
     is_lactating = models.BooleanField(default=False)
     needs_attention = models.BooleanField(default=False)
+    attention_reason = models.CharField(max_length=255, blank=True)
     tracking_stage = models.CharField(
         max_length=32,
         choices=TRACKING_STAGE_CHOICES,
@@ -333,6 +336,8 @@ class Cow(models.Model):
 
     @property
     def status_tone(self):
+        if self.tracking_stage == self.STAGE_ACTIVE_LABOR:
+            return "rose"
         if self.needs_attention:
             return "rose"
         if self.is_nearing_calving():
@@ -345,10 +350,10 @@ class Cow(models.Model):
 
     @property
     def status_label(self):
-        if self.needs_attention:
-            return "Needs attention"
         if self.tracking_stage == self.STAGE_ACTIVE_LABOR:
             return "Active labor"
+        if self.needs_attention:
+            return "Needs attention"
         if self.tracking_stage == self.STAGE_POST_CALVING:
             return "Post-calving"
         if self.is_nearing_calving():
@@ -390,10 +395,10 @@ class Cow(models.Model):
 
     @property
     def alert_category(self):
-        if self.needs_attention:
-            return "Needs attention"
         if self.tracking_stage == self.STAGE_ACTIVE_LABOR:
             return "Active labor"
+        if self.needs_attention:
+            return "Needs attention"
         if self.is_nearing_calving():
             return "Nearing calving"
         if self.tracking_stage == self.STAGE_INSEMINATED:
@@ -403,19 +408,40 @@ class Cow(models.Model):
         return "Registered"
 
     @property
+    def alert_label(self):
+        if self.tracking_stage == self.STAGE_ACTIVE_LABOR:
+            return "Check now"
+        if self.needs_attention:
+            return "Needs a check"
+        return "Calving soon"
+
+    @property
+    def alert_reason_text(self):
+        if self.tracking_stage == self.STAGE_ACTIVE_LABOR:
+            return "Labour is marked as active."
+        if self.needs_attention:
+            return self.attention_reason.strip() or "General check needed."
+        days_until_due = (self.expected_calving_date - timezone.localdate()).days
+        if days_until_due == 0:
+            return "Expected to calve today."
+        if days_until_due == 1:
+            return "Expected to calve tomorrow."
+        return f"Expected to calve in {days_until_due} days."
+
+    @property
     def next_action_text(self):
+        if self.tracking_stage == self.STAGE_ACTIVE_LABOR:
+            return "Check her closely and contact a veterinary professional if you are worried."
         if self.active_insemination_request:
             return self.active_insemination_request.next_step_text
         if self.needs_attention:
-            return "Review the cow and open support if the issue continues."
-        if self.tracking_stage == self.STAGE_ACTIVE_LABOR:
-            return "Track labour progress closely and prepare for escalation."
+            return "Check her and contact a veterinary professional if you are worried."
         if self.tracking_stage == self.STAGE_POST_CALVING:
             return "Monitor recovery, keep the calf safe, and record the next heat when ready."
         if self.tracking_stage == self.STAGE_INSEMINATED:
             return "Keep watch after service and plan the pregnancy check."
         if self.is_nearing_calving():
-            return "Start calving watch and keep the pen ready."
+            return "Get the calving area ready."
         if self.is_pregnant:
             return "Keep pregnancy follow-up and calving dates visible."
         if self.reproductive_status == self.REPRODUCTIVE_STATUS_NOT_INSEMINATED:
@@ -424,7 +450,7 @@ class Cow(models.Model):
 
 
 class MilkRecord(models.Model):
-    """One farmer-entered daily milk total for a cow, measured in litres."""
+    """One cow's daily milk total plus its measured morning/evening sessions."""
 
     cow = models.ForeignKey(
         Cow,
@@ -433,6 +459,20 @@ class MilkRecord(models.Model):
     )
     record_date = models.DateField()
     daily_yield_liters = models.DecimalField(max_digits=8, decimal_places=2)
+    # Null session values preserve older daily-total rows whose session split
+    # was never recorded; new form submissions require both measured sessions.
+    morning_yield_liters = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    evening_yield_liters = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -447,6 +487,25 @@ class MilkRecord(models.Model):
                 condition=models.Q(daily_yield_liters__gte=0),
                 name="milk_record_non_negative_yield",
             ),
+            models.CheckConstraint(
+                condition=(
+                    models.Q(
+                        morning_yield_liters__isnull=True,
+                        evening_yield_liters__isnull=True,
+                    )
+                    | models.Q(
+                        morning_yield_liters__isnull=False,
+                        evening_yield_liters__isnull=False,
+                        morning_yield_liters__gte=0,
+                        evening_yield_liters__gte=0,
+                        daily_yield_liters=(
+                            models.F("morning_yield_liters")
+                            + models.F("evening_yield_liters")
+                        ),
+                    )
+                ),
+                name="milk_record_sessions_match_total",
+            ),
         ]
 
     def clean(self):
@@ -455,6 +514,92 @@ class MilkRecord(models.Model):
             raise ValidationError(
                 {"record_date": "Milk records cannot be dated in the future."}
             )
+        has_morning = self.morning_yield_liters is not None
+        has_evening = self.evening_yield_liters is not None
+        if has_morning != has_evening:
+            raise ValidationError(
+                "Enter both morning and evening milk amounts for a session record."
+            )
+        if has_morning and has_evening:
+            morning_yield = Decimal(self.morning_yield_liters)
+            evening_yield = Decimal(self.evening_yield_liters)
+            if morning_yield < 0 or evening_yield < 0:
+                raise ValidationError("Milk session amounts cannot be negative.")
+            session_total = morning_yield + evening_yield
+            if session_total > Decimal("999999.99"):
+                raise ValidationError(
+                    "The combined daily total exceeds the supported limit."
+                )
+            self.daily_yield_liters = session_total
+
+    def save(self, *args, **kwargs):
+        if (
+            self.morning_yield_liters is not None
+            and self.evening_yield_liters is not None
+        ):
+            # Keep the existing daily-total field as the calculation source
+            # for history features while storing the proposal's two inputs.
+            self.daily_yield_liters = (
+                Decimal(self.morning_yield_liters)
+                + Decimal(self.evening_yield_liters)
+            )
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.cow} — {self.record_date}: {self.daily_yield_liters} L"
+
+
+class MilkProductionAlert(models.Model):
+    """Saved evidence and farmer follow-up for one cow's milk-drop rule."""
+
+    SEVERITY_WARNING = "warning"
+    SEVERITY_CRITICAL = "critical"
+    SEVERITY_CHOICES = [
+        (SEVERITY_WARNING, "Warning"),
+        (SEVERITY_CRITICAL, "Critical"),
+    ]
+
+    STATUS_ACTIVE = "active"
+    STATUS_ACKNOWLEDGED = "acknowledged"
+    STATUS_RESOLVED = "resolved"
+    STATUS_CHOICES = [
+        (STATUS_ACTIVE, "Active"),
+        (STATUS_ACKNOWLEDGED, "Acknowledged"),
+        (STATUS_RESOLVED, "Resolved"),
+    ]
+
+    cow = models.ForeignKey(
+        Cow,
+        on_delete=models.CASCADE,
+        related_name="milk_production_alerts",
+    )
+    record_date = models.DateField()
+    severity = models.CharField(max_length=16, choices=SEVERITY_CHOICES)
+    status = models.CharField(
+        max_length=16,
+        choices=STATUS_CHOICES,
+        default=STATUS_ACTIVE,
+    )
+    baseline_yield_liters = models.DecimalField(max_digits=8, decimal_places=2)
+    current_yield_liters = models.DecimalField(max_digits=8, decimal_places=2)
+    drop_percent = models.DecimalField(max_digits=7, decimal_places=2)
+    next_step_text = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    acknowledged_at = models.DateTimeField(null=True, blank=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-record_date", "-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["cow", "record_date"],
+                name="unique_milk_drop_alert_per_cow_day",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["cow", "status", "record_date"]),
+        ]
+
+    def __str__(self):
+        return f"{self.cow} milk drop on {self.record_date} ({self.severity})"

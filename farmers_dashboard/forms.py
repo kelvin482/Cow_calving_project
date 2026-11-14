@@ -6,6 +6,21 @@ from communications.upload_validation import validate_uploaded_image
 from .models import Cow, MilkRecord, ReproductiveEvent
 
 
+class AttentionReasonForm(forms.Form):
+    attention_reason = forms.CharField(
+        label="What needs attention?",
+        required=False,
+        max_length=255,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-input",
+                "maxlength": 255,
+                "placeholder": "e.g. eating less than usual",
+            }
+        ),
+    )
+
+
 class CowRegistrationForm(forms.ModelForm):
     reproductive_status = forms.ChoiceField(
         choices=Cow.REPRODUCTIVE_STATUS_CHOICES,
@@ -172,26 +187,42 @@ class CowRegistrationForm(forms.ModelForm):
 
 
 class MilkRecordForm(forms.ModelForm):
+    morning_yield_liters = forms.DecimalField(
+        label="Morning milk (litres)",
+        min_value=0,
+        max_digits=8,
+        decimal_places=2,
+        widget=forms.NumberInput(
+            attrs={"class": "form-input w-full max-w-full", "min": "0", "step": "0.01"}
+        ),
+    )
+    evening_yield_liters = forms.DecimalField(
+        label="Evening milk (litres)",
+        min_value=0,
+        max_digits=8,
+        decimal_places=2,
+        widget=forms.NumberInput(
+            attrs={"class": "form-input w-full max-w-full", "min": "0", "step": "0.01"}
+        ),
+    )
+
     class Meta:
         model = MilkRecord
-        fields = ["cow", "record_date", "daily_yield_liters"]
+        fields = [
+            "cow",
+            "record_date",
+            "morning_yield_liters",
+            "evening_yield_liters",
+        ]
         widgets = {
             "cow": forms.Select(attrs={"class": "form-input w-full max-w-full"}),
             "record_date": forms.DateInput(
                 attrs={"type": "date", "class": "form-input w-full max-w-full"}
             ),
-            "daily_yield_liters": forms.NumberInput(
-                attrs={
-                    "class": "form-input w-full max-w-full",
-                    "min": "0",
-                    "step": "0.01",
-                }
-            ),
         }
         labels = {
             "cow": "Cow",
             "record_date": "Production date",
-            "daily_yield_liters": "Total milk for the day (litres)",
         }
 
     def __init__(self, *args, farmer, **kwargs):
@@ -201,6 +232,22 @@ class MilkRecordForm(forms.ModelForm):
         )
         if self.instance.pk:
             self.fields["cow"].disabled = True
+
+    def clean(self):
+        cleaned_data = super().clean()
+        morning_yield = cleaned_data.get("morning_yield_liters")
+        evening_yield = cleaned_data.get("evening_yield_liters")
+        if morning_yield is not None and evening_yield is not None:
+            daily_total = morning_yield + evening_yield
+            if daily_total > 999999.99:
+                self.add_error(
+                    "evening_yield_liters",
+                    "The combined daily total exceeds the supported limit.",
+                )
+            else:
+                # Keep the existing total as the source used by history features.
+                self.instance.daily_yield_liters = daily_total
+        return cleaned_data
 
     def clean_record_date(self):
         record_date = self.cleaned_data["record_date"]
