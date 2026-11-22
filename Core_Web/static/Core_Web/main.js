@@ -205,10 +205,18 @@ document.addEventListener('DOMContentLoaded', () => {
      6. Interactive Checklist
   ---------------------------------------------------------------- */
   document.querySelectorAll('.check-box').forEach(box => {
-    box.addEventListener('click', () => {
+    const toggleChecklistItem = () => {
       box.classList.toggle('checked');
+      box.setAttribute('aria-checked', box.classList.contains('checked') ? 'true' : 'false');
       const item = box.closest('.check-item');
       if (item) item.classList.toggle('done', box.classList.contains('checked'));
+    };
+    box.addEventListener('click', toggleChecklistItem);
+    box.addEventListener('keydown', event => {
+      if (event.key === ' ' || event.key === 'Enter') {
+        event.preventDefault();
+        toggleChecklistItem();
+      }
     });
   });
 
@@ -219,6 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const box = item.querySelector('.check-box');
       if (box) {
         box.classList.toggle('checked');
+        box.setAttribute('aria-checked', box.classList.contains('checked') ? 'true' : 'false');
         item.classList.toggle('done', box.classList.contains('checked'));
       }
     });

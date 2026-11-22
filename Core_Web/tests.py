@@ -66,8 +66,9 @@ class CoreWebHomeTests(TestCase):
         response = self.client.get(reverse("Core_Web:checklist"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Farmer Checklist")
-        self.assertContains(response, "Prepare before the first calf arrives.")
+        self.assertContains(response, "Farm Records And Follow-up Checklist")
+        self.assertContains(response, "Cow and breeding records")
+        self.assertContains(response, "A milk-drop alert is a prompt to investigate")
         self.assertContains(response, "Sign In")
 
     @override_settings(DEBUG=True)

@@ -2649,6 +2649,52 @@ nav {
   font-weight: 700;
 }
 
+.check-box:focus-visible {
+  outline: 3px solid var(--amber);
+  outline-offset: 3px;
+}
+
+.checklist-note {
+  margin-top: 14px;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.checklist-note a {
+  color: var(--green-dark);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.farm-workflow-wrap { width: min(1160px, calc(100% - 40px)); margin: 0 auto; display: grid; gap: 24px; }
+.farm-workflow-hero, .farm-workflow-section, .farm-workflow-bottom { border: 1px solid var(--border); border-radius: 24px; background: #fff; padding: clamp(24px, 4vw, 48px); box-shadow: 0 14px 36px rgba(20, 50, 35, .06); }
+.farm-workflow-hero { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(240px, .6fr); align-items: center; gap: 36px; background: linear-gradient(120deg, #f7f5eb, #fff 72%); }
+.farm-workflow-kicker { color: var(--green); font-size: 12px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+.farm-workflow-hero h1 { max-width: 720px; margin: 12px 0; color: var(--green-dark); font-size: clamp(34px, 5vw, 56px); line-height: 1.08; }
+.farm-workflow-hero p:not(.farm-workflow-kicker), .farm-workflow-section > p:not(.farm-workflow-kicker), .farm-workflow-steps p, .farm-workflow-bottom p { color: #59645d; line-height: 1.7; }
+.farm-workflow-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+.farm-workflow-primary, .farm-workflow-secondary { display: inline-flex; min-height: 46px; align-items: center; justify-content: center; border-radius: 12px; padding: 11px 18px; font-weight: 700; text-decoration: none; }
+.farm-workflow-primary { background: var(--green-dark); color: #fff; }
+.farm-workflow-secondary { border: 1px solid var(--border); background: #fff; color: var(--green-dark); }
+.farm-workflow-hero-note { border-left: 4px solid var(--amber); border-radius: 0 16px 16px 0; background: #fff8eb; padding: 20px; }
+.farm-workflow-hero-note span { color: #774414; font-weight: 800; }
+.farm-workflow-hero-note p { margin: 8px 0 0; }
+.farm-workflow-section h2, .farm-workflow-bottom h2 { margin: 8px 0 12px; color: var(--green-dark); font-size: clamp(24px, 3vw, 34px); }
+.farm-workflow-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-top: 24px; }
+.farm-workflow-steps article, .farm-workflow-card { min-width: 0; border: 1px solid var(--border); border-radius: 18px; background: #fbfcfa; padding: 20px; }
+.farm-workflow-steps article > span { color: var(--amber); font-weight: 800; letter-spacing: .08em; }
+.farm-workflow-steps h3, .farm-workflow-card h3 { margin: 10px 0 7px; color: var(--green-dark); font-size: 18px; }
+.farm-workflow-check-groups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 22px; }
+.farm-check-items { display: grid; gap: 8px; }
+.farm-check-items .check-item { align-items: flex-start; padding: 10px 12px; background: #fff; }
+.farm-check-items .check-item span { line-height: 1.5; }
+.farm-workflow-bottom { display: flex; align-items: center; justify-content: space-between; gap: 24px; background: #f4f7f3; }
+.farm-workflow-bottom a:not(.farm-workflow-secondary) { color: var(--green-dark); font-weight: 700; }
+@media (max-width: 850px) { .farm-workflow-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } .farm-workflow-hero { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .farm-workflow-wrap { width: calc(100% - 24px); gap: 14px; } .farm-workflow-hero, .farm-workflow-section, .farm-workflow-bottom { padding: 22px 18px; border-radius: 18px; } .farm-workflow-steps, .farm-workflow-check-groups { grid-template-columns: 1fr; } .farm-workflow-bottom { align-items: flex-start; flex-direction: column; } }
+
 .toolkit-box {
   background: linear-gradient(160deg, var(--green-dark) 0%, #1e3d2c 100%);
   border-radius: var(--radius-md);

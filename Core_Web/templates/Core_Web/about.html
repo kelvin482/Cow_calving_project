@@ -1,0 +1,40 @@
+{% extends "Core_Web/base_site.html" %}
+
+{% block title %}About CowCalving.farm{% endblock %}
+
+{% block content %}
+<div class="main-wrap" style="padding-top: 42px; padding-bottom: 56px;">
+  <section class="farm-workflow-hero" aria-labelledby="about-title">
+    <div>
+      <p class="farm-workflow-kicker">About the system</p>
+      <h1 id="about-title">Practical records for clearer farm follow-up.</h1>
+      <p>CowCalving.farm is a digital farm-support platform for dairy farmers and veterinary professionals. It brings cow records, milk production entries, follow-up alerts, and communication into one connected workflow.</p>
+    </div>
+    <aside class="farm-workflow-hero-note">
+      <span>What guides the system</span>
+      <p>Useful records and timely follow-up should support a farmer’s decisions. They should not be presented as a veterinary diagnosis.</p>
+    </aside>
+  </section>
+
+  <section class="farm-workflow-section" style="margin-top: 24px;" aria-labelledby="about-workflow-title">
+    <p class="farm-workflow-kicker">How the workflow works</p>
+    <h2 id="about-workflow-title">From farm observation to informed follow-up</h2>
+    <div class="farm-workflow-steps">
+      <article><span>01</span><h3>Keep cow records</h3><p>Farmers register cows and record available identity, breeding, and calving information.</p></article>
+      <article><span>02</span><h3>Track milk entries</h3><p>Morning and evening amounts are recorded by cow and date, with a calculated daily total.</p></article>
+      <article><span>03</span><h3>Review changes</h3><p>Milk-drop alerts point to a change worth checking. Farmers can review the records and save observations for follow-up.</p></article>
+      <article><span>04</span><h3>Connect with support</h3><p>Farmer and veterinary workspaces support role-based access and communication with service providers.</p></article>
+    </div>
+  </section>
+
+  <section class="farm-workflow-check-groups" style="margin-top: 24px;" aria-label="System capabilities and boundaries">
+    <article class="farm-workflow-card"><p class="farm-workflow-kicker">Available now</p><h2>What the system supports</h2><ul><li>Cow and breeding records</li><li>Morning/evening milk capture and daily totals</li><li>Rule-based milk-drop alerts and farmer observations</li><li>Farmer-to-provider messages and notifications</li><li>AI question-and-answer guidance</li></ul></article>
+    <article class="farm-workflow-card"><p class="farm-workflow-kicker">Clear boundaries</p><h2>What it does not claim</h2><ul><li>A milk alert is not proof of illness or a diagnosis.</li><li>The AI assistant is not a veterinarian and does not replace professional assessment.</li><li>Milk forecasting is not currently an operational feature.</li><li>Alert performance has not been established on representative real-farm data.</li></ul></article>
+  </section>
+
+  <section class="farm-workflow-bottom" style="margin-top: 24px;">
+    <div><p class="farm-workflow-kicker">Continue exploring</p><h2>See how the system fits your farm workflow.</h2><p>Review the farmer checklist or open the dashboard to work with your own records.</p></div>
+    <div class="farm-workflow-actions"><a href="{% url 'Core_Web:checklist' %}" class="farm-workflow-secondary">View the checklist</a>{% if request.user.is_authenticated %}<a href="{{ dashboard_url|default:profile_url }}" class="farm-workflow-primary">{{ dashboard_label|default:"Open Dashboard" }}</a>{% else %}<a href="{% url 'accounts:signup' %}" class="farm-workflow-primary">Create an account</a>{% endif %}</div>
+  </section>
+</div>
+{% endblock %}

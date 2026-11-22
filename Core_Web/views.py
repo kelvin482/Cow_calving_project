@@ -54,3 +54,7 @@ def guide_view(request):
 
 def checklist_view(request):
     return _render_site_page(request, "Core_Web/checklist.html", page_key="checklist")
+
+
+def about_view(request):
+    return _render_site_page(request, "Core_Web/about.html", page_key="about")
