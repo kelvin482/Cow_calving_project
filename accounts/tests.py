@@ -1,4 +1,5 @@
 import re
+import requests
 from django.test import TestCase
 from django.urls import resolve
 from django.urls import reverse
@@ -13,7 +14,7 @@ from django.test import override_settings
 
 from cow_calving_MAIN.context_processors import dev_static_version
 
-from .email_backends import BrevoAPIEmailBackend
+from .email_backends import BrevoAPIEmailBackend, ResendAPIEmailBackend
 from .forms import CowCalvingRegisterForm
 from users.models import Profile, Role
 
@@ -457,14 +458,17 @@ class PasswordResetCodeFlowTests(TestCase):
     def test_password_reset_request_shows_error_when_email_send_fails(self, mocked_send):
         mocked_send.side_effect = RuntimeError("mail failed")
 
-        response = self.client.post(
-            reverse("accounts:password_reset_request"),
-            {"email": self.user.email},
-        )
+        with self.assertLogs("accounts.views", level="ERROR") as captured_logs:
+            response = self.client.post(
+                reverse("accounts:password_reset_request"),
+                {"email": self.user.email},
+            )
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "We could not send the reset code right now.")
         self.assertNotIn("password_reset_code_state", self.client.session)
+        self.assertIn("Password reset email failed", captured_logs.output[0])
+        self.assertNotIn(self.user.email, captured_logs.output[0])
 
 
 class BrevoAPIEmailBackendTests(TestCase):
@@ -487,7 +491,7 @@ class BrevoAPIEmailBackendTests(TestCase):
     )
     @patch("accounts.email_backends.requests.post")
     def test_backend_sends_html_and_text_payload(self, mocked_post):
-        mocked_post.return_value.raise_for_status.return_value = None
+        mocked_post.return_value.status_code = 201
 
         backend = BrevoAPIEmailBackend()
         message = EmailMultiAlternatives(
@@ -516,3 +520,96 @@ class BrevoAPIEmailBackendTests(TestCase):
         self.assertEqual(kwargs["json"]["subject"], "Verify your account")
         self.assertEqual(kwargs["json"]["textContent"], "Plain text body")
         self.assertEqual(kwargs["json"]["htmlContent"], "<p>HTML body</p>")
+
+    @override_settings(BREVO_API_KEY="test-key")
+    @patch("accounts.email_backends.requests.post")
+    def test_backend_surfaces_brevo_rejection_details(self, mocked_post):
+        response = mocked_post.return_value
+        response.status_code = 400
+        response.json.return_value = {
+            "code": "invalid_parameter",
+            "message": "The sender is not authorized.",
+        }
+        backend = BrevoAPIEmailBackend()
+        message = EmailMultiAlternatives(
+            subject="Reset code",
+            body="Plain text body",
+            from_email="alerts@example.com",
+            to=["farmer@example.com"],
+        )
+
+        with self.assertRaisesRegex(
+            requests.HTTPError,
+            "HTTP 400.*invalid_parameter.*sender is not authorized",
+        ):
+            backend.send_messages([message])
+
+
+class ResendAPIEmailBackendTests(TestCase):
+    @override_settings(RESEND_API_KEY="")
+    def test_backend_requires_api_key(self):
+        backend = ResendAPIEmailBackend(fail_silently=False)
+        message = EmailMultiAlternatives(
+            subject="Milk alert",
+            body="Plain text body",
+            from_email="Cow Calving <onboarding@resend.dev>",
+            to=["farmer@example.com"],
+        )
+
+        with self.assertRaises(ImproperlyConfigured):
+            backend.send_messages([message])
+
+    @override_settings(RESEND_API_KEY="test-resend-key")
+    @patch("accounts.email_backends.requests.post")
+    def test_backend_sends_text_html_and_address_fields(self, mocked_post):
+        mocked_post.return_value.status_code = 200
+        backend = ResendAPIEmailBackend()
+        message = EmailMultiAlternatives(
+            subject="Milk alert",
+            body="Plain text body",
+            from_email="Cow Calving <alerts@example.com>",
+            to=["farmer@example.com"],
+            cc=["vet@example.com"],
+            bcc=["manager@example.com"],
+            reply_to=["support@example.com"],
+        )
+        message.attach_alternative("<p>HTML body</p>", "text/html")
+
+        sent_count = backend.send_messages([message])
+
+        self.assertEqual(sent_count, 1)
+        _, kwargs = mocked_post.call_args
+        self.assertEqual(
+            kwargs["headers"]["Authorization"], "Bearer test-resend-key"
+        )
+        self.assertEqual(kwargs["json"]["from"], "Cow Calving <alerts@example.com>")
+        self.assertEqual(kwargs["json"]["to"], ["farmer@example.com"])
+        self.assertEqual(kwargs["json"]["cc"], ["vet@example.com"])
+        self.assertEqual(kwargs["json"]["bcc"], ["manager@example.com"])
+        self.assertEqual(kwargs["json"]["reply_to"], "support@example.com")
+        self.assertEqual(kwargs["json"]["text"], "Plain text body")
+        self.assertEqual(kwargs["json"]["html"], "<p>HTML body</p>")
+
+    @override_settings(RESEND_API_KEY="test-resend-key")
+    @patch("accounts.email_backends.requests.post")
+    def test_backend_surfaces_resend_rejection_details(self, mocked_post):
+        response = mocked_post.return_value
+        response.status_code = 403
+        response.json.return_value = {
+            "statusCode": 403,
+            "name": "validation_error",
+            "message": "The sender domain is not verified.",
+        }
+        backend = ResendAPIEmailBackend()
+        message = EmailMultiAlternatives(
+            subject="Milk alert",
+            body="Plain text body",
+            from_email="onboarding@resend.dev",
+            to=["farmer@example.com"],
+        )
+
+        with self.assertRaisesRegex(
+            requests.HTTPError,
+            "validation_error.*sender domain is not verified",
+        ):
+            backend.send_messages([message])

@@ -101,6 +101,24 @@ class BrevoAPIEmailBackend(BaseEmailBackend):
 
         return payload
 
+    def _build_api_error(self, response):
+        """Keep Brevo's rejection reason while avoiding request-header secrets."""
+        try:
+            response_data = response.json()
+        except ValueError:
+            response_data = {}
+        if not isinstance(response_data, dict):
+            response_data = {}
+
+        error_code = response_data.get("code")
+        error_message = response_data.get("message") or "Brevo rejected the email request."
+        detail = f" ({error_code})" if error_code else ""
+        detail += f": {str(error_message)[:500]}"
+        return requests.HTTPError(
+            f"Brevo email request failed with HTTP {response.status_code}{detail}",
+            response=response,
+        )
+
     def send_messages(self, email_messages):
         if not email_messages:
             return 0
@@ -127,7 +145,101 @@ class BrevoAPIEmailBackend(BaseEmailBackend):
                     json=self._build_payload(message),
                     timeout=self.timeout,
                 )
-                response.raise_for_status()
+                if response.status_code >= 400:
+                    raise self._build_api_error(response)
+            except Exception:
+                if not self.fail_silently:
+                    raise
+            else:
+                sent_count += 1
+
+        return sent_count
+
+
+class ResendAPIEmailBackend(BaseEmailBackend):
+    """Send standard Django email messages through the Resend REST API."""
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.api_key = getattr(settings, "RESEND_API_KEY", "").strip()
+        self.api_url = getattr(
+            settings, "RESEND_API_URL", "https://api.resend.com/emails"
+        ).strip()
+        self.timeout = int(getattr(settings, "RESEND_API_TIMEOUT", 15))
+
+    def _build_payload(self, message):
+        payload = {
+            "from": message.from_email or settings.DEFAULT_FROM_EMAIL,
+            "to": message.to,
+            "subject": message.subject,
+        }
+
+        if getattr(message, "content_subtype", "plain") == "html":
+            payload["html"] = message.body
+        else:
+            payload["text"] = message.body
+
+        for alternative, mimetype in getattr(message, "alternatives", []):
+            if mimetype == "text/html":
+                payload["html"] = alternative
+
+        if message.cc:
+            payload["cc"] = message.cc
+        if message.bcc:
+            payload["bcc"] = message.bcc
+        if message.reply_to:
+            payload["reply_to"] = message.reply_to[0]
+
+        return payload
+
+    def _build_api_error(self, response):
+        """Keep Resend's useful rejection detail while never exposing request headers."""
+        try:
+            response_data = response.json()
+        except ValueError:
+            response_data = {}
+        if not isinstance(response_data, dict):
+            response_data = {}
+
+        error_data = response_data.get("error", response_data)
+        if not isinstance(error_data, dict):
+            error_data = {}
+
+        error_code = error_data.get("name") or error_data.get("code")
+        error_message = error_data.get("message") or "Resend rejected the email request."
+        detail = f" ({error_code})" if error_code else ""
+        detail += f": {str(error_message)[:500]}"
+        return requests.HTTPError(
+            f"Resend email request failed with HTTP {response.status_code}{detail}",
+            response=response,
+        )
+
+    def send_messages(self, email_messages):
+        if not email_messages:
+            return 0
+
+        if not self.api_key:
+            if self.fail_silently:
+                return 0
+            raise ImproperlyConfigured(
+                "Set RESEND_API_KEY to use accounts.email_backends.ResendAPIEmailBackend."
+            )
+
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+        sent_count = 0
+        for message in email_messages:
+            try:
+                response = requests.post(
+                    self.api_url,
+                    headers=headers,
+                    json=self._build_payload(message),
+                    timeout=self.timeout,
+                )
+                if response.status_code >= 400:
+                    raise self._build_api_error(response)
             except Exception:
                 if not self.fail_silently:
                     raise

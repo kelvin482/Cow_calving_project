@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta
 from random import SystemRandom
 
@@ -25,6 +26,7 @@ from django.urls import reverse
 PASSWORD_RESET_SESSION_KEY = "password_reset_code_state"
 PASSWORD_RESET_CODE_LENGTH = 6
 PASSWORD_RESET_CODE_TTL_SECONDS = 10 * 60
+logger = logging.getLogger(__name__)
 
 
 def _hash_reset_code(email, code):
@@ -189,7 +191,13 @@ def password_reset_request_view(request):
         _store_reset_state(request, user, code)
         try:
             _send_password_reset_code(user, code)
-        except Exception:
+        except Exception as exc:
+            # Keep provider details in server logs for diagnosis, never on the public reset page.
+            logger.exception(
+                "Password reset email failed (user_id=%s, error_type=%s)",
+                user.pk,
+                type(exc).__name__,
+            )
             _clear_reset_state(request)
             messages.error(
                 request,

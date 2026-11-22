@@ -97,9 +97,9 @@ SECURE_CONTENT_TYPE_NOSNIFF = env_bool("SECURE_CONTENT_TYPE_NOSNIFF", default=Tr
 SECURE_REFERRER_POLICY = (
     os.getenv(
         "SECURE_REFERRER_POLICY",
-        "same-origin" if DEBUG else "strict-origin-when-cross-origin",
+        "strict-origin-when-cross-origin",
     ).strip()
-    or "same-origin"
+    or "strict-origin-when-cross-origin"
 )
 X_FRAME_OPTIONS = os.getenv("X_FRAME_OPTIONS", "DENY").strip() or "DENY"
 
@@ -267,27 +267,25 @@ LOGOUT_REDIRECT_URL = os.getenv("LOGOUT_REDIRECT_URL", "/accounts/login/")
 AUTHENTICATED_DEFAULT_URL = os.getenv("AUTHENTICATED_DEFAULT_URL", "/dashboard/profile/")
 CSRF_FAILURE_VIEW = "accounts.views.csrf_failure_view"
 
-# Email settings (Brevo SMTP by default).
+# Email settings. Provider credentials and sender identity stay outside source control.
 EMAIL_BACKEND = os.getenv(
-    "EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend"
+    "EMAIL_BACKEND", "accounts.email_backends.BrevoAPIEmailBackend"
 )
-EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp-relay.brevo.com")
+EMAIL_HOST = os.getenv("EMAIL_HOST", "")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "true").strip().lower() in {
-    "1",
-    "true",
-    "yes",
-    "y",
+    "1", "true", "yes", "y"
 }
 EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "false").strip().lower() in {
-    "1",
-    "true",
-    "yes",
-    "y",
+    "1", "true", "yes", "y"
 }
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "no-reply@example.com")
+RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
+RESEND_API_URL = os.getenv("RESEND_API_URL", "https://api.resend.com/emails")
+RESEND_API_TIMEOUT = int(os.getenv("RESEND_API_TIMEOUT", "15"))
+SITE_URL = os.getenv("SITE_URL", "http://localhost:8000").rstrip("/")
 BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")
 BREVO_API_URL = os.getenv("BREVO_API_URL", "https://api.brevo.com/v3/smtp/email")
 BREVO_API_TIMEOUT = int(os.getenv("BREVO_API_TIMEOUT", "15"))
