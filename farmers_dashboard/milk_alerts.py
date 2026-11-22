@@ -69,6 +69,11 @@ def _sync_alert(record, result):
         return
 
     old_severity = alert.severity if alert else None
+    should_notify = (
+        alert is None
+        or old_severity != severity
+        or alert.status == MilkProductionAlert.STATUS_RESOLVED
+    )
     if alert is None:
         alert = MilkProductionAlert(cow_id=record.cow_id, record_date=record.record_date)
     if old_severity != severity or alert.status == MilkProductionAlert.STATUS_RESOLVED:
@@ -87,6 +92,13 @@ def _sync_alert(record, result):
     )
     alert.next_step_text = _next_step(severity)
     alert.save()
+    if should_notify:
+        # Send only for a new or materially changed alert, and only after its row commits.
+        from .alert_emails import email_farmer_about_alert
+
+        transaction.on_commit(
+            lambda alert_id=alert.pk: email_farmer_about_alert(alert_id)
+        )
 
 
 @transaction.atomic

@@ -3,7 +3,7 @@ from django.utils import timezone
 
 from communications.upload_validation import validate_uploaded_image
 
-from .models import Cow, MilkRecord, ReproductiveEvent
+from .models import Cow, MilkAlertCheck, MilkRecord, ReproductiveEvent
 
 
 class AttentionReasonForm(forms.Form):
@@ -254,6 +254,31 @@ class MilkRecordForm(forms.ModelForm):
         if record_date > timezone.localdate():
             raise forms.ValidationError("Milk records cannot be dated in the future.")
         return record_date
+
+
+class MilkAlertCheckForm(forms.ModelForm):
+    class Meta:
+        model = MilkAlertCheck
+        fields = [
+            "milking_changed",
+            "feed_water_changed",
+            "cow_condition_changed",
+        ]
+        widgets = {
+            field: forms.RadioSelect(
+                attrs={"class": "h-4 w-4 accent-emerald-700"}
+            )
+            for field in (
+                "milking_changed",
+                "feed_water_changed",
+                "cow_condition_changed",
+            )
+        }
+        labels = {
+            "milking_changed": "Was milking or recording different?",
+            "feed_water_changed": "Did feed or water change, or did she eat or drink less?",
+            "cow_condition_changed": "Did the cow seem different?",
+        }
 
 
 class ReproductiveEventForm(forms.Form):

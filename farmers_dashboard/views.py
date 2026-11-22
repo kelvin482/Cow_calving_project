@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Case, Count, IntegerField, Prefetch, Q, When
+from django.db.models import Case, Count, IntegerField, Prefetch, When
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -35,6 +35,7 @@ from .forms import (
     AttentionReasonForm,
     CowRegistrationForm,
     FarmLocationForm,
+    MilkAlertCheckForm,
     MilkRecordForm,
     ReproductiveEventForm,
     ServiceProviderMessageForm,
@@ -1766,20 +1767,20 @@ def alerts_view(request):
     )
     search_query = request.GET.get("q", "").strip()
     cow_alerts = context["cow_alerts"]
-    milk_drop_alerts = MilkProductionAlert.objects.filter(
+    milk_drop_alerts = list(MilkProductionAlert.objects.filter(
         cow__owner=request.user,
         status__in=[
             MilkProductionAlert.STATUS_ACTIVE,
             MilkProductionAlert.STATUS_ACKNOWLEDGED,
         ],
-    ).select_related("cow").order_by(
+    ).select_related("cow", "check_observation").order_by(
         Case(
             When(severity=MilkProductionAlert.SEVERITY_CRITICAL, then=0),
             default=1,
             output_field=IntegerField(),
         ),
         "-record_date",
-    )
+    ))
 
     if search_query:
         normalized_query = search_query.casefold()
@@ -1791,11 +1792,18 @@ def alerts_view(request):
             or normalized_query in cow.alert_reason_text.casefold()
             or normalized_query in cow.alert_label.casefold()
         ]
-        milk_drop_alerts = milk_drop_alerts.filter(
-            Q(cow__name__icontains=search_query)
-            | Q(cow__cow_number__icontains=search_query)
-            | Q(severity__icontains=search_query)
-            | Q(next_step_text__icontains=search_query)
+        milk_drop_alerts = [
+            alert
+            for alert in milk_drop_alerts
+            if normalized_query in alert.cow.name.casefold()
+            or normalized_query in alert.cow.cow_number.casefold()
+            or normalized_query in alert.severity.casefold()
+            or normalized_query in alert.next_step_text.casefold()
+        ]
+
+    for alert in milk_drop_alerts:
+        alert.quick_check_form = MilkAlertCheckForm(
+            instance=getattr(alert, "check_observation", None)
         )
 
     context["cow_alerts"] = cow_alerts
@@ -1810,7 +1818,7 @@ def alerts_view(request):
     context["alerts_search_query"] = search_query
     context["hide_dashboard_search"] = True
     context["cow_check_count"] = len(cow_alerts)
-    context["milk_drop_alert_count"] = milk_drop_alerts.count()
+    context["milk_drop_alert_count"] = len(milk_drop_alerts)
     context["total_alert_count"] = (
         context["cow_check_count"] + context["milk_drop_alert_count"]
     )
@@ -1833,12 +1841,50 @@ def acknowledge_milk_alert_view(request, alert_id):
 
 @login_required
 @role_required("farmer")
+@require_POST
+def record_milk_alert_check_view(request, alert_id):
+    alert = get_object_or_404(
+        MilkProductionAlert.objects.select_related("cow", "check_observation"),
+        pk=alert_id,
+        cow__owner=request.user,
+    )
+    check_form = MilkAlertCheckForm(
+        request.POST,
+        instance=getattr(alert, "check_observation", None),
+    )
+    if check_form.is_valid():
+        check = check_form.save(commit=False)
+        check.alert = alert
+        if check.pk is None:
+            check.recorded_by = request.user
+        check.save()
+        messages.success(
+            request,
+            f"Check-in for {alert.cow.name} saved to the cow's report.",
+        )
+    else:
+        messages.error(
+            request,
+            "Choose Yes, No, or Not sure for each quick-check question.",
+        )
+    return redirect("farmers_dashboard:alerts")
+
+
+@login_required
+@role_required("farmer")
 def reports_view(request):
     selected_cow_id = request.GET.get("cow", "").strip()
     selected_cow = None
     milk_report_records = []
     milk_report_average = None
     calvings_recorded = 0
+    milk_alert_checks = []
+    expected_calving_date = None
+    calving_date_is_estimated = False
+    expected_heat_window = None
+    pregnancy_check_window = None
+    calving_prep_window = None
+    pregnancy_confirmed = False
 
     if selected_cow_id:
         selected_cow = get_object_or_404(
@@ -1857,6 +1903,42 @@ def reports_view(request):
         calvings_recorded = selected_cow.reproductive_events.filter(
             event_type=ReproductiveEvent.EVENT_CALVED
         ).count()
+        pregnancy_confirmed = bool(
+            selected_cow.is_pregnant
+            or selected_cow.pregnancy_confirmation_date
+            or selected_cow.tracking_stage
+            in {Cow.STAGE_PREGNANT, Cow.STAGE_NEARING_CALVING}
+        )
+        expected_calving_date = _derive_expected_calving_date(selected_cow)
+        calving_date_is_estimated = bool(
+            expected_calving_date and not selected_cow.expected_calving_date
+        )
+        if pregnancy_confirmed and expected_calving_date:
+            calving_prep_window = (
+                expected_calving_date - timedelta(days=21),
+                expected_calving_date - timedelta(days=1),
+            )
+        if not pregnancy_confirmed:
+            heat_reference_date = (
+                selected_cow.insemination_date or selected_cow.last_heat_date
+            )
+            if heat_reference_date:
+                expected_heat_window = (
+                    heat_reference_date + timedelta(days=18),
+                    heat_reference_date + timedelta(days=24),
+                )
+            if selected_cow.insemination_date:
+                pregnancy_check_window = (
+                    selected_cow.insemination_date + timedelta(days=28),
+                    selected_cow.insemination_date + timedelta(days=35),
+                )
+        milk_alert_checks = list(
+            selected_cow.milk_production_alerts.filter(
+                check_observation__isnull=False
+            )
+            .select_related("check_observation", "check_observation__recorded_by")
+            .order_by("-check_observation__recorded_at", "-record_date")
+        )
 
     context = _build_farmer_dashboard_context(
         request,
@@ -1864,7 +1946,7 @@ def reports_view(request):
         page_eyebrow="Reports",
         page_heading="Cow reports",
         page_intro=(
-            f"A one-page summary of {selected_cow.name}'s recorded details and milk production."
+            f"A summary of {selected_cow.name}'s breeding dates, milk production, and follow-up checks."
             if selected_cow
             else "Browse each cow's key information and milk production."
         ),
@@ -1885,7 +1967,14 @@ def reports_view(request):
             "selected_cow": selected_cow,
             "milk_report_records": milk_report_records,
             "milk_report_average": milk_report_average,
+            "milk_alert_checks": milk_alert_checks,
             "calvings_recorded": calvings_recorded,
+            "expected_calving_date": expected_calving_date,
+            "calving_date_is_estimated": calving_date_is_estimated,
+            "expected_heat_window": expected_heat_window,
+            "pregnancy_check_window": pregnancy_check_window,
+            "calving_prep_window": calving_prep_window,
+            "pregnancy_confirmed": pregnancy_confirmed,
             "report_generated_date": timezone.localdate(),
         }
     )

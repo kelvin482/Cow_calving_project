@@ -603,3 +603,40 @@ class MilkProductionAlert(models.Model):
 
     def __str__(self):
         return f"{self.cow} milk drop on {self.record_date} ({self.severity})"
+
+
+class MilkAlertCheck(models.Model):
+    """Farmer observations recorded while following up a milk-drop alert."""
+
+    ANSWER_YES = "yes"
+    ANSWER_NO = "no"
+    ANSWER_UNSURE = "unsure"
+    ANSWER_CHOICES = [
+        (ANSWER_YES, "Yes"),
+        (ANSWER_NO, "No"),
+        (ANSWER_UNSURE, "Not sure"),
+    ]
+
+    alert = models.OneToOneField(
+        MilkProductionAlert,
+        on_delete=models.CASCADE,
+        related_name="check_observation",
+    )
+    milking_changed = models.CharField(max_length=8, choices=ANSWER_CHOICES)
+    feed_water_changed = models.CharField(max_length=8, choices=ANSWER_CHOICES)
+    cow_condition_changed = models.CharField(max_length=8, choices=ANSWER_CHOICES)
+    recorded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="milk_alert_checks",
+    )
+    recorded_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-recorded_at"]
+
+    def __str__(self):
+        return f"Milk-drop check for {self.alert.cow} on {self.recorded_at:%Y-%m-%d}"
