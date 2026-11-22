@@ -83,11 +83,16 @@
                     </div>
 
                     <div class="chat-surface embedded-chat-surface">
-                        <div id="chat-log" class="chat-log embedded-chat-log px-3 sm:px-5">
+                        <div id="chat-log" class="chat-log embedded-chat-log px-3 sm:px-5" aria-live="polite" aria-label="Conversation">
                             <article class="chat-row assistant chat-row-intro">
                                 <div class="bubble bubble-assistant bubble-assistant-intro markdown">
                                     <h3>Ask one clear farm question.</h3>
-                                    <p>Share the key symptom, timing, or concern and I will help with the next practical step.</p>
+                                    <p>Share the symptom, when it began, and what you have noticed. I will suggest a practical next step.</p>
+                                    <div class="intro-question-list" aria-label="Try a question">
+                                        <button type="button" data-question="My cow is straining but no calf is visible. What should I do now?">Difficult labour</button>
+                                        <button type="button" data-question="My cow has a sudden milk drop today. What should I check first?">Sudden milk drop</button>
+                                        <button type="button" data-question="What should I monitor in a newborn calf during its first hours?">Newborn calf care</button>
+                                    </div>
                                 </div>
                             </article>
                         </div>
@@ -97,11 +102,11 @@
                         <form id="ai-form" class="composer embedded-composer" data-ai-endpoint="{% url 'cow_calving_ai:ai_test' %}">
                             <label class="sr-only" for="question">Question</label>
                             <div class="composer-shell">
-                                <textarea id="question" name="q" rows="1" placeholder="Ask a clear farm question..." class="composer-input" required></textarea>
+                                <textarea id="question" name="q" rows="1" placeholder="Describe what is happening with the cow..." class="composer-input" required></textarea>
                                 <button id="submit-btn" type="submit" class="composer-primary">Ask AI</button>
                             </div>
                             <div class="embedded-composer-footer">
-                                <p class="composer-note">Short, direct questions usually work best.</p>
+                                <p class="composer-note">Enter to send · Shift + Enter for a new line.</p>
                                 <button id="clear-btn" type="button" class="composer-secondary">Clear chat</button>
                             </div>
                         </form>
@@ -160,7 +165,12 @@
                                 <article class="chat-row assistant chat-row-intro">
                                     <div class="bubble bubble-assistant bubble-assistant-intro markdown">
                                         <h3>Ask one clear farm question.</h3>
-                                        <p>Share the key symptom, timing, or concern and I will help with the next practical step.</p>
+                                        <p>Share the symptom, when it began, and what you have noticed. I will suggest a practical next step.</p>
+                                    <div class="intro-question-list" aria-label="Try a question">
+                                        <button type="button" data-question="My cow is straining but no calf is visible. What should I do now?">Difficult labour</button>
+                                        <button type="button" data-question="My cow has a sudden milk drop today. What should I check first?">Sudden milk drop</button>
+                                        <button type="button" data-question="What should I monitor in a newborn calf during its first hours?">Newborn calf care</button>
+                                    </div>
                                     </div>
                                 </article>
                             </div>
@@ -169,11 +179,11 @@
                         <form id="ai-form" class="composer" data-ai-endpoint="{% url 'cow_calving_ai:ai_test' %}">
                             <label class="sr-only" for="question">Question</label>
                             <div class="composer-shell">
-                                <textarea id="question" name="q" rows="1" placeholder="Ask a clear farm question..." class="composer-input" required></textarea>
+                                <textarea id="question" name="q" rows="1" placeholder="Describe what is happening with the cow..." class="composer-input" required></textarea>
                                 <button id="submit-btn" type="submit" class="composer-primary">Ask AI</button>
                             </div>
                             <div class="embedded-composer-footer">
-                                <p class="composer-note">Short, direct questions usually work best.</p>
+                                <p class="composer-note">Enter to send · Shift + Enter for a new line.</p>
                                 <button id="clear-btn" type="button" class="composer-secondary">Clear chat</button>
                             </div>
                         </form>

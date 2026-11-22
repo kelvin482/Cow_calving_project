@@ -193,7 +193,7 @@
     function setLoading(isLoading) {
         submitBtn.disabled = isLoading;
         questionInput.disabled = isLoading;
-        submitBtn.textContent = isLoading ? "Thinking..." : "Ask AI";
+        submitBtn.textContent = isLoading ? "Thinking..." : "Ask AI";`r`n        submitBtn.setAttribute("aria-busy", isLoading ? "true" : "false");`r`n        clearBtn.disabled = isLoading;
     }
 
     function autoresizeInput() {
@@ -237,7 +237,7 @@
         const cowId = (cowIdInput?.value || "").trim();
         addMessage("user", question, false, "end");
         setLoading(true);
-        setStatus("Sending request...");
+        setStatus("Connecting to the assistant...");
         const typingRow = addTypingMessage();
         const requestStart = performance.now();
 
@@ -286,7 +286,7 @@
         questionInput.focus();
     });
 
-    quickPromptsToggle?.addEventListener("click", () => {
+    chatLog?.addEventListener("click", async (event) => {`r`n        const button = event.target.closest("[data-question]");`r`n        if (!(button instanceof HTMLButtonElement)) return;`r`n        await submitQuestion(button.dataset.question || "");`r`n    });`r`n`r`n    quickPromptsToggle?.addEventListener("click", () => {
         const isExpanded =
             quickPromptsToggle.getAttribute("aria-expanded") === "true";
         setQuickPromptsOpen(!isExpanded);
